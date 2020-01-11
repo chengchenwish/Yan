@@ -87,7 +87,7 @@ namespace parser
                 temp = peek();
                 if(temp == ' '||temp == '+' || temp == '-' ||temp == '/'|| temp == '*'|| temp == '\n'|| temp == '\t'||temp=='\r'||temp == '\f'|| temp == EOF)
                 {
-                    t->token = T_NUMBER;
+                    t->token = T_INTLIT;
                     t->value = num;
 
                 }
@@ -101,8 +101,13 @@ namespace parser
 
         return true;
        }
+       else
+       {
+            t->token = T_EOF;
+            return true;
+       }
    
-       return false;
+       
    
    }
 
@@ -141,8 +146,10 @@ std::string tokenToString(tokenType t)
             return "-";
         case T_SLASH:
             return "/";
-        case T_NUMBER :
+        case T_INTLIT :
             return "number";
+        case T_EOF:
+            return "eof";
         default:
             return "unknow";
     }

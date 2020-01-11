@@ -11,7 +11,8 @@ enum tokenType
     T_MINUS,
     T_STAR,
     T_SLASH,
-    T_NUMBER
+    T_INTLIT,
+    T_EOF
 };
 std::string tokenToString(tokenType t);
 struct token 
