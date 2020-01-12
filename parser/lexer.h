@@ -1,9 +1,9 @@
-#ifndef _PARSER_H_
-#define _PARSER_H_
+#ifndef _LEXER_H_
+#define _LEXER_H_
 #include <fstream> 
 #include <iostream>
 #include <string>
-namespace parser {
+namespace Yan{
 
 enum tokenType 
 {
@@ -20,11 +20,11 @@ struct token
     int value;
     tokenType token;  
 };
-class parser 
+class lexer 
 {
 public:
-   explicit parser(std::string& filename);
-   ~parser();
+   explicit lexer(std::string& filename);
+   ~lexer();
    bool next(char& c);
    bool skip( char& c);
    bool scan(token* t);

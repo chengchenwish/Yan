@@ -1,5 +1,5 @@
 #include "interp.h"
-
+namespace Yan{
 int  interpExpAST(ASTnode* root)
 {
 
@@ -29,4 +29,5 @@ int  interpExpAST(ASTnode* root)
             std::cout<<" ERROR op"<<root->op<<std::endl;
             exit(1);
     }
+}
 }

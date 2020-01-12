@@ -1,19 +1,21 @@
-#include "parser/parser.h"
+#include "parser/lexer.h"
 #include "parser/AST.h"
 #include "parser/interp.h"
+//namespace Yan{
+
 int main()
 {
     std::cout<<" input file name:";
     std::string file;
     std::cin>> file;
-    parser::parser p(file);
-    parser::token t;
+    Yan::lexer p(file);
+    Yan::token t;
     if(p.openFile())
     {
         while(p.scan(&t))
         {
-            std::cout<<parser::tokenToString(t.token)<<" "<<t.value<<std::endl;
-            if(t.token == parser::T_EOF)
+            std::cout<<Yan::tokenToString(t.token)<<" "<<t.value<<std::endl;
+            if(t.token == Yan::T_EOF)
             {
                 break;
             }
@@ -25,19 +27,20 @@ int main()
         std::cout<<"open file fail"<<std::endl;
 
     }
-    parser::parser pp(file);
+    Yan::lexer pp(file);
     if(pp.openFile())
     {
-        ASTnode* node;
+        Yan::ASTnode* node;
 
-        parser::token ttt;
+        Yan::token ttt;
         pp.scan(&ttt);
-        exprAST ast(pp);
+        Yan::exprAST ast(pp);
         node = ast.binExpr(ttt);
         std::cout<<"node type:"<<node->op<<std::endl;
     
-        int result = interpExpAST(node);
+        int result = Yan::interpExpAST(node);
         std::cout<<"result is:"<<result<<std::endl;
     }
     return 0;
 }
+

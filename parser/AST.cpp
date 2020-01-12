@@ -1,6 +1,7 @@
 #include "AST.h"
+namespace Yan{
 
-exprAST::exprAST(parser::parser& s):scan(s)
+exprAST::exprAST(lexer& s):scan(s)
 {
     
 }
@@ -8,10 +9,10 @@ exprAST::~exprAST()
 {
  
 }
-ASTnode* exprAST::primary(parser::token& t)
+ASTnode* exprAST::primary(token& t)
 {
     ASTnode* node =nullptr;
-    if (t.token == parser::T_INTLIT)
+    if (t.token == T_INTLIT)
     {   std::cout<<t.value<<"value "<<std::endl;
         node = new ASTnode(tokenType2ASTop(t.token),nullptr, nullptr,t.value);
     }
@@ -22,11 +23,11 @@ ASTnode* exprAST::primary(parser::token& t)
     }
     return node;
 }
-ASTnode* exprAST::binExpr(parser::token& t, int ptp)
+ASTnode* exprAST::binExpr(token& t, int ptp)
 {
     ASTnode* left = nullptr, *right = nullptr;
     int tokenType;
-    if(t.token == parser::T_EOF)
+    if(t.token == T_EOF)
     {
         std::cout<<"end of the file";
         return nullptr;
@@ -35,7 +36,7 @@ ASTnode* exprAST::binExpr(parser::token& t, int ptp)
     left = primary(t);
     scan.scan(&currentToken);
     tokenType = currentToken.token;
-    if(tokenType == parser::T_EOF)
+    if(tokenType ==T_EOF)
     {
         return left;
     }
@@ -48,7 +49,7 @@ ASTnode* exprAST::binExpr(parser::token& t, int ptp)
         right = binExpr(currentToken,current_ptp);
         left = new ASTnode(tokenType2ASTop(tokenType),left,right,0);
         tokenType = currentToken.token; 
-        if (tokenType == parser::T_EOF)
+        if (tokenType == T_EOF)
         {
             return left;
         }
@@ -73,19 +74,19 @@ int exprAST::tokenType2ASTop(int tokenType)
 
  switch (tokenType)
 {
-    case parser::T_ADD:
+    case T_ADD:
         op = A_ADD;
         break;
-    case parser::T_STAR:
+    case T_STAR:
         op = A_MULTIPLY;
         break;
-    case  parser::T_MINUS:
+    case T_MINUS:
         op = A_SUBTRACT;
         break;
-    case parser::T_SLASH:
+    case T_SLASH:
         op = A_DIVIDE;
         break;
-    case parser::T_INTLIT:
+    case T_INTLIT:
         op = A_INTLIT;
         break;
 
@@ -94,36 +95,4 @@ int exprAST::tokenType2ASTop(int tokenType)
 return op;
     
 }
-/*void exprAST::AddToTree(parser::token& t,)
-{
-    int op;
-    switch (t.token)
-    {
-        case parser::T_ADD:
-            op = A_ADD;
-            break;
-        case parser::T_STAR:
-            op = A_MULTIPLY;
-            break;
-        case  parser::T_MINUS:
-            op = A_SUBTRACT;
-            break;
-        case parser::T_SLASH:
-            op = A_DIVIDE;
-            break;
-        case parser::T_INTLIT:
-            op = A_INTLIT;
-            break;
-
-    }
-    if(root == std::nullptr)
-    {
-        root = new ASTnode();
-        //std::memset(root,0,sizeof(root));
-        root->op = op;
-        root->left = std::nullptr;
-        root->right = std::nullptr;
-
-    }
-
-}*/
+}

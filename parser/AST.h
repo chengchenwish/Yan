@@ -1,6 +1,7 @@
 #ifndef _AST_H_
 #define _AST_H_
-#include"parser.h"
+#include"lexer.h"
+namespace Yan{
 
 enum ASTop{
     A_ADD,
@@ -30,17 +31,18 @@ static constexpr int op_priority[] = {0, 0, 1, 1, -1, -1};
 class exprAST 
 {
     public:
-        exprAST(parser::parser& s);
+        exprAST(lexer& s);
         ~exprAST();
-        ASTnode*primary(parser::token& t);
-        ASTnode*binExpr(parser::token& t, int ptp = -1);
+        ASTnode*primary(token& t);
+        ASTnode*binExpr(token& t, int ptp = -1);
         int tokenType2ASTop(int tokenType);
         int getOpPriority(int optype);
-        //void buildTree(parser::token& t);
+        //void buildTree(lexer::token& t);
     private:
 //        ASTnode* root;
-        //parser::token currentToken;
-        parser::parser& scan;
-        parser::token currentToken;
+        //lexer::token currentToken;
+        lexer& scan;
+        token currentToken;
+};
 };
 #endif

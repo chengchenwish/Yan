@@ -6,10 +6,10 @@ add_library(compiler "")
 target_sources(compiler
     PRIVATE
     parser/interp.cpp
-    parser/parser.cpp
+    parser/lexer.cpp
     parser/AST.cpp
     )
-add_executable(YAN main)
+add_executable(YAN main.cpp)
 target_link_libraries(YAN compiler)
                       #include_directories(server)
 option(YAN_BUILD_TESTS "Build YAN unit test" ON)

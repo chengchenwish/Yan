@@ -1,13 +1,13 @@
-#include "parser.h"
-namespace parser
+#include "lexer.h"
+namespace Yan
 {
-    parser::parser(std::string&filename):
+    lexer::lexer(std::string&filename):
         fileName(filename),
         lineNum(0)
     {
     }
 
-   bool  parser::openFile()
+   bool  lexer::openFile()
    {
       infile.open(fileName.c_str(),std::ios_base::in);
       if(!infile.is_open())
@@ -18,7 +18,7 @@ namespace parser
       }
       return true;
    }
-   bool parser::next(char& c)
+   bool lexer::next(char& c)
    {
         if(infile.get(c))
         {
@@ -30,7 +30,7 @@ namespace parser
         }
         return false;
    }
-   bool  parser::skip(char& c)
+   bool  lexer::skip(char& c)
    {
         
         if(!next(c))
@@ -48,7 +48,7 @@ namespace parser
         }
         return true;
    }
-   bool parser::scan(token* t)
+   bool lexer::scan(token* t)
    {
        char c;
        if (skip(c))
@@ -111,7 +111,7 @@ namespace parser
    
    }
 
-   bool parser::isdigit(char c)
+   bool lexer::isdigit(char c)
    {
      if( c>='0' && c<='9')
      {
@@ -122,12 +122,12 @@ namespace parser
          return false;
      }
    }
-   int parser::peek()
+   int lexer::peek()
    {
        return infile.peek();
 
    }
-   parser::~parser()
+   lexer::~lexer()
    {
        if(infile.is_open())
        {
