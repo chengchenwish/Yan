@@ -13,7 +13,7 @@ ASTnode* exprAST::primary(parser::token& t)
     ASTnode* node =nullptr;
     if (t.token == parser::T_INTLIT)
     {   std::cout<<t.value<<"value "<<std::endl;
-        node = new ASTnode(tokenType2ASTop(t.token),t.value);
+        node = new ASTnode(tokenType2ASTop(t.token),nullptr, nullptr,t.value);
     }
     else
     {
@@ -22,32 +22,50 @@ ASTnode* exprAST::primary(parser::token& t)
     }
     return node;
 }
-ASTnode* exprAST::binExpr(parser::token& t)
+ASTnode* exprAST::binExpr(parser::token& t, int ptp)
 {
-    ASTnode* left = nullptr, *right = nullptr, *root= nullptr;
-    int nodeType;
+    ASTnode* left = nullptr, *right = nullptr;
+    int tokenType;
     if(t.token == parser::T_EOF)
     {
         std::cout<<"end of the file";
         return nullptr;
     }
+
     left = primary(t);
-    parser::token nextToken;
-    scan.scan(&nextToken);
-    if(nextToken.token == parser::T_EOF)
+    scan.scan(&currentToken);
+    tokenType = currentToken.token;
+    if(tokenType == parser::T_EOF)
     {
         return left;
     }
-    nodeType = tokenType2ASTop(nextToken.token);
-     
-    scan.scan(&nextToken);
-    right = binExpr(nextToken);
-    root = new ASTnode(nodeType,0);
-    root->left = left;
-    root->right = right;
-    return root;
+    
+    while(getOpPriority(tokenType)>ptp)
+    {
+        int current_ptp = getOpPriority(tokenType);
+        std::cout<<"current_ptp"<<current_ptp<<std::endl;
+        scan.scan(&currentToken);
+        right = binExpr(currentToken,current_ptp);
+        left = new ASTnode(tokenType2ASTop(tokenType),left,right,0);
+        tokenType = currentToken.token; 
+        if (tokenType == parser::T_EOF)
+        {
+            return left;
+        }
+    }
+    return left;
     
        
+}
+
+int exprAST::getOpPriority(int  optype)
+{
+    if(op_priority[optype] == -1)
+    {
+        std::cout<<"ERROR:Invalid operation"<<std::endl;
+        exit(1);
+    }
+    return op_priority[optype];
 }
 int exprAST::tokenType2ASTop(int tokenType)
 { 

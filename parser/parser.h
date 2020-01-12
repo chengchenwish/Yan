@@ -20,7 +20,6 @@ struct token
     int value;
     tokenType token;  
 };
-
 class parser 
 {
 public:
