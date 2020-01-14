@@ -2,7 +2,8 @@
 #define _TOKEN_H_
 #include<string>
 enum class tokenType 
-{
+{ 
+    //The token is a meaningful string
     T_ADD    = 0,
     T_MINUS  = 1,
     T_STAR   = 2,

@@ -1,6 +1,7 @@
 #include "parser/lexer.h"
 #include "parser/AST.h"
 #include "parser/interp.h"
+#include "parser/gen.h"
 //namespace Yan{
 
 int main()
@@ -40,6 +41,9 @@ int main()
     
         int result = Yan::interpExpAST(node);
         std::cout<<"result is:"<<result<<std::endl;
+        Yan::gen gen;
+        gen.generateCode(node);
+        
     }
     return 0;
 }

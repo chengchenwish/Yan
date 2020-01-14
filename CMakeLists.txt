@@ -8,6 +8,7 @@ target_sources(compiler
     parser/interp.cpp
     parser/lexer.cpp
     parser/AST.cpp
+    parser/gen.cpp
     )
 add_executable(YAN main.cpp)
 target_link_libraries(YAN compiler)

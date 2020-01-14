@@ -24,14 +24,15 @@ class lexer
 {
 public:
    explicit lexer(std::string& filename);
-   ~lexer();
-   bool next(char& c);
-   bool skip( char& c);
+   ~lexer();  
    bool scan(token* t);
    int peek();
-   bool openFile();
-   bool isdigit(char c);
+   bool openFile();  
    int getLineNum(){ return lineNum;}
+private:
+   bool next(char& c);
+   bool skip( char& c);
+   bool isdigit(char c);
 private:
   std::string fileName;
   int lineNum;

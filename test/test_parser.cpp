@@ -6,5 +6,5 @@ TEST(parserTest, test)
 {
   int a =8;
   ASSERT_TRUE(a==8);
-  ASSERT_TRUE(a==89);
+
 }
