@@ -2,6 +2,7 @@
 #include "parser/AST.h"
 #include "parser/interp.h"
 #include "parser/gen.h"
+#include "parser/parser.h"
 //namespace Yan{
 
 int main()
@@ -15,8 +16,8 @@ int main()
     {
         while(p.scan(&t))
         {
-            std::cout<<Yan::tokenToString(t.token)<<" "<<t.value<<std::endl;
-            if(t.token == Yan::T_EOF)
+            std::cout<<t.tostring()<<" "<<t.value<<std::endl;
+            if(t.type == Yan::tokenType::T_EOF)
             {
                 break;
             }
@@ -28,21 +29,27 @@ int main()
         std::cout<<"open file fail"<<std::endl;
 
     }
+    
     Yan::lexer pp(file);
     if(pp.openFile())
     {
-        Yan::ASTnode* node;
+       // Yan::ASTnode* node;
 
-        Yan::token ttt;
-        pp.scan(&ttt);
-        Yan::exprAST ast(pp);
-        node = ast.binExpr(ttt);
-        std::cout<<"node type:"<<node->op<<std::endl;
-    
-        int result = Yan::interpExpAST(node);
-        std::cout<<"result is:"<<result<<std::endl;
+        //Yan::token ttt;
+       // pp.scan(&ttt);
+        
         Yan::gen gen;
-        gen.generateCode(node);
+        Yan::parser ast(pp,gen);
+        gen.genPreamble();
+        ast.statements();
+        gen.genpostamble();
+       // node = ast.binExpr(ttt);
+       // std::cout<<"node type:"<<node->op<<std::endl;
+    
+        //int result = Yan::interpExpAST(node);
+        //std::cout<<"result is:"<<result<<std::endl;
+        //Yan::gen gen;
+       // gen.generateCode(node);
         
     }
     return 0;

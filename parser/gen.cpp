@@ -2,6 +2,7 @@
 namespace Yan
 {
     char const *gen::registerList[gen::regNum] = {"%r8" ,"%r9","%r10","%r11"};
+    std::array<int,gen::regNum> gen::freeRegMark ={1,1,1,1};
     gen::gen(const std::string& fileName):outfileName(fileName)
     {
         outfstream.open(fileName.c_str(), std::ios::out);

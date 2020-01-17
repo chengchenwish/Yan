@@ -7,7 +7,7 @@ namespace Yan{
 class gen 
 {
 public:
-    explicit gen(const std::string& fileName = "a.out");
+    explicit gen(const std::string& fileName = "a.s");
     ~gen();
     int genAST(ASTnode* root);
     void generateCode(ASTnode* root);
@@ -25,14 +25,10 @@ public:
     void printint(int r);
 private:
     static constexpr std::size_t  regNum = 4;
-    /*
-    static char const *r8;
-    static constexpr char* r9 = "%r9";
-    static constexpr char* r10 = "%r10";
-    static constexpr char* r11 = "%r11";*/
-    static char const *registerList[regNum];// = { r8, r9, r10, r11 };
-    //1 means freed, o means allocated
-    std::array<int,regNum> freeRegMark =  { 1 };
+    
+    static char const *registerList[regNum];
+    static std::array<int,regNum> freeRegMark;
+    
     
     std::string outfileName; 
     std::fstream outfstream;

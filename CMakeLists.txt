@@ -7,8 +7,9 @@ target_sources(compiler
     PRIVATE
     parser/interp.cpp
     parser/lexer.cpp
-    parser/AST.cpp
     parser/gen.cpp
+    parser/parser.cpp
+    parser/token.cpp
     )
 add_executable(YAN main.cpp)
 target_link_libraries(YAN compiler)

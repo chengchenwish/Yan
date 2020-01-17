@@ -1,7 +1,10 @@
 #include "token.h"
-std::string okenToString(tokenType t)
+namespace Yan
 {
-    switch (t)
+
+std::string token::tostring()
+{
+     switch (type)
     {
         case tokenType::T_ADD:
             return "+";
@@ -15,7 +18,20 @@ std::string okenToString(tokenType t)
             return "number";
         case tokenType::T_EOF:
             return "eof";
+        case tokenType::T_PRINT:
+            return "print";
+        case tokenType::T_SEMI:
+            return ";";
+        case tokenType::T_INT:
+            return "int";
+        case tokenType::T_EQ:
+            return "=";
+        case tokenType::T_IDENT:
+            return "identi";
         default:
-            return "unknow";
+            return "unknow value";
     }
+
+}
+
 }

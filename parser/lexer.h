@@ -3,23 +3,10 @@
 #include <fstream> 
 #include <iostream>
 #include <string>
+#include "token.h"
 namespace Yan{
 
-enum tokenType 
-{
-    T_ADD,
-    T_MINUS,
-    T_STAR,
-    T_SLASH,
-    T_INTLIT,
-    T_EOF
-};
-std::string tokenToString(tokenType t);
-struct token 
-{
-    int value;
-    tokenType token;  
-};
+
 class lexer 
 {
 public:
@@ -33,6 +20,9 @@ private:
    bool next(char& c);
    bool skip( char& c);
    bool isdigit(char c);
+   bool isalpha(char c);
+   bool scanInt(char c, token*t);
+   void  scanIdenti(char c, token*t);
 private:
   std::string fileName;
   int lineNum;
