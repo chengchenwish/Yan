@@ -16,7 +16,7 @@ namespace Yan
 
     static  char* program = "Yan";
 
-    static void VError(const location& loc,
+     void static vError(const location& loc,
                    const char* format,
                    va_list args)
  {
@@ -75,14 +75,15 @@ namespace Yan
         fprintf(stderr, "\n");   
     }
 
-void Error(const token* tok, const char* format, ...)
+void Error(const location& loc, const char* format, ...)
 {
   va_list args;
   va_start(args, format);
-  VError(tok->sourceLocation, format, args);
+  vError(loc, format, args);
   va_end(args);
  
-
 }
+
+
 
 }

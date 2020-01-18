@@ -3,29 +3,24 @@
 namespace Yan
 {
     lexer::lexer(std::string&filename):
-        fileName(filename),
-        lineNum(0)
+        loc(filename,0,0)
     {
-    }
-
-   bool  lexer::openFile()
-   {
-      infile.open(fileName.c_str(),std::ios_base::in);
+        infile.open(filename.c_str(),std::ios_base::in);
       if(!infile.is_open())
       {
-          std::cout<<"open file fail"<<std::endl;
-    
-         return false; 
+          Error("Fail to open file:%s",filename.c_str());
       }
-      return true;
-   }
+
+    }
+
    bool lexer::next(char& c)
    {
         if(infile.get(c))
         {
+            loc.colum++;
             if(c == '\n')
             {
-                lineNum++;
+                loc.line++;
             }
             return true;
         }
@@ -129,9 +124,9 @@ namespace Yan
         }
         else
         {
-            t->sourceLocation.colum = 122;
-            t->sourceLocation.fileName ="p";
-            Error(t,"error toekn");
+          //  t->sourceLocation.colum = 122;
+            //t->sourceLocation.fileName ="p";
+            Error(loc,"error toekn");
             //std::cout<<"ERROR: unknown token LINE:"<<lineNum<<" "<<temp<<std::endl;
            // return false;
 

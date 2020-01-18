@@ -42,13 +42,19 @@ struct location
     std::string fileName;
     int line;
     int colum;
+    location(const std::string& file, int line, int colum)
+    {
+        this->fileName = file;
+        this->line = line;
+        this->colum = colum;
+    }
     
 };
  struct token 
 {   
     int value;
     tokenType type;
-    location sourceLocation;
+    //location loc;
     std::string  tostring();
 };
 }

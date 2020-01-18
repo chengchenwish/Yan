@@ -8,7 +8,7 @@ void Error(const char* format, ...);
 
 void Info(const char*format, ...);
 
-void Error(const token* tok, const char* format, ...);
+void Error(const location& loc, const char* format, ...);
 
 };
 #endif

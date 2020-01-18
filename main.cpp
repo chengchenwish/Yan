@@ -12,7 +12,7 @@ int main()
     std::cin>> file;
     Yan::lexer p(file);
     Yan::token t;
-    if(p.openFile())
+    //if(p.openFile())
     {
         while(p.scan(&t))
         {
@@ -24,14 +24,10 @@ int main()
         }
 
     }
-    else
-    {
-        std::cout<<"open file fail"<<std::endl;
-
-    }
+    
     
     Yan::lexer pp(file);
-    if(pp.openFile())
+    //if(pp.openFile())
     {
        // Yan::ASTnode* node;
 

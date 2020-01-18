@@ -15,8 +15,7 @@ public:
    ~lexer();  
    bool scan(token* t);
    int peek();
-   bool openFile();  
-   int getLineNum(){ return lineNum;}
+   location& getLocation(){ return loc;}
 private:
    bool next(char& c);
    bool skip( char& c);
@@ -25,8 +24,9 @@ private:
    bool scanInt(char c, token*t);
    void scanIdenti(char c, token*t);
 private:
-  std::string fileName;
-  int lineNum;
+   location loc;
+  //std::string fileName;
+  //int lineNum;
   std::ifstream infile;
 };
 }
