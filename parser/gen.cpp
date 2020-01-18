@@ -2,14 +2,15 @@
 namespace Yan
 {
     char const *gen::registerList[gen::regNum] = {"%r8" ,"%r9","%r10","%r11"};
+    //1 means freed, o means allocated
     std::array<int,gen::regNum> gen::freeRegMark ={1,1,1,1};
-    gen::gen(const std::string& fileName):outfileName(fileName)
+    gen::gen(symbolTable& sym, const std::string& fileName):outfileName(fileName),symb(sym)
     {
         outfstream.open(fileName.c_str(), std::ios::out);
         if(!outfstream.is_open())
         {
-            std::cout<<"Error open output file failed"<<std::endl;
-            exit(1);
+            ExitWithError("Open output file:%s fail", fileName.c_str());
+         
         }
 
     }
@@ -22,13 +23,13 @@ namespace Yan
         }
     }
 
-    int gen::genAST(ASTnode* root)
+    int gen::genAST(ASTnode* root,int reg)
     {
 
    
     int leftReg, rightReg;
-    if(root->left) leftReg = genAST(root->left);
-    if(root->right) rightReg = genAST(root->right);
+    if(root->left) leftReg = genAST(root->left,-1);
+    if(root->right) rightReg = genAST(root->right,leftReg);
     
     switch(root->op)
     {   
@@ -43,7 +44,15 @@ namespace Yan
             return genSub(leftReg, rightReg);
         case ASTop::A_INTLIT:
             return loadValue(root->intValue);
+        case ASTop::A_IDENTI:
+            return (loadGlobal(symb.getSymbol(root->intValue).name));
+        case A_LVIDENT:
+            return (storeGlobal(reg, symb.getSymbol(root->intValue).name));
+        case A_ASSIGN:
+    // The work has already been done, return the result
+        return (rightReg);
         default:
+            
             std::cout<<" ERROR op"<<root->op<<std::endl;
             exit(1);
     }
@@ -76,8 +85,7 @@ namespace Yan
        }
        outfstream.flush();
        outfstream.close();
-       std::cout<<"error no freed reg"<<std::endl;
-       exit(1);
+       ExitWithError("%s:No freed reg",__func__);
     }
     void gen::freeReg(int reg)
     {
@@ -161,7 +169,21 @@ namespace Yan
         freeReg(r);
 
     }
+    void gen::genGlobalSymbol(std::string& s)
+    {
+        outfstream<<"\t.comm\t"<<s<<",8,8\n";
+    }
 
- 
+    int gen::loadGlobal(std::string& text)
+    {
+        int r = allocReg();
+        outfstream<<"\tmovq\t"<<text<<"(%rip),"<<registerList[r]<<"\n";
+        return r;
+    }
+    int gen::storeGlobal(int reg, std::string& text)
+    {
+        outfstream<<"\tmovq\t"<<registerList[reg]<<","<<text<<"(%rip)\n";
+       return reg;
+    }
 	
 }

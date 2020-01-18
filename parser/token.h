@@ -52,7 +52,8 @@ struct location
 };
  struct token 
 {   
-    int value;
+    int value;//store 
+    std::string text;//store identi name;
     tokenType type;
     //location loc;
     std::string  tostring();

@@ -10,7 +10,7 @@ const parser::precedenceMap parser::opPrecedence({
 
 });// = parser::initPrecedenceMap();
 
-parser::parser(lexer& s,  gen& g):scan(s),codeGen(g)
+parser::parser(lexer& s,gen&g,symbolTable& t):scan(s),codeGen(g),symb(t)
 {
     
 }
@@ -21,14 +21,22 @@ parser::~parser()
 ASTnode* parser::primary(token& t)
 {
     ASTnode* node =nullptr;
-    if (t.type == tokenType::T_INTLIT)
-    {   Info("function:%s,token:%s",__func__,t.tostring().c_str());
-        node = new ASTnode(tokenType2ASTop(t.type),nullptr, nullptr,t.value);
-    }
-    else
+    Info(__func__);
+    switch( t.type)
     {
-        std::cout<<"ERROR:unexpected token"<<std::endl;
-        exit(1);
+        case tokenType::T_INTLIT:
+            node = new ASTnode(tokenType2ASTop(t.type),nullptr, nullptr,t.value);
+            break;
+        case tokenType::T_IDENT:
+            auto id = symb.findGlob(t.text);
+            if(id == -1)
+            {
+                ExitWithError("undefined variable");
+            }
+            node = new ASTnode(tokenType2ASTop(t.type),nullptr, nullptr,id);
+            break; 
+       // default:
+         //   ExitWithError("expect intlitr or identi");
     }
     return node;
 }
@@ -41,7 +49,7 @@ ASTnode* parser::binExpr(token& t, int ptp)
         std::cout<<"end of expr";
         return nullptr;
     }
-
+    Info("token:%s",t.tostring().c_str());
     left = primary(t);
     scan.scan(&currentToken);
     tokenType = currentToken.type;
@@ -79,6 +87,60 @@ void parser::match(tokenType t, const std::string& what)
         exit(1);
     }
 }
+void parser::printStatement()
+{
+
+    scan.scan(&currentToken);
+    Info(__func__);
+    auto tree = binExpr(currentToken);
+    auto reg = codeGen.genAST(tree);
+    codeGen.printint(reg);
+    codeGen.freeAllReg();
+    Info(__func__);
+               
+        //scan.scan(&currentToken);
+    match(tokenType::T_SEMI,"expect semi");
+
+        
+
+}
+void parser::varDeclaration()
+{
+    Info(__func__);
+    match(tokenType::T_INT,"int");
+    scan.scan(&currentToken);
+    match(tokenType::T_IDENT,"identi");
+    Info("44445");
+    symb.addGlob(currentToken.text);
+    Info("middle");
+    codeGen.genGlobalSymbol(currentToken.text);
+    scan.scan(&currentToken);
+    match(tokenType::T_SEMI,";");
+    Info("end declar");
+}
+void parser::assignmentStatement()
+{
+    int id = symb.findGlob(currentToken.text);
+    if(id == -1)
+    {
+        ExitWithError("undefined variable :%s",currentToken.text);
+    }
+     ASTnode *left, *right, *tree;
+     
+
+     right = new ASTnode(A_LVIDENT,nullptr,nullptr,id);
+     scan.scan(&currentToken);
+     match(tokenType::T_ASSIGN,"=");
+     scan.scan(&currentToken);
+     left = binExpr(currentToken);
+     tree = new ASTnode(A_ASSIGN, left, right, 0);
+     codeGen.genAST(tree);
+     codeGen.freeAllReg();
+     match(tokenType::T_SEMI,";");
+     Info(__func__);
+     
+
+}
 void parser::statements()
 {
 
@@ -89,20 +151,22 @@ void parser::statements()
         {
             return;
         }
-       // std::cout<<tokenToString(currentToken.token)<<"stmt"<<std::endl;;
-        match(tokenType::T_PRINT,"expect print");
-        if (currentToken.type!= tokenType::T_PRINT)
+        switch (currentToken.type)
         {
-            exit(1);
+        case tokenType::T_PRINT:
+            printStatement();
+            break;
+        case tokenType::T_INT:
+            varDeclaration();
+            break;
+        case tokenType::T_IDENT:
+            assignmentStatement();
+            break;
+        default:
+            ExitWithError("unkown token :%s",currentToken.tostring().c_str());
+            break;
         }
-        scan.scan(&currentToken);
-        auto tree = binExpr(currentToken);
-        auto reg = codeGen.genAST(tree);
-        codeGen.printint(reg);
-        codeGen.freeAllReg();
-               
-        //scan.scan(&currentToken);
-        match(tokenType::T_SEMI,"expect semi");
+      
 
         
     }
@@ -134,7 +198,9 @@ int parser::tokenType2ASTop(tokenType type)
     case tokenType::T_INTLIT:
         op = A_INTLIT;
         break;
-
+    case tokenType::T_IDENT:
+        op = A_IDENTI;
+        break;
 }
 
 return op;

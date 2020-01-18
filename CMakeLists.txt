@@ -11,6 +11,7 @@ target_sources(compiler
     parser/parser.cpp
     parser/token.cpp
     parser/error.cpp
+    parser/symbol.cpp
     )
 add_executable(YAN main.cpp)
 target_link_libraries(YAN compiler)

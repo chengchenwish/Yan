@@ -33,9 +33,9 @@ int main()
 
         //Yan::token ttt;
        // pp.scan(&ttt);
-        
-        Yan::gen gen;
-        Yan::parser ast(pp,gen);
+        Yan::symbolTable symb;
+        Yan::gen gen(symb);
+        Yan::parser ast(pp,gen,symb);
         gen.genPreamble();
         ast.statements();
         gen.genpostamble();

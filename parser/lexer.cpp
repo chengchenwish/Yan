@@ -3,12 +3,12 @@
 namespace Yan
 {
     lexer::lexer(std::string&filename):
-        loc(filename,0,0)
+        loc(filename,1,0)
     {
         infile.open(filename.c_str(),std::ios_base::in);
       if(!infile.is_open())
       {
-          Error("Fail to open file:%s",filename.c_str());
+          ExitWithError("Fail to open file:%s",filename.c_str());
       }
 
     }
@@ -65,6 +65,9 @@ namespace Yan
                 break;
             case ';':
                 t->type = tokenType::T_SEMI;
+                break;
+            case '=':
+                t->type = tokenType::T_ASSIGN;
                 break;
             default:
                 if(isdigit(c))
@@ -126,7 +129,7 @@ namespace Yan
         {
           //  t->sourceLocation.colum = 122;
             //t->sourceLocation.fileName ="p";
-            Error(loc,"error toekn");
+            ExitWithError(loc,"error toekn");
             //std::cout<<"ERROR: unknown token LINE:"<<lineNum<<" "<<temp<<std::endl;
            // return false;
 
@@ -159,10 +162,17 @@ namespace Yan
     {
         t->type = tokenType::T_PRINT;
     }
+    else if(strcmp(identi,"int") == 0)
+    {
+        t->type = tokenType::T_INT;
+    }
     else
     {
-        std::cout<<"unkown identi :"<<identi<<std::endl;
-        exit(1);
+        t->type = tokenType::T_IDENT;
+        t->text = identi;
+       // ExitWithError(loc,"unkown toekn:%s")
+        //std::cout<<"unkown identi :"<<identi<<std::endl;
+        //exit(1);
     }
          
       

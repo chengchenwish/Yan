@@ -45,7 +45,7 @@ namespace Yan
   fprintf(stderr, ANSI_COLOR_GREEN "^\n");
   exit(-1);
 }
-    void Error(const char* format, ...)
+    void ExitWithError(const char* format, ...)
     {
         fprintf(stderr,
           "%s: " ANSI_COLOR_RED "error: " ANSI_COLOR_RESET,
@@ -75,7 +75,7 @@ namespace Yan
         fprintf(stderr, "\n");   
     }
 
-void Error(const location& loc, const char* format, ...)
+void ExitWithError(const location& loc, const char* format, ...)
 {
   va_list args;
   va_start(args, format);

@@ -26,9 +26,11 @@ std::string token::tostring()
         case tokenType::T_INT:
             return "int";
         case tokenType::T_EQ:
-            return "=";
+            return "==";
         case tokenType::T_IDENT:
             return "identi";
+        case tokenType::T_ASSIGN:
+            return "=";
         default:
             return "unknow value";
     }

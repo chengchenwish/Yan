@@ -8,7 +8,10 @@ enum ASTop{
     A_SUBTRACT,
     A_MULTIPLY,
     A_DIVIDE,
-    A_INTLIT
+    A_INTLIT,
+    A_LVIDENT,
+    A_ASSIGN,
+    A_IDENTI
 
 };
 struct ASTnode

@@ -4,11 +4,11 @@
 namespace Yan
 {
 
-void Error(const char* format, ...);
+void ExitWithError(const char* format, ...);
 
 void Info(const char*format, ...);
 
-void Error(const location& loc, const char* format, ...);
+void ExitWithError(const location& loc, const char* format, ...);
 
 };
 #endif
