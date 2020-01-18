@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include "token.h"
+#include "error.h"
 namespace Yan{
 
 
@@ -22,7 +23,7 @@ private:
    bool isdigit(char c);
    bool isalpha(char c);
    bool scanInt(char c, token*t);
-   void  scanIdenti(char c, token*t);
+   void scanIdenti(char c, token*t);
 private:
   std::string fileName;
   int lineNum;

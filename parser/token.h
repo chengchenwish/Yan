@@ -34,14 +34,21 @@ enum class tokenType
     T_RBRACE,// }
     T_LPAREN, // (
     T_RPAREN,// )
-    T_LBRACKET,
-    T_RBRACKET
+    T_LBRACKET, //[
+    T_RBRACKET//]
 };
-
+struct location
+{
+    std::string fileName;
+    int line;
+    int colum;
+    
+};
  struct token 
 {   
     int value;
     tokenType type;
+    location sourceLocation;
     std::string  tostring();
 };
 }

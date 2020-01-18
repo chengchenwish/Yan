@@ -4,6 +4,7 @@
 #include "lexer.h"
 #include "AST.h"
 #include "gen.h"
+#include "error.h"
 namespace Yan {
 
 // + - * / intlitr EOF
@@ -22,12 +23,12 @@ class parser
         void match(tokenType t, const std::string& what);
 
         int tokenType2ASTop(tokenType type);
-        int getOpPrecedence(tokenType optype);
+        int getOpPrecedence(tokenType optype) const;
     private:
         lexer& scan;
         token currentToken;
         gen& codeGen;
-        static  precedenceMap opPrecedence;        
+        static const precedenceMap opPrecedence;        
 
         //disable copy and assign
         parser(const parser&) = delete;

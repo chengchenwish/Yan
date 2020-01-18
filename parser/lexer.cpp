@@ -129,8 +129,11 @@ namespace Yan
         }
         else
         {
-            std::cout<<"ERROR: unknown token LINE:"<<lineNum<<" "<<temp<<std::endl;
-            return false;
+            t->sourceLocation.colum = 122;
+            t->sourceLocation.fileName ="p";
+            Error(t,"error toekn");
+            //std::cout<<"ERROR: unknown token LINE:"<<lineNum<<" "<<temp<<std::endl;
+           // return false;
 
         }
         return true;

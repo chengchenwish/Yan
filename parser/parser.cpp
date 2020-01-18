@@ -1,6 +1,6 @@
 #include "parser.h"
 namespace Yan{
-parser::precedenceMap parser::opPrecedence({
+const parser::precedenceMap parser::opPrecedence({
     std::pair<tokenType,int>(tokenType::T_EOF, 0),
     std::pair<tokenType,int>(tokenType::T_ADD, 100),
     std::pair<tokenType,int>(tokenType::T_MINUS, 100),
@@ -22,7 +22,7 @@ ASTnode* parser::primary(token& t)
 {
     ASTnode* node =nullptr;
     if (t.type == tokenType::T_INTLIT)
-    {   std::cout<<t.value<<"value "<<std::endl;
+    {   Info("function:%s,token:%s",__func__,t.tostring().c_str());
         node = new ASTnode(tokenType2ASTop(t.type),nullptr, nullptr,t.value);
     }
     else
@@ -108,11 +108,10 @@ void parser::statements()
     }
     
 }
-int parser::getOpPrecedence(tokenType  optype)
+int parser::getOpPrecedence(tokenType  optype) const
 {
     
-    return opPrecedence[optype];
-    //return op_priority[static_cast<int>(optype)];
+    return opPrecedence.at(optype);
 }
 int parser::tokenType2ASTop(tokenType type)
 { 
