@@ -24,54 +24,6 @@ namespace Yan
         }
     }
 
-    int gen::genAST(ASTnode* root,int reg)
-    {
-
-   
-    int leftReg, rightReg;
-    if(root->left) leftReg = genAST(root->left,-1);
-    if(root->right) rightReg = genAST(root->right,leftReg);
-    
-    switch(root->op)
-    {   
-        case  A_ADD:
-    
-            return genAdd(leftReg, rightReg);
-        case  A_DIVIDE:
-            return genDiv(leftReg, rightReg);
-        case  A_MULTIPLY:
-            return genMul(leftReg, rightReg);
-        case  A_SUBTRACT:
-            return genSub(leftReg, rightReg);
-        case  A_INTLIT:
-            return loadValue(root->intValue);
-        case  A_IDENTI:
-            return (loadGlobal(symb.getSymbol(root->intValue).name));
-        case A_LVIDENT:
-            return (storeGlobal(reg, symb.getSymbol(root->intValue).name));
-        case A_ASSIGN:
-    // The work has already been done, return the result
-            return (rightReg);
-        case A_EQ:
-            return genEQ(leftReg, rightReg);
-        case A_NE:
-             return (genNE(leftReg, rightReg));
-        case A_LT:
-            return genLT(leftReg, rightReg);
-        case A_GT:
-            return genGT(leftReg, rightReg);
-        case A_LE:
-             return genLE(leftReg, rightReg);
-        case A_GE:
-            return genGE(leftReg, rightReg);
-
-
-        default:
-            
-            std::cout<<" ERROR op"<<root->op<<std::endl;
-            exit(1);
-    }
-    }
     int gen::genBinaryOp(BinaryOp* root,int reg)
     {
 
@@ -120,15 +72,7 @@ namespace Yan
             exit(1);
     }
     }
-    void gen::generateCode(ASTnode* root)
-    {
-        int reg;
-        genPreamble();
-        reg = genAST(root);
-        printint(reg);
-        genpostamble();
-
-    }
+    
     void gen::visit(BinaryOp* node)
     {
         int reg;

@@ -38,36 +38,6 @@ struct  BinaryOp: public Node
     BinaryOp*  right;
     int intValue;
 };
-enum ASTop
-    {   A_ADD,
-        A_SUBTRACT,
-        A_MULTIPLY,
-        A_DIVIDE,
-        A_INTLIT,
-        A_LVIDENT,
-        A_ASSIGN,
-        A_IDENTI,
-        A_EQ,
-        A_NE,
-        A_GT,
-        A_LT,
-        A_GE,
-        A_LE
-    };
-struct ASTnode
-{
-    ASTnode(int op, ASTnode* left, ASTnode* right,int intvalue)
-    {
-        this->op = op;
-        this->intValue = intvalue;
-        this->left = left;
-        this->right = right;
-    }
-    int op;
-    ASTnode*left;
-    ASTnode*right;
-    int intValue;
-};
 
 class Ivisitor 
 {

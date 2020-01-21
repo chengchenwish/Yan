@@ -4,6 +4,6 @@
 #include "AST.h"
 namespace Yan{
 
-int interpExpAST(ASTnode* root);
+int interpExpAST(BinaryOp* root);
 }
 #endif

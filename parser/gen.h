@@ -10,8 +10,6 @@ class gen:public Ivisitor
 public:
     explicit gen(symbolTable& sym,const std::string& fileName = "a.s");
     ~gen();
-    int genAST(ASTnode* root,int reg = -1);
-    void generateCode(ASTnode* root);
     void freeAllReg();
     int allocReg();
     void freeReg(int reg);

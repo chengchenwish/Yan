@@ -146,7 +146,7 @@ void parser::assignmentStatement()
      match(tokenType::T_ASSIGN,"=");
      nextToken();
      left = binExpr();
-     tree = new BinaryOp(A_ASSIGN, left, right, 0);
+     tree = new BinaryOp(BinaryOp::A_ASSIGN, left, right, 0);
      //codeGen.genAST(tree);
      codeGen.genBinaryOp(tree);
      codeGen.freeAllReg();
