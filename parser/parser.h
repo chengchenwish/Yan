@@ -18,8 +18,8 @@ class parser
     public:
         parser(lexer& s,gen& g,symbolTable& t);
         ~parser();
-        ASTnode*primary(token& t);
-        ASTnode*binExpr(token& t, int ptp = 0);
+        BinaryOp*primary();
+        BinaryOp*binExpr(int ptp = 0);
         void statements();
         void assignmentStatement();
         void varDeclaration();
@@ -28,6 +28,7 @@ class parser
 
         int tokenType2ASTop(tokenType type);
         int getOpPrecedence(tokenType optype) const;
+        void nextToken();
     private:
         lexer& scan;
         token currentToken;

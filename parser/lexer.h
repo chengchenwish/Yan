@@ -19,6 +19,7 @@ public:
 private:
    bool next(char& c);
    bool skip( char& c);
+   void consume();
    bool isdigit(char c);
    bool isalpha(char c);
    bool scanInt(char c, token*t);

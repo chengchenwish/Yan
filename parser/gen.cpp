@@ -2,6 +2,7 @@
 namespace Yan
 {
     char const *gen::registerList[gen::regNum] = {"%r8" ,"%r9","%r10","%r11"};
+    char const *gen::breglist[gen::regNum]= { "%r8b", "%r9b", "%r10b", "%r11b" };
     //1 means freed, o means allocated
     std::array<int,gen::regNum> gen::freeRegMark ={1,1,1,1};
     gen::gen(symbolTable& sym, const std::string& fileName):outfileName(fileName),symb(sym)
@@ -33,24 +34,86 @@ namespace Yan
     
     switch(root->op)
     {   
-        case ASTop::A_ADD:
+        case  A_ADD:
     
             return genAdd(leftReg, rightReg);
-        case ASTop::A_DIVIDE:
+        case  A_DIVIDE:
             return genDiv(leftReg, rightReg);
-        case ASTop::A_MULTIPLY:
+        case  A_MULTIPLY:
             return genMul(leftReg, rightReg);
-        case ASTop::A_SUBTRACT:
+        case  A_SUBTRACT:
             return genSub(leftReg, rightReg);
-        case ASTop::A_INTLIT:
+        case  A_INTLIT:
             return loadValue(root->intValue);
-        case ASTop::A_IDENTI:
+        case  A_IDENTI:
             return (loadGlobal(symb.getSymbol(root->intValue).name));
         case A_LVIDENT:
             return (storeGlobal(reg, symb.getSymbol(root->intValue).name));
         case A_ASSIGN:
     // The work has already been done, return the result
-        return (rightReg);
+            return (rightReg);
+        case A_EQ:
+            return genEQ(leftReg, rightReg);
+        case A_NE:
+             return (genNE(leftReg, rightReg));
+        case A_LT:
+            return genLT(leftReg, rightReg);
+        case A_GT:
+            return genGT(leftReg, rightReg);
+        case A_LE:
+             return genLE(leftReg, rightReg);
+        case A_GE:
+            return genGE(leftReg, rightReg);
+
+
+        default:
+            
+            std::cout<<" ERROR op"<<root->op<<std::endl;
+            exit(1);
+    }
+    }
+    int gen::genBinaryOp(BinaryOp* root,int reg)
+    {
+
+   
+    int leftReg, rightReg;
+    if(root->left) leftReg = genBinaryOp(root->left,-1);
+    if(root->right) rightReg = genBinaryOp(root->right,leftReg);
+    
+    switch(root->op)
+    {   
+        case  BinaryOp::A_ADD:
+    
+            return genAdd(leftReg, rightReg);
+        case  BinaryOp::A_DIVIDE:
+            return genDiv(leftReg, rightReg);
+        case  BinaryOp::A_MULTIPLY:
+            return genMul(leftReg, rightReg);
+        case  BinaryOp::A_SUBTRACT:
+            return genSub(leftReg, rightReg);
+        case  BinaryOp::A_INTLIT:
+            return loadValue(root->intValue);
+        case  BinaryOp::A_IDENTI:
+            return (loadGlobal(symb.getSymbol(root->intValue).name));
+        case BinaryOp::A_LVIDENT:
+            return (storeGlobal(reg, symb.getSymbol(root->intValue).name));
+        case BinaryOp::A_ASSIGN:
+    // The work has already been done, return the result
+            return (rightReg);
+        case BinaryOp::A_EQ:
+            return genEQ(leftReg, rightReg);
+        case BinaryOp::A_NE:
+             return (genNE(leftReg, rightReg));
+        case BinaryOp::A_LT:
+            return genLT(leftReg, rightReg);
+        case BinaryOp::A_GT:
+            return genGT(leftReg, rightReg);
+        case BinaryOp::A_LE:
+             return genLE(leftReg, rightReg);
+        case BinaryOp::A_GE:
+            return genGE(leftReg, rightReg);
+
+
         default:
             
             std::cout<<" ERROR op"<<root->op<<std::endl;
@@ -65,6 +128,14 @@ namespace Yan
         printint(reg);
         genpostamble();
 
+    }
+    void gen::visit(BinaryOp* node)
+    {
+        int reg;
+        genPreamble();
+        reg = genBinaryOp(node);
+        printint(reg);
+        genpostamble();   
     }
     void gen::freeAllReg()
     {
@@ -185,5 +256,42 @@ namespace Yan
         outfstream<<"\tmovq\t"<<registerList[reg]<<","<<text<<"(%rip)\n";
        return reg;
     }
+
+    int gen::genGE(int r1, int r2)
+    {
+        return genCmp(r1,r2,"setge");
+    }
+    int gen::genEQ(int r1, int r2)
+    {
+        return genCmp(r1,r2,"sete");
+    }
+    int gen::genNE(int r1, int r2)
+    {
+       return genCmp(r1,r2,"setne");
+    }
+    int gen::genGT(int r1, int r2)
+    {
+       return  genCmp(r1,r2,"setg");
+    }
+    int gen::genLT(int r1, int r2)
+    {
+       return  genCmp(r1,r2,"setl");
+    }
+    int gen::genLE(int r1, int r2)
+    {
+        return genCmp(r1,r2,"setle");
+    }
+    int  gen::genCmp(int r1, int r2, const std::string& how)
+    {
+      
+
+         outfstream<<"\tcmpq\t"<<registerList[r2]<<","<<registerList[r1]<<"\n";
+         outfstream<<"\t"<<how<<"\t"<<breglist[r2]<<"\n";
+         outfstream<<"\tandq\t$255,"<<registerList[r2]<<"\n";
+         freeReg(r1);
+         return r2;
+
+    }
+
 	
 }

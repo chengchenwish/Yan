@@ -17,8 +17,9 @@ enum class tokenType
     T_EQ, //==
     T_GT, //>
     T_LT, //<
-    T_LQ, //<=
+    T_LE, //<=
     T_GE, //>=
+    T_NE, // !=
 //type keyword
     T_VOID,// void
     T_CHAR,// char

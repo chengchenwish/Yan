@@ -21,6 +21,7 @@ namespace Yan
             if(c == '\n')
             {
                 loc.line++;
+                loc.colum = 0;
             }
             return true;
         }
@@ -35,7 +36,6 @@ namespace Yan
         }
         while (c == '\t'||c == ' '|| c=='\n' || c == '\r' || c == '\f')
         {
-            std::cout<<c<<" ";
             if(!next(c))
             {
                 return false;
@@ -67,7 +67,52 @@ namespace Yan
                 t->type = tokenType::T_SEMI;
                 break;
             case '=':
-                t->type = tokenType::T_ASSIGN;
+                if(peek() == '=')
+                {
+                    consume();
+                    t->type = tokenType::T_EQ;
+                }
+                else
+                {
+                   t->type = tokenType::T_ASSIGN;
+                }
+                break;
+                
+                
+            case '>':
+        
+                if(peek() =='=')
+                {   consume();
+                    t->type = tokenType::T_GE;
+                }
+                else
+                {
+                    t->type = tokenType::T_GT;
+                }
+                
+               break;
+             case '<':
+                
+                if(peek() =='=')
+                {   consume();
+                    t->type = tokenType::T_LE;
+                }
+                else
+                {
+                    t->type = tokenType::T_LT;
+                }
+                
+               break;
+            case '!':
+                if(peek() == '=')
+                {
+                    consume();
+                    t->type = tokenType::T_NE;
+                }
+                else
+                {
+                    exit(1);
+                }
                 break;
             default:
                 if(isdigit(c))
@@ -204,6 +249,22 @@ namespace Yan
    {
        return infile.peek();
 
+   }
+   void lexer::consume()
+   {
+       char c;
+       next(c);
+       if(c = '\n')
+       {
+           loc.line++;
+           loc.colum = 0;
+       }
+       else
+       {
+           loc.colum++;
+       }
+       
+       
    }
    lexer::~lexer()
    {

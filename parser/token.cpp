@@ -31,6 +31,16 @@ std::string token::tostring()
             return "identi";
         case tokenType::T_ASSIGN:
             return "=";
+        case tokenType::T_LT:
+            return "<";
+         case tokenType::T_GT:
+            return ">";
+        case tokenType::T_LE:
+            return "<=";
+        case tokenType::T_GE:
+            return ">=";
+        case tokenType::T_NE:
+            return "!=";
         default:
             return "unknow value";
     }
