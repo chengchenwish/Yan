@@ -41,6 +41,13 @@ std::string token::tostring()
             return ">=";
         case tokenType::T_NE:
             return "!=";
+        case tokenType::T_IF: return "if";
+        case tokenType::T_ELSE: return "else";
+        case tokenType::T_LBRACE:return "{";
+        case tokenType::T_RBRACE: return "}";
+        case tokenType::T_LPAREN:return "(";
+        case tokenType::T_RPAREN: return ")";
+
         default:
             return "unknow value";
     }

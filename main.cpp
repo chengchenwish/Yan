@@ -37,6 +37,7 @@ int main()
         Yan::gen gen(symb);
         Yan::parser ast(pp,gen,symb);
         gen.genPreamble();
+        Yan::Info("statements");
         ast.statements();
         gen.genpostamble();
        // node = ast.binExpr(ttt);

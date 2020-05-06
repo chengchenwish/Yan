@@ -11,7 +11,7 @@ BinaryOp::BinaryOp(int op, BinaryOp*left, BinaryOp* right, int value)
 {
     this->op = op;
     this->intValue = value;
-    this->left = std::move(left);
-    this->right = std::move(right);
+    this->left = left;
+    this->right = right;
 }
 }

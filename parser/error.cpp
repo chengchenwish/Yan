@@ -14,7 +14,7 @@ namespace Yan
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-    static  char* program = "Yan";
+    const  char* program = "Yan";
 
      void static vError(const location& loc,
                    const char* format,

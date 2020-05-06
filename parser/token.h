@@ -30,6 +30,9 @@ enum class tokenType
     T_PRINT,
     T_SEMI,
     T_IDENT,
+//KEY WORD
+    T_IF,
+    T_ELSE,
 
     T_LBRACE,// {
     T_RBRACE,// }

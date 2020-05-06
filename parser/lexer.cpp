@@ -63,6 +63,18 @@ namespace Yan
             case '/':
                 t->type = tokenType::T_SLASH;
                 break;
+            case '{':
+                t->type = tokenType::T_LBRACE;
+                break;
+            case '}':
+                t->type =  tokenType::T_RBRACE;
+                break;
+            case '(':
+                t->type = tokenType::T_LPAREN;
+                break;
+            case ')':
+                t->type =  tokenType::T_RPAREN;
+                break;
             case ';':
                 t->type = tokenType::T_SEMI;
                 break;
@@ -164,7 +176,7 @@ namespace Yan
         }
         int temp;
         temp = peek();
-        if(temp == ';'||temp == ' '||temp == '+' || temp == '-' ||temp == '/'|| temp == '*'|| temp == '\n'|| temp == '\t'||temp=='\r'||temp == '\f'|| temp == EOF)
+        if(temp == ';'||temp == ' '||isOperator(temp)|| temp == '\n'|| temp == '\t'||temp=='\r'||temp == '\f'|| temp == EOF)
         {
             t->type = tokenType::T_INTLIT;
             t->value = num;
@@ -211,6 +223,14 @@ namespace Yan
     {
         t->type = tokenType::T_INT;
     }
+    else if(strcmp(identi,"if") == 0)
+    {
+        t->type = tokenType::T_IF;
+    }
+    else if(strcmp(identi,"else") == 0)
+    {
+        t->type = tokenType::T_ELSE;
+    }
     else
     {
         t->type = tokenType::T_IDENT;
@@ -237,6 +257,17 @@ namespace Yan
    bool lexer::isalpha(char c)
    {
        if((c>='a' && c<='z')||c>='A' && c<= 'Z')
+       {
+           return true;
+       }
+       else
+       {
+           return false;
+       }
+   }
+   bool lexer:: isOperator(char c)
+   {
+       if(c=='+'||c == '-'||c=='*'||c=='/'||c=='<'||c=='>'||c == '!'||c == '=')
        {
            return true;
        }

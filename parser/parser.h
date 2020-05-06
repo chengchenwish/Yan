@@ -20,18 +20,37 @@ class parser
         ~parser();
         BinaryOp*primary();
         BinaryOp*binExpr(int ptp = 0);
+        Program* parserProgram();
+        FunctionDef* parserFuncDef(Identifier* identi);
+        Declaration* parserDeclaration(Identifier* identi);
+        CompousedStmt*parserCompoundStmt();
         void statements();
         void assignmentStatement();
         void varDeclaration();
         void printStatement();
-        void match(tokenType t, const std::string& what);
+        void ifStatement();
+        void compoundStatement();
+        
 
         int tokenType2ASTop(tokenType type);
         int getOpPrecedence(tokenType optype) const;
-        void nextToken();
     private:
+        bool isTypeName();
+        Type*baseType(storageClass* sclass);
+        Type*Declarator(Type*type);
+        //token ralated function
+        bool match(tokenType t);
+        bool test(tokenType t);
+        token consume();
+        void expect(tokenType t, const std::string& what);
+
+    private:
+        struct {
+            bool hasvule;
+            token tempToken;
+        } tmpToken;
         lexer& scan;
-        token currentToken;
+       // token currentToken;
         gen& codeGen;
         symbolTable& symb;
         

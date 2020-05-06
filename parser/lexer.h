@@ -22,6 +22,7 @@ private:
    void consume();
    bool isdigit(char c);
    bool isalpha(char c);
+   bool isOperator(char c);
    bool scanInt(char c, token*t);
    void scanIdenti(char c, token*t);
 private:
