@@ -1,61 +1,98 @@
+#include<cstring>
+
+#include<stdio.h>
 #include "parser/lexer.h"
 #include "parser/AST.h"
 #include "parser/interp.h"
 #include "parser/gen.h"
 #include "parser/parser.h"
 //namespace Yan{
+static void help()
+{
+    std::string help="Usgae: Yan [option] file ...\n"
+                     "  -h       Display help info\n"
+                     "  -S       Compile only,Do not assemble and link\n"
+                     "  -o       Complie and link,Generate excutable file\n";
+    std::cout<<help;
+}
+static void compile(std::vector<std::string>&files)
+{
+    Yan::lexer pp(files.front());
 
+    Yan::symbolTable symb;
+    Yan::gen gen(symb);
+    Yan::parser pars(pp,symb);
+    auto pp1= pars.parserProgram();
+    gen.genProgram(pp1);
+        
+}
+static void compile_link(std::vector<std::string>&files)
+{
+    compile(files);
+    const char* cmd = "cc  a.s";
+    if(system(cmd)!=0)
+    {
+        Yan::ExitWithError("Link error");
+    }
+}
+static void parseArgs(int argc, char* argv[])
+{
+    if(argc<2)
+    {
+        help();
+    }
+    bool S_arg = false;
+    bool h_arg =false;
+    bool o_arg = false;
+    bool error = false;
+    std::vector<std::string> inputFiles;
+    for(auto i=1; i<argc;i++)
+    {
+        if(strcmp(argv[i],"-S")==0)
+        {
+            S_arg =true;   
+        }
+        else if (strcmp(argv[i],"-h")==0)
+        {
+            h_arg =true;
+        }
+        else if(strcmp(argv[i],"-o")==0)
+        {
+            o_arg = true;
+        }
+        else if(argv[i][0]!='-')
+        {
+            inputFiles.emplace_back(argv[i]);
+            std::cout<<std::string(argv[i]);
+        }
+        else
+        {
+            error =true;
+        }        
+        
+    }
+
+    if(error || h_arg || inputFiles.empty())
+    {
+        help();
+        return;
+    }
+    
+    if(S_arg)
+    {
+        compile(inputFiles);
+    }
+    else if(o_arg||!inputFiles.empty())
+    {
+        compile_link(inputFiles);
+    }
+    
+}
 int main(int argc,char*argv[])
 {
-    if(argc != 2)
-    {
+    parseArgs(argc,argv);
+ 
 
-    }
-    std::cout<<" input file name:";
-    std::string file;
-    std::cin>> file;
-    Yan::lexer p(file);
-    Yan::token t;
-    //if(p.openFile())
-    {
-        while(p.scan(&t))
-        {
-            std::cout<<t.tostring()<<" "<<t.value<<std::endl;
-            if(t.type == Yan::tokenType::T_EOF)
-            {
-                break;
-            }
-        }
-
-    }
-    
-    
-    Yan::lexer pp(file);
-    //if(pp.openFile())
-    {
-       // Yan::ASTnode* node;
-
-        //Yan::token ttt;
-       // pp.scan(&ttt);
-        Yan::symbolTable symb;
-        Yan::gen gen(symb);
-        Yan::parser pars(pp,symb);
-        auto pp= pars.parserProgram();
-        gen.genProgram(pp);
-        
-       // gen.genPreamble();
-       // Yan::Info("statements");
-       // ast.statements();
-        //gen.genpostamble();
-       // node = ast.binExpr(ttt);
-       // std::cout<<"node type:"<<node->op<<std::endl;
-    
-        //int result = Yan::interpExpAST(node);
-        //std::cout<<"result is:"<<result<<std::endl;
-        //Yan::gen gen;
-       // gen.generateCode(node);
-        
-    }
     return 0;
 }
 
