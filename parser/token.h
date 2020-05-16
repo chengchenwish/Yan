@@ -4,7 +4,33 @@
 namespace Yan{
 
 //max str len for one token
+
 constexpr int MAX_STR_LEN = 100;
+/*
+#define TOKEN_MAP(c) \
+        c(T_EOF,'eo')\
+        c(T_ASSGIN, '=')
+enum Token
+{
+#define c(Type,Text)\
+        Type,
+TOKEN_MAP(c)
+#undef c
+};
+std::string getstring(Token t)
+{
+
+    #define c(Type,Text)\
+        case Type: return #Text;
+    switch(t)
+    {
+        TOKEN_MAP(c)
+    }
+    #undef c
+
+}
+*/
+
 enum class tokenType 
 { 
     //The token is a meaningful string
@@ -39,7 +65,8 @@ enum class tokenType
     T_LPAREN, // (
     T_RPAREN,// )
     T_LBRACKET, //[
-    T_RBRACKET//]
+    T_RBRACKET,//]
+    T_COMMA
 };
 struct location
 {

@@ -38,8 +38,8 @@ public:
     int getGlobIdex() const{ return glob;} 
     symbol& getSymbol(int index){ return table.at(index);}
     //new 
-    void addSymoble(const std::string& name, const Identifier& indenti);
-   bool  getIdentiInCurrentScope(const std::string& name, const Identifier* indenti)const;
+    void addSymoble(const std::string& name,  Identifier* indenti);
+   bool  getIdentiInCurrentScope(const std::string& name,  Identifier** indenti);
    void setParent(symbolTable* parent){ parent_ = parent;}
    void setScope(const Scope s){ scope_ = s;}
 
@@ -47,8 +47,9 @@ private:
     static constexpr int MAX_TABLE_SIZE = 1024;
     std::array<symbol,MAX_TABLE_SIZE> table;
     int glob;
+
     Scope scope_;
-    std::map<std::string, Identifier> map_;
+    std::map<std::string, Identifier*> map_;
     symbolTable* parent_;
 
 

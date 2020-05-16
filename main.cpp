@@ -5,8 +5,12 @@
 #include "parser/parser.h"
 //namespace Yan{
 
-int main()
+int main(int argc,char*argv[])
 {
+    if(argc != 2)
+    {
+
+    }
     std::cout<<" input file name:";
     std::string file;
     std::cin>> file;
@@ -35,11 +39,14 @@ int main()
        // pp.scan(&ttt);
         Yan::symbolTable symb;
         Yan::gen gen(symb);
-        Yan::parser ast(pp,gen,symb);
-        gen.genPreamble();
-        Yan::Info("statements");
-        ast.statements();
-        gen.genpostamble();
+        Yan::parser pars(pp,symb);
+        auto pp= pars.parserProgram();
+        gen.genProgram(pp);
+        
+       // gen.genPreamble();
+       // Yan::Info("statements");
+       // ast.statements();
+        //gen.genpostamble();
        // node = ast.binExpr(ttt);
        // std::cout<<"node type:"<<node->op<<std::endl;
     

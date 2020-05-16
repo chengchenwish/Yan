@@ -20,7 +20,7 @@ const parser::precedenceMap parser::opPrecedence({
 });// = parser::initPrecedenceMap();
 
 
-parser::parser(lexer& s,gen&g,symbolTable& t):scan(s),codeGen(g),symb(t)
+parser::parser(lexer& s,symbolTable& t):scan(s),symb(t)
 {
     tmpToken.hasvule = false;
 }
@@ -28,23 +28,25 @@ parser::~parser()
 {
  
 }
-BinaryOp* parser::primary()
+Expr* parser::primary()
 {
-    BinaryOp* node =nullptr;
+    Expr* node =nullptr;
     Info(__func__);
 
         if(match(tokenType::T_INTLIT))
         {
             Info(std::to_string(tmpToken.tempToken.value).c_str());
-            node = new BinaryOp(tokenType2ASTop(tmpToken.tempToken.type),nullptr, nullptr,tmpToken.tempToken.value);
+            node =  ConstantValue::create(tmpToken.tempToken.value);
         }
         else if(match(tokenType::T_IDENT))
-        {   auto id = symb.findGlob(tmpToken.tempToken.text);
-            if(id == -1)
+        {    Identifier* identi;
+             auto exist =symb.getIdentiInCurrentScope(tmpToken.tempToken.text,&identi);
+             if(!exist)
             {
-                ExitWithError("undefined variable");
-            }
-            node = new BinaryOp(tokenType2ASTop(tmpToken.tempToken.type),nullptr, nullptr,id);
+                ExitWithError("undefined variable :%s",tmpToken.tempToken.text.c_str());
+             }
+          // return Identifier::create(identi->name_,nullptr);
+            return identi;
         }
         else
         {
@@ -55,9 +57,9 @@ BinaryOp* parser::primary()
     return node;
     Info("endfff");
 }
-BinaryOp* parser::binExpr( int ptp)
+Expr* parser::binExpr( int ptp)
 {
-    BinaryOp* left = nullptr, *right = nullptr;
+    Expr* left = nullptr, *right = nullptr;
     tokenType tokenType;
     Info("token:%s",tmpToken.tempToken.tostring().c_str());
     if(match(tokenType::T_SEMI))
@@ -67,7 +69,7 @@ BinaryOp* parser::binExpr( int ptp)
 
     left = primary();
     
-    if(test(tokenType::T_SEMI))
+    if(test(tokenType::T_SEMI)|| test(tokenType::T_RPAREN))
     {
         return left;
     }
@@ -78,15 +80,14 @@ BinaryOp* parser::binExpr( int ptp)
         auto t = consume();        
         int current_ptp = getOpPrecedence(tokenType);
         right = binExpr(current_ptp);
-        left = new BinaryOp(tokenType2ASTop(tokenType),left,right,0);
+        left = new BinaryOp(tokenType2ASTop(tokenType),left,right);
         tokenType = t.type; 
         if(test(tokenType::T_SEMI))
         {
             return left;
         }
     }
-    return left;
-    
+    return left;    
        
 }
 //if the front token doesn't match the specific token exit with error
@@ -148,115 +149,93 @@ token  parser::consume()
      }
      
 }
-void parser::printStatement()
-{
+// void parser::printStatement()
+// {
 
-    Info(__func__);
-    auto tree = binExpr();
-   // expect(tokenType::T_SEMI, ";");
+//     Info(__func__);
+//     auto tree = binExpr();
+//    // expect(tokenType::T_SEMI, ";");
 
-    Info("jjjj");
-    auto reg = codeGen.genBinaryOp(tree);
-    Info("5550:%d",reg);
-    codeGen.printint(reg);
-    Info("5556");
-    codeGen.freeAllReg();
-    Info(__func__);
+//     Info("jjjj");
+//     auto reg = codeGen.genBinaryOp(tree);
+//     Info("5550:%d",reg);
+//     codeGen.printint(reg);
+//     Info("5556");
+//     codeGen.freeAllReg();
+//     Info(__func__);
                
-        //nextToken()
-    expect(tokenType::T_SEMI,"match semi");
+//         //nextToken()
+//     expect(tokenType::T_SEMI,"match semi");
 
-}
-void parser::varDeclaration()
+// }
+PrintStmt* parser::parserPrintStmt()
 {
-    Info(__func__);
-    expect(tokenType::T_IDENT,"identi");
-    Info("44445");
-    symb.addGlob(tmpToken.tempToken.text);
-    Info("middle");
-    codeGen.genGlobalSymbol(tmpToken.tempToken.text);
+    auto expr = binExpr();
     expect(tokenType::T_SEMI,";");
-    Info("end declar");
+    return PrintStmt::create(expr);
 }
-void parser::assignmentStatement()
+// void parser::varDeclaration()
+// {
+//     Info(__func__);
+//     expect(tokenType::T_IDENT,"identi");
+//     Info("44445");
+//     symb.addGlob(tmpToken.tempToken.text);
+//     Info("middle");
+//     codeGen.genGlobalSymbol(tmpToken.tempToken.text);
+//     expect(tokenType::T_SEMI,";");
+//     Info("end declar");
+// }
+BinaryOp* parser::parserAssignExpr(token var)
+
 {
-    int id = symb.findGlob(tmpToken.tempToken.text);
-    if(id == -1)
+    //int id = symb.findGlob(tmpToken.tempToken.text);
+    Identifier* identi;
+    auto exist =symb.getIdentiInCurrentScope(var.text,&identi);
+    if(!exist)
     {
-        ExitWithError("undefined variable :%s",tmpToken.tempToken.text.c_str());
+        ExitWithError("undefined variable :%s",var.text.c_str());
     }
-     BinaryOp *left, *right, *tree;
+     Expr *left, *right;
+     BinaryOp* tree;
      
 
-     right = new  BinaryOp(BinaryOp::A_LVIDENT,nullptr,nullptr,id);
+     left = identi;
      expect(tokenType::T_ASSIGN,"=");
-     left = binExpr();
+     right = binExpr();
     // expect(tokenType::T_SEMI, ";");
-     tree = new BinaryOp(BinaryOp::A_ASSIGN, left, right, 0);
+     tree = new BinaryOp(BinaryOp::A_ASSIGN, left, right);
      //codeGen.genAST(tree);
-     codeGen.genBinaryOp(tree);
-     codeGen.freeAllReg();
+    // codeGen.genBinaryOp(tree);
+    // codeGen.freeAllReg();
      expect(tokenType::T_SEMI,";");
      Info(__func__);
+     return tree;
      
 
 }
 
-void parser::ifStatement()
-{
-    expect(tokenType::T_IF,"if");
+// void parser::ifStatement()
+// {
+//     expect(tokenType::T_IF,"if");
 
-    expect(tokenType::T_LPAREN,"(");
+//     expect(tokenType::T_LPAREN,"(");
 
-    auto tree = binExpr();
+//     auto tree = binExpr();
 
-    expect(tokenType::T_RPAREN,")");
+//     expect(tokenType::T_RPAREN,")");
 
-    expect(tokenType::T_RBRACE,"{");
-    statements();
-    expect(tokenType::T_RBRACE,"}");
+//     expect(tokenType::T_RBRACE,"{");
+//     statements();
+//     expect(tokenType::T_RBRACE,"}");
 
-}
-void parser::statements()
-{
-    while(1){
-        if(match(tokenType::T_EOF))
-        {
-            return;
-        }
-        if (match(tokenType::T_PRINT))
-        {
-            printStatement();
-        }
-        else if(match(tokenType::T_INT))
-        {
-             varDeclaration();
-        }
-        else if(match(tokenType::T_IF))
-        {
-            ifStatement();
-        }
-        else if(match(tokenType::T_LBRACE))
-        {
+// }
 
-        }
-        else if(match(tokenType::T_IDENT))
-        {
-             assignmentStatement();   
-        }
-        else
-        {
-     
-           ExitWithError("unkown token :%s",tmpToken.tempToken.tostring().c_str());   
-        } 
-    }        
-    
-}
  CompousedStmt* parser::parserCompoundStmt()
  {
+      Info(__func__);
      expect(tokenType::T_LBRACE,"{");
      auto compoused = CompousedStmt::create();
-     while(match(tokenType::T_RBRACE))
+     while(!match(tokenType::T_RBRACE))
      {
      if(match(tokenType::T_EOF))
         {
@@ -264,15 +243,28 @@ void parser::statements()
         }
         if (match(tokenType::T_PRINT))
         {
-            printStatement();
+           compoused->addStmt(parserPrintStmt());
         }
         else if(match(tokenType::T_INT))
         {
-             varDeclaration();
+            auto ty = IntType::create();
+            if(test(tokenType::T_IDENT))
+            {
+                auto t = consume();
+
+                auto identi = Identifier::create(t.text,ty);
+                symb.addSymoble(identi->name_,identi);
+                 compoused->addStmt(parserDeclaration(identi));
+            }
+            else
+            {
+                ExitWithError("wrong declaration");
+            }
+            
         }
         else if(match(tokenType::T_IF))
         {
-            ifStatement();
+            //ifStatement();
         }
         else if(match(tokenType::T_LBRACE))
         {
@@ -280,7 +272,15 @@ void parser::statements()
         }
         else if(match(tokenType::T_IDENT))
         {
-             assignmentStatement();   
+             auto varToken = tmpToken.tempToken;
+             if(match(tokenType::T_LPAREN))
+             {
+                 compoused->addStmt(parserFuncCall(varToken));
+             }
+             else
+             {
+                 compoused->addStmt(parserAssignExpr(varToken)); 
+             }  
         }
         else
         {
@@ -291,11 +291,41 @@ void parser::statements()
      return compoused;
 
  }
+  FunctionCall* parser::parserFuncCall(token var)
+  {
+       Identifier* identi;
+    auto exist =symb.getIdentiInCurrentScope(var.text,&identi);
+    if(!exist)
+    {
+        if(var.text == "print")
+        {
+            identi = Identifier::create(var.text,FuncType::create(VoidType::create()));
+        }
+        else
+
+            ExitWithError("undefined variable :%s",var.text.c_str());
+    }
+    else if(identi->type_->getType()!=Type::T_FUNC)
+    {
+        ExitWithError("Expect function type");
+    }
+      auto funcCall = FunctionCall::create(identi);
+      auto expr = binExpr();
+      Info("add args");
+      funcCall->addArg(expr);
+      expect(tokenType::T_RPAREN,")");
+      expect(tokenType::T_SEMI,";");
+      return funcCall;
+ 
+  }
  FunctionDef* parser::parserFuncDef(Identifier* identi)
  {
      auto func = FunctionDef::create(identi);
      auto body = parserCompoundStmt();
      func->setBody(body);
+     Info(__func__);
+     return func;
+     
  }
 Declaration* parser::parserDeclaration(Identifier* identi)
 {
@@ -323,11 +353,31 @@ Declaration* parser::parserDeclaration(Identifier* identi)
         }
         if(match(tokenType::T_LPAREN))
         {
-            identi->type_ = (Type*)FuncType::create(type);
-            expect(tokenType::T_RPAREN,")");
+            identi->type_ = FuncType::create(type);
+            if(match(tokenType::T_INT))
+            {
+                while(!match(tokenType::T_RPAREN))
+                {
+                    auto t = consume();
+                    auto param = Identifier::create(t.text, IntType::create());
+                    static_cast<FuncType*>(identi->type_)->addParam(param);
+                    if(!test(tokenType::T_RPAREN))
+                    {
+                        match(tokenType::T_COMMA);
+                    }
+                }
+              
+            }
+            else
+            {
+                expect(tokenType::T_RPAREN,")");
+               // ExitWithError("function paser expect int");
+            }
+            
+           // expect(tokenType::T_RPAREN,")");
         }
         
-        symb.addSymoble(identi->name_,*identi);
+        symb.addSymoble(identi->name_,identi);
 
          if(identi->type_->getType() == Type::T_FUNC)
          {
@@ -339,6 +389,8 @@ Declaration* parser::parserDeclaration(Identifier* identi)
          }
 
      }
+     Info(__func__);
+     return program;
  }
 
  bool parser::isTypeName()
@@ -392,12 +444,12 @@ int parser::tokenType2ASTop(tokenType type)
     case tokenType::T_SLASH:
         op =  BinaryOp::A_DIVIDE;
         break;
-    case tokenType::T_INTLIT:
-        op =  BinaryOp::A_INTLIT;
-        break;
-    case tokenType::T_IDENT:
-        op =  BinaryOp::A_IDENTI;
-        break;
+    // case tokenType::T_INTLIT:
+    //     op =  BinaryOp::A_INTLIT;
+    //     break;
+    // case tokenType::T_IDENT:
+    //     op =  BinaryOp::A_IDENTI;
+    //     break;
     case tokenType::T_EQ:
         op =  BinaryOp::A_EQ;
         break;

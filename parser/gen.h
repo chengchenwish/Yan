@@ -10,37 +10,54 @@ class gen:public Ivisitor
 public:
     explicit gen(symbolTable& sym,const std::string& fileName = "a.s");
     ~gen();
-    void freeAllReg();
-    int allocReg();
-    void freeReg(int reg);
-    virtual void visit(BinaryOp* node);
-    int genBinaryOp(BinaryOp* root,int reg=-1);
-    void genPreamble();
-    void genpostamble();
-    int loadValue(int value);
+    //impliment Ivistor
+    virtual void visit(BinaryOp* node)override;
+    virtual void visit(Identifier* node) override;
+    virtual void visit(ConstantValue* node)override;
+    virtual void visit(FunctionDef* node)override;
+    virtual void visit(Declaration* node)override;
+    virtual void visit(Program* node)override;
+   virtual void visit(AssginStmt* node) override;
+   virtual void visit(IfStmt* node)override;
+   virtual void visit(PrintStmt* node)override;
+   virtual void visit(CompousedStmt* node)override;
+   virtual void visit(FunctionCall* node)override;
+    virtual void visit(JumpStmt* node)override {}
+   virtual void visit(ReturnStmt* node)override {}
+
+    void genProgram(Program* node);
+
+  
+    int genBinaryOp(BinaryOp* root);
     //operator
-    int genAdd(int r1, int r2);
-    int genSub(int r1, int r2);
-    int genMul(int r1, int r2);
-    int genDiv(int r1, int r2);
-    int  genGE(int r1, int r2);
-    int  genEQ(int r1, int r2);
-    int  genNE(int r1, int r2);
-    int  genGT(int r1, int r2);
-    int  genLT(int r1, int r2);
-    int  genLE(int r1, int r2);
-    int  genCmp(int r1, int r2, const std::string& how);
+    void genAdd();
+    void genSub();
+    void genMul();
+    void genDiv();
+    void  genGE();
+    void genEQ();
+    void  genNE();
+    void  genGT();
+    void  genLT();
+    void  genLE();
+    void  genCmp(const std::string& how);
 
     void printint(int r);
-    void genGlobalSymbol(std::string& s);
-    int loadGlobal(std::string& text);
-    int storeGlobal(int reg,std::string& text);
+    // void genGlobalSymbol(std::string& s);
+    // int loadGlobal(std::string& text);
+    // int storeGlobal(int reg,std::string& text);
 private:
-    static constexpr std::size_t  regNum = 4;
-    
-    static char const *registerList[regNum];
-    static char const *breglist[regNum];
-    static std::array<int,regNum> freeRegMark;
+    void emit(std::string inst, std::string dest, std::string source);
+    void emit(std::string inst);
+
+    //1 byte
+    static const std::vector<std::string> argReg1;
+    //2 byte
+    static const std::vector<std::string> argReg2;
+    //4 byte
+    static const std::vector<std::string> argReg4;
+    //8 byte
+    static const std::vector<std::string> argReg8;
     
     symbolTable& symb;
     std::string outfileName; 

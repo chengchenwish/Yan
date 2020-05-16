@@ -3,7 +3,6 @@
 #include<map>
 #include "lexer.h"
 #include "AST.h"
-#include "gen.h"
 #include "error.h"
 #include "symbol.h"
 namespace Yan {
@@ -16,24 +15,30 @@ class parser
         using precedenceMap = std::map<tokenType,int>;
        // static precedenceMap initPrecedenceMap();
     public:
-        parser(lexer& s,gen& g,symbolTable& t);
+        parser(lexer& s,symbolTable& t);
         ~parser();
-        BinaryOp*primary();
-        BinaryOp*binExpr(int ptp = 0);
+        Expr*primary();
+        Expr*binExpr(int ptp = 0);
         Program* parserProgram();
         FunctionDef* parserFuncDef(Identifier* identi);
         Declaration* parserDeclaration(Identifier* identi);
         CompousedStmt*parserCompoundStmt();
-        void statements();
-        void assignmentStatement();
-        void varDeclaration();
-        void printStatement();
-        void ifStatement();
-        void compoundStatement();
+        PrintStmt* parserPrintStmt();
+        BinaryOp* parserAssignExpr(token var);
+        FunctionCall* parserFuncCall(token var);
+
+        
+       // BinaryOp* parser::assignmentStatement();
+        // void statements();
+        // void varDeclaration();
+        // void printStatement();
+        // void ifStatement();
+        // void compoundStatement();
         
 
         int tokenType2ASTop(tokenType type);
         int getOpPrecedence(tokenType optype) const;
+       
     private:
         bool isTypeName();
         Type*baseType(storageClass* sclass);
@@ -51,7 +56,7 @@ class parser
         } tmpToken;
         lexer& scan;
        // token currentToken;
-        gen& codeGen;
+        // gen& codeGen;
         symbolTable& symb;
         
         static const precedenceMap opPrecedence;        

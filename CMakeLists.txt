@@ -5,14 +5,13 @@ set(CMAKE_CXX_FLAGS "-std=c++17 ")
 add_library(compiler "")
 target_sources(compiler
     PRIVATE
-    parser/interp.cpp
     parser/lexer.cpp
-    parser/gen.cpp
     parser/parser.cpp
     parser/token.cpp
     parser/error.cpp
     parser/symbol.cpp
     parser/AST.cpp
+    parser/gen.cpp
     )
 add_executable(YAN main.cpp)
 target_link_libraries(YAN compiler)

@@ -5,7 +5,7 @@
 namespace Yan
 {
 
-
+class Identifier;
 
 class Type
 {
@@ -108,13 +108,16 @@ private:
     int len_;
 
 };
-class FuncType: Type
+class FuncType: public Type
 {
 public:
+    void addParam(Identifier* param){paramList_.push_back(param);}
+    std::vector<Identifier*>&getParam(){return paramList_;}
     static FuncType* create(Type* returnType){ return new FuncType(returnType); }
 private:
     FuncType(Type* returnType):Type(4,4,T_FUNC), returnType_(returnType){}
     Type* returnType_;
+    std::vector<Identifier*>paramList_;
 };
 class StructType:public Type
 {
@@ -125,7 +128,7 @@ public:
         std::string name_;
         int offset;
     };
-static StructType* create(){new StructType();}
+static StructType* create(){return new StructType();}
 void addMember(const Member& memb){members_.push_back(memb);}
 private:
     StructType():Type(0,14,T_STRUCT,true){}

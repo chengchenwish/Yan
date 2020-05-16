@@ -1,10 +1,12 @@
 #include "gen.h"
 namespace Yan
 {
-    char const *gen::registerList[gen::regNum] = {"%r8" ,"%r9","%r10","%r11"};
-    char const *gen::breglist[gen::regNum]= { "%r8b", "%r9b", "%r10b", "%r11b" };
-    //1 means freed, o means allocated
-    std::array<int,gen::regNum> gen::freeRegMark ={1,1,1,1};
+
+    const std::vector<std::string> gen::argReg1 ={"dil", "sil", "dl", "cl", "r8b", "r9b"};
+    const std::vector<std::string> gen::argReg2 ={"di", "si", "dx", "cx", "r8w", "r9w"};
+    const std::vector<std::string> gen::argReg4 ={"edi", "esi", "edx", "ecx", "r8d", "r9d"};
+    const std::vector<std::string> gen::argReg8 ={"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+   
     gen::gen(symbolTable& sym, const std::string& fileName):outfileName(fileName),symb(sym)
     {
         outfstream.open(fileName.c_str(), std::ios::out);
@@ -23,219 +25,217 @@ namespace Yan
 
         }
     }
-
-    int gen::genBinaryOp(BinaryOp* root,int reg)
-    {
-
-   
-    int leftReg, rightReg;
-    if(root->left) leftReg = genBinaryOp(root->left,-1);
-    if(root->right) rightReg = genBinaryOp(root->right,leftReg);
-    
-    switch(root->op)
-    {   
-        case  BinaryOp::A_ADD:
-    
-            return genAdd(leftReg, rightReg);
-        case  BinaryOp::A_DIVIDE:
-            return genDiv(leftReg, rightReg);
-        case  BinaryOp::A_MULTIPLY:
-            return genMul(leftReg, rightReg);
-        case  BinaryOp::A_SUBTRACT:
-            return genSub(leftReg, rightReg);
-        case  BinaryOp::A_INTLIT:
-            return loadValue(root->intValue);
-        case  BinaryOp::A_IDENTI:
-            return (loadGlobal(symb.getSymbol(root->intValue).name));
-        case BinaryOp::A_LVIDENT:
-            return (storeGlobal(reg, symb.getSymbol(root->intValue).name));
-        case BinaryOp::A_ASSIGN:
-    // The work has already been done, return the result
-            return (rightReg);
-        case BinaryOp::A_EQ:
-            return genEQ(leftReg, rightReg);
-        case BinaryOp::A_NE:
-             return (genNE(leftReg, rightReg));
-        case BinaryOp::A_LT:
-            return genLT(leftReg, rightReg);
-        case BinaryOp::A_GT:
-            return genGT(leftReg, rightReg);
-        case BinaryOp::A_LE:
-             return genLE(leftReg, rightReg);
-        case BinaryOp::A_GE:
-            return genGE(leftReg, rightReg);
-
-
-        default:
-            
-            std::cout<<" ERROR op"<<root->op<<std::endl;
-            exit(1);
+    /*
+   void gen::emit(char* mt, ...)
+   {
+     // Replace "#" with "%%" so that vfprintf prints out "#" as "%".
+    char buf[256];
+    int i = 0;
+    for (char *p = mt; *p; p++) {
+       // assert(i < sizeof(buf) - 3);
+        if (*p == '#') {
+            buf[i++] = '%';
+            buf[i++] = '%';
+        } else {
+            buf[i++] = *p;
+        }
     }
+    buf[i] = '\0';
+    va_list args;
+    va_start(args, mt);
+    char outputstr[100];
+    int col = sprintf(outputstr, buf, args);
+    va_end(args);
+    outfstream <<"\t"<< std::string(outputstr)<<std::endl;
+
+   }*/
+   void gen::emit(std::string inst, std::string dest, std::string source)
+    {
+        outfstream<<"\t"<<inst<<"\t"<<dest<<", "<<source<<"\n";
+    }
+
+    void gen::emit(std::string inst)
+    {
+        outfstream<<"\t"<<inst<<"\n";
+    }
+
+    int gen::genBinaryOp(BinaryOp* root)
+    {  
+        Info(__func__);
+        return 0;
+       
     }
     
     void gen::visit(BinaryOp* node)
     {
         int reg;
-        genPreamble();
-        reg = genBinaryOp(node);
-        printint(reg);
-        genpostamble();   
+        
+        //i++;
+       Info("binary");
+      
+      node->right->accept(this);
+       // reg = genBinaryOp(node);
+       // printint(reg);
+ 
     }
-    void gen::freeAllReg()
-    {
-        for(int i=0;i<regNum; ++i)
-        {
-            freeRegMark[i]= 1;
-        }
-    }
-    int gen::allocReg()
-    {
-       for (int i = 0; i<regNum; i++)
-       {
-           if (freeRegMark[i])
-           {
-               freeRegMark[i] = 0;
-               return i;
-           }
-       }
-       outfstream.flush();
-       outfstream.close();
-       ExitWithError("%s:No freed reg",__func__);
-    }
-    void gen::freeReg(int reg)
-    {
-        freeRegMark[reg] = 1;
-    }
-    void gen::genPreamble()
-    {
+    
 
-        freeAllReg();
-        outfstream<<"\t.text\n"
-                   ".LC0:\n"
-                    "\t.string\t\"%d\\n\"\n"
-	                "printint:\n"
-	                "\tpushq\t%rbp\n"
-	                "\tmovq\t%rsp, %rbp\n"
-	                "\tsubq\t$16, %rsp\n"
-	                "\tmovl\t%edi, -4(%rbp)\n"
-	                "\tmovl\t-4(%rbp), %eax\n"
-	                "\tmovl\t%eax, %esi\n"
-	                "\tleaq	.LC0(%rip), %rdi\n"
-	                "\tmovl	$0, %eax\n"
-	                "\tcall	printf@PLT\n"
-	                "\tnop\n"
-	                "\tleave\n"
-	                "\tret\n"
-	                "\n"
-	                "\t.globl\tmain\n"
-	                "\t.type\tmain, @function\n"
-	                "main:\n"
-	                "\tpushq\t%rbp\n"
-	                "\tmovq	%rsp, %rbp\n";
-    }
-
-    void gen::genpostamble()
+    void gen::genAdd()
     {
-        outfstream << "\tmovl $0, %eax\n"
-	                 "\tpopq %rbp\n"
-	                 "\tret\n";
+        emit("add","rax","rdx");
+        emit("push rax");
     }
-
-    int gen::loadValue(int value)
+    void gen::genSub()
     {
-        int reg;
-        reg = allocReg();
-        outfstream<<"\tmovq\t$"<<value<<", "<<registerList[reg]<<"\n";
-        return reg;
+        emit("sub","rax","rdx");
+        emit("push rax");
     }
-    int gen::genAdd(int r1, int r2)
+    void gen::genMul()
     {
-        outfstream<<"\taddq\t"<<registerList[r1]<<", "<<registerList[r2]<<"\n";
-        freeReg(r1);
-        return r2;
+        emit("imul","rax","rdx");
+        emit("push rax");
     }
-    int gen::genSub(int r1, int r2)
+    void gen::genDiv()
     {
-        outfstream<<"\tsubq\t"<<registerList[r2]<<", "<<registerList[r1]<<"\n";
-        freeReg(r2);
-        return r1;
-    }
-    int gen::genMul(int r1, int r2)
-    {
-        outfstream<<"\timulq\t"<<registerList[r1]<<", "<<registerList[r2]<<"\n";
-        freeReg(r1);
-        return r2;
-    }
-    int gen::genDiv(int r1, int r2)
-    {
-        outfstream<<"\tmovq\t"<<registerList[r1]<<","<<"%rax\n";
-        outfstream<<"\tcqo\n";
-        outfstream<<"\tidivq\t"<<registerList[r2]<<"\n";
-        outfstream<<"\tmovq\t%rax, "<<registerList[r1]<<"\n";
-        freeReg(r2);
-        return r1;
-
+        emit("cqo");
+        emit("idiv rdi");
     }
     void  gen::printint(int r)
     {   
-        outfstream<<"\tmovq\t"<<registerList[r]<<","<<"%rdi\n";
-        outfstream<<"\tcall\tprintint\n";
+        std::cout<<r<<std::endl;
+        // outfstream<<"\tmovq\t"<<registerList[r]<<","<<"%rdi\n";
+        // outfstream<<"\tcall\tprintint\n";
 
-        freeReg(r);
+        // freeReg(r);
 
     }
-    void gen::genGlobalSymbol(std::string& s)
-    {
-        outfstream<<"\t.comm\t"<<s<<",8,8\n";
-    }
+   
 
-    int gen::loadGlobal(std::string& text)
+   void gen::genGE()
     {
-        int r = allocReg();
-        outfstream<<"\tmovq\t"<<text<<"(%rip),"<<registerList[r]<<"\n";
-        return r;
+        genCmp("setge");
     }
-    int gen::storeGlobal(int reg, std::string& text)
+     void gen::genEQ()
     {
-        outfstream<<"\tmovq\t"<<registerList[reg]<<","<<text<<"(%rip)\n";
-       return reg;
+        genCmp("sete");
     }
-
-    int gen::genGE(int r1, int r2)
+     void gen::genNE()
     {
-        return genCmp(r1,r2,"setge");
+        genCmp("setne");
     }
-    int gen::genEQ(int r1, int r2)
+     void gen::genGT()
     {
-        return genCmp(r1,r2,"sete");
+        genCmp("setg");
     }
-    int gen::genNE(int r1, int r2)
+     void gen::genLT()
     {
-       return genCmp(r1,r2,"setne");
+        genCmp("setl");
     }
-    int gen::genGT(int r1, int r2)
+     void gen::genLE()
     {
-       return  genCmp(r1,r2,"setg");
+        genCmp("setle");
     }
-    int gen::genLT(int r1, int r2)
+    void  gen::genCmp(const std::string& how)
     {
-       return  genCmp(r1,r2,"setl");
-    }
-    int gen::genLE(int r1, int r2)
-    {
-        return genCmp(r1,r2,"setle");
-    }
-    int  gen::genCmp(int r1, int r2, const std::string& how)
-    {
-      
-
-         outfstream<<"\tcmpq\t"<<registerList[r2]<<","<<registerList[r1]<<"\n";
-         outfstream<<"\t"<<how<<"\t"<<breglist[r2]<<"\n";
-         outfstream<<"\tandq\t$255,"<<registerList[r2]<<"\n";
-         freeReg(r1);
-         return r2;
+        emit("cmp", "rax", "rdx");
+        std::string inst = how+" al";
+        emit(inst);
+        emit("movezb","rax","al");
 
     }
 
-	
+void gen::genProgram(Program* node)
+{  
+    emit(".intel_syntax noprefix\n");
+    emit(".LC0:");
+    emit("\t.string \"%d\"");
+    emit(".text");
+    emit(".global print");
+    emit("print:");
+    emit("push rbp");
+    emit("mov rbp, rsp");
+    emit("sub rsp, 16");
+    emit("mov DWORD PTR [rbp-4], edi");
+    emit("mov eax, DWORD PTR [rbp-4]") ;
+    emit("mov esi, eax");
+    emit("mov edi, OFFSET FLAT:.LC0");
+    emit("mov eax, 0");
+    emit("call printf");
+    emit("nop");
+    emit("leave");
+    emit("ret");         
+
+    for(auto& decl: node->decls_)
+    {
+        decl->accept(this);
+       // visit(decl);
+    }
+}
+   
+   void gen::visit(AssginStmt* node)
+   {
+       Info("assign");
+   }
+   void gen::visit(ConstantValue* node)
+   {
+       emit("mov eax, "+std::to_string(node->ivalue_));
+       Info(std::to_string(node->ivalue_).c_str());
+   }
+   void gen::visit(FunctionDef* node)
+   {
+           Info("FunctionDef");
+           emit(".global "+node->identi_->name_);
+           emit(node->identi_->name_+":");
+           emit("push rbp");
+           emit("mov rbp, rsp");
+           emit("sub rsp, 16");
+
+           //node->identi_->accept(this);
+           node->body_->accept(this);
+           emit("mov eax, 0");
+           emit("leave");
+           emit("ret");
+
+   }
+   void gen::visit(Declaration* node)
+   {
+       Info("decalration");
+       
+   }
+  void  gen:: visit(Program* node)
+  {
+
+  }
+ void  gen::visit(Identifier* node)
+ {
+     Info("identifier");
+     //if(node)
+     Info(node->name_.c_str());
+   //  Info(static_cast<FuncType*>(node->type_)->
+ }
+  void  gen::visit(IfStmt* node)
+  {
+
+  }
+  void  gen::visit(PrintStmt* node)
+  {
+
+  }
+  void gen::visit(FunctionCall* node)
+{
+    Info("functionCall");
+    auto arg = node->argList_.front();
+    arg->accept(this);
+    emit("mov edi, eax");
+    emit("call "+node->designator_->name_);
+}
+void  gen::visit(CompousedStmt* node)
+{
+    for(auto& stmt: node->stmtlist_)
+    {
+        stmt->accept(this);
+    }
+    Info("compoused");
+}
+
 }

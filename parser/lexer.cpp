@@ -78,6 +78,9 @@ namespace Yan
             case ';':
                 t->type = tokenType::T_SEMI;
                 break;
+            case ',':
+                t->type = tokenType::T_COMMA;
+                break;
             case '=':
                 if(peek() == '=')
                 {
@@ -176,7 +179,7 @@ namespace Yan
         }
         int temp;
         temp = peek();
-        if(temp == ';'||temp == ' '||isOperator(temp)|| temp == '\n'|| temp == '\t'||temp=='\r'||temp == '\f'|| temp == EOF)
+        if(temp==')'||temp == ';'||temp == ' '||isOperator(temp)|| temp == '\n'|| temp == '\t'||temp=='\r'||temp == '\f'|| temp == EOF)
         {
             t->type = tokenType::T_INTLIT;
             t->value = num;
@@ -215,11 +218,11 @@ namespace Yan
            
        }
        identi[len++]='\0';
-    if(strcmp(identi,"print")==0)
-    {
-        t->type = tokenType::T_PRINT;
-    }
-    else if(strcmp(identi,"int") == 0)
+    // if(strcmp(identi,"print")==0)
+    // {
+    //     t->type = tokenType::T_PRINT;
+    // }
+     if(strcmp(identi,"int") == 0)
     {
         t->type = tokenType::T_INT;
     }
@@ -285,7 +288,7 @@ namespace Yan
    {
        char c;
        next(c);
-       if(c = '\n')
+       if(c == '\n')
        {
            loc.line++;
            loc.colum = 0;
