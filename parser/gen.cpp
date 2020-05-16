@@ -146,21 +146,21 @@ namespace Yan
 
 void gen::genProgram(Program* node)
 {  
-    emit(".intel_syntax noprefix\n");
+    //emit(".intel_syntax noprefix\n");
     emit(".LC0:");
     emit("\t.string \"%d\"");
     emit(".text");
     emit(".global print");
     emit("print:");
-    emit("push rbp");
-    emit("mov rbp, rsp");
-    emit("sub rsp, 16");
-    emit("mov DWORD PTR [rbp-4], edi");
-    emit("mov eax, DWORD PTR [rbp-4]") ;
-    emit("mov esi, eax");
-    emit("mov edi, OFFSET FLAT:.LC0");
-    emit("mov eax, 0");
-    emit("call printf");
+    emit("pushq %rbp");
+    emit("movq %rsp, %rbp");
+   // emit("sub $16, %rsp");
+    emit("movq %rdi, -8(%rbp)");
+    emit("movq -8(%rbp), %rax") ;
+    emit("movq %rax, %rsi");
+    emit("leaq .LC0(%rip), %rdi");
+    emit("movq $0,%rax");
+    emit("call printf@PLT");
     emit("nop");
     emit("leave");
     emit("ret");         
@@ -178,7 +178,7 @@ void gen::genProgram(Program* node)
    }
    void gen::visit(ConstantValue* node)
    {
-       emit("mov eax, "+std::to_string(node->ivalue_));
+       emit("movq $" +std::to_string(node->ivalue_)+", %rax");
        Info(std::to_string(node->ivalue_).c_str());
    }
    void gen::visit(FunctionDef* node)
@@ -186,13 +186,13 @@ void gen::genProgram(Program* node)
            Info("FunctionDef");
            emit(".global "+node->identi_->name_);
            emit(node->identi_->name_+":");
-           emit("push rbp");
-           emit("mov rbp, rsp");
-           emit("sub rsp, 16");
+           emit("pushq %rbp");
+           emit("movq %rsp, %rbp");
+         //  emit("sub $16, %rsp");
 
            //node->identi_->accept(this);
            node->body_->accept(this);
-           emit("mov eax, 0");
+           emit("movq $0, %rax");
            emit("leave");
            emit("ret");
 
@@ -226,7 +226,7 @@ void gen::genProgram(Program* node)
     Info("functionCall");
     auto arg = node->argList_.front();
     arg->accept(this);
-    emit("mov edi, eax");
+    emit("movq %rax, %rdi");
     emit("call "+node->designator_->name_);
 }
 void  gen::visit(CompousedStmt* node)
