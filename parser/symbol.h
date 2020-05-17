@@ -32,11 +32,7 @@ class symbolTable
 {
 public:
     symbolTable();
-    ~symbolTable();
-    int findGlob(const std::string& s);
-    void addGlob(std::string& s);
-    int getGlobIdex() const{ return glob;} 
-    symbol& getSymbol(int index){ return table.at(index);}
+    ~symbolTable();   
     //new 
     void addSymoble(const std::string& name,  Identifier* indenti);
    bool  getIdentiInCurrentScope(const std::string& name,  Identifier** indenti);
@@ -44,18 +40,14 @@ public:
    void setScope(const Scope s){ scope_ = s;}
 
 private:
-    static constexpr int MAX_TABLE_SIZE = 1024;
-    std::array<symbol,MAX_TABLE_SIZE> table;
-    int glob;
-
-    Scope scope_;
+     Scope scope_;
     std::map<std::string, Identifier*> map_;
     symbolTable* parent_;
 
 
     //disable copy and assign
-   // symbolTable  ( const symbolTable&) = delete;
-   // symbolTable& operator = (const symbolTable&) = delete;
+    symbolTable  ( const symbolTable&) = delete;
+    symbolTable& operator = (const symbolTable&) = delete;                     
 
 };
 }

@@ -7,6 +7,7 @@
 #include "parser/gen.h"
 #include "parser/parser.h"
 //namespace Yan{
+
 static void help()
 {
     std::string help="Usgae: Yan [option] file ...\n"

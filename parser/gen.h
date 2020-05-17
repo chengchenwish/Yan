@@ -3,6 +3,7 @@
 #include "AST.h"
 #include "symbol.h"
 #include<array>
+#include<sstream>
 namespace Yan{
 
 class gen:public Ivisitor
@@ -26,6 +27,8 @@ public:
    virtual void visit(ReturnStmt* node)override {}
 
     void genProgram(Program* node);
+    void genLvalue(Identifier*node);
+   // void genLvalue(node* node);
 
   
     int genBinaryOp(BinaryOp* root);

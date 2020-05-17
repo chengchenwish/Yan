@@ -28,13 +28,7 @@ class parser
         FunctionCall* parserFuncCall(token var);
 
         
-       // BinaryOp* parser::assignmentStatement();
-        // void statements();
-        // void varDeclaration();
-        // void printStatement();
-        // void ifStatement();
-        // void compoundStatement();
-        
+
 
         int tokenType2ASTop(tokenType type);
         int getOpPrecedence(tokenType optype) const;
@@ -51,12 +45,11 @@ class parser
 
     private:
         struct {
-            bool hasvule;
-            token tempToken;
-        } tmpToken;
+            bool hasvalue_;
+            token token_;
+        } cacheToken;
         lexer& scan;
-       // token currentToken;
-        // gen& codeGen;
+        
         symbolTable& symb;
         
         static const precedenceMap opPrecedence;        

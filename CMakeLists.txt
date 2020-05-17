@@ -29,10 +29,10 @@ if(YAN_BUILD_TESTS)
                       APPEND PROPERTY COMPILE_OPTIONS -Wno-missing-field-initializers)
     set_property(TARGET gmock
                       APPEND PROPERTY COMPILE_OPTIONS -Wno-missing-field-initializers)
-    add_executable(Test test/test_parser.cpp
-                        test/testAll.cpp)
-    target_link_libraries(Test gtest)
-    add_test(NAME Test COMMAND Test)
+    add_executable(UT UT/test_parser.cpp
+                        UT/testAll.cpp)
+    target_link_libraries(UT gtest)
+    add_test(NAME UT COMMAND UT)
 endif(YAN_BUILD_TESTS)
 
 

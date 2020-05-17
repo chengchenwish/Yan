@@ -65,6 +65,7 @@ namespace Yan
         return 0;
        
     }
+    //void gen::genLvalue(node* node);
     
     void gen::visit(BinaryOp* node)
     {
@@ -72,8 +73,47 @@ namespace Yan
         
         //i++;
        Info("binary");
+       Info("fff:%d",node->op);
+       if(node->op == BinaryOp::A_ASSIGN)
+       {
+          // node->left->accept(this);
+          genLvalue(static_cast<Identifier*>(node->left));
+           node->right->accept(this);
+                  
+           emit("popq %rax");
+           emit("popq %rbx");
+           emit("movq %rax, (%rbx)");
+           emit("pushq %rax");
+
+       }
+       else if(node->op ==BinaryOp::A_ADD)
+       {
+           Info("addiii");
+           node->left->accept(this);
+           node->right->accept(this);
+           genAdd();
+       }
+       else if(node->op == BinaryOp::A_SUBTRACT)
+       {
+           node->left->accept(this);
+           node->right->accept(this);
+           genSub();
+       }
+       else if(node->op == BinaryOp::A_MULTIPLY)
+       {
+           node->left->accept(this);
+           node->right->accept(this);
+           genMul();
+       }
+       else if(node->op == BinaryOp::A_DIVIDE)
+       {
+            node->left->accept(this);
+            node->right->accept(this);
+           genDiv();
+    
+       }
       
-      node->right->accept(this);
+      //node->right->accept(this);
        // reg = genBinaryOp(node);
        // printint(reg);
  
@@ -82,13 +122,18 @@ namespace Yan
 
     void gen::genAdd()
     {
-        emit("add","rax","rdx");
-        emit("push rax");
+        emit("popq %rax");
+        emit("popq %rbx");
+        emit("addq %rbx, %rax");
+        emit("pushq %rax");
     }
     void gen::genSub()
     {
-        emit("sub","rax","rdx");
-        emit("push rax");
+        
+        emit("popq %rdx");
+        emit("popq %rax");
+        emit("subq","%rdx","%rax");
+        emit("pushq %rax");
     }
     void gen::genMul()
     {
@@ -154,7 +199,7 @@ void gen::genProgram(Program* node)
     emit("print:");
     emit("pushq %rbp");
     emit("movq %rsp, %rbp");
-   // emit("sub $16, %rsp");
+    emit("subq $16, %rsp");
     emit("movq %rdi, -8(%rbp)");
     emit("movq -8(%rbp), %rax") ;
     emit("movq %rax, %rsi");
@@ -180,6 +225,7 @@ void gen::genProgram(Program* node)
    {
        emit("movq $" +std::to_string(node->ivalue_)+", %rax");
        Info(std::to_string(node->ivalue_).c_str());
+       emit("pushq %rax");
    }
    void gen::visit(FunctionDef* node)
    {
@@ -188,7 +234,7 @@ void gen::genProgram(Program* node)
            emit(node->identi_->name_+":");
            emit("pushq %rbp");
            emit("movq %rsp, %rbp");
-         //  emit("sub $16, %rsp");
+           emit("subq $16, %rsp");
 
            //node->identi_->accept(this);
            node->body_->accept(this);
@@ -199,7 +245,18 @@ void gen::genProgram(Program* node)
    }
    void gen::visit(Declaration* node)
    {
+
        Info("decalration");
+      auto& name = node->obj_->name_;
+
+      auto align = (node->obj_->type_)->getalign();
+      auto size = node->obj_->type_->getsize();
+      std::stringstream out;
+      emit(".data");
+      emit(".global "+name);
+
+      out<<".lcomm "<<name<<","<<size;
+      emit(out.str());
        
    }
   void  gen:: visit(Program* node)
@@ -211,7 +268,18 @@ void gen::genProgram(Program* node)
      Info("identifier");
      //if(node)
      Info(node->name_.c_str());
+     std::stringstream fm;
+     fm<<"movq "<<node->name_<<"(%rip), %rax";
+     emit(fm.str());
+     emit("pushq %rax"); 
    //  Info(static_cast<FuncType*>(node->type_)->
+ }
+ void gen::genLvalue(Identifier*node)
+ {
+     std::stringstream fm;
+     fm<<"leaq "<<node->name_<<"(%rip), %rax";
+     emit(fm.str());
+     emit("pushq %rax"); 
  }
   void  gen::visit(IfStmt* node)
   {
@@ -226,6 +294,7 @@ void gen::genProgram(Program* node)
     Info("functionCall");
     auto arg = node->argList_.front();
     arg->accept(this);
+    emit("popq %rax");
     emit("movq %rax, %rdi");
     emit("call "+node->designator_->name_);
 }
