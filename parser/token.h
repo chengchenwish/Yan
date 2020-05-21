@@ -7,16 +7,12 @@ namespace Yan{
 
 constexpr int MAX_STR_LEN = 100;
 /*
-#define TOKEN_MAP(c) \
-        c(T_EOF,'eo')\
-        c(T_ASSGIN, '=')
-enum Token
-{
-#define c(Type,Text)\
-        Type,
-TOKEN_MAP(c)
-#undef c
-};
+#define TOKEN_MAP(xx) \
+        xx(T_EOF,'eof')\
+        xx(T_ASSGIN, '=')\
+        xx(T_ASPLUS,'+=')\
+*/
+/*
 std::string getstring(Token t)
 {
 
@@ -31,21 +27,34 @@ std::string getstring(Token t)
 }
 */
 
-enum class tokenType 
+enum class TokenType 
 { 
     //The token is a meaningful string
     T_EOF,
+    //op
     T_ASSIGN, //=
+    T_ASPLUS,// +=
+    T_ASMINUS,//-=
+    T_ASSTAR,//*=
+    T_ASSLASH,// /=
+    T_ASMOD,// %=
+    T_QUSTION,//?
     T_ADD    ,//+
     T_MINUS ,//-
     T_STAR ,//*
     T_SLASH ,// /
+    T_MOD,// %
     T_EQ, //==
     T_GT, //>
     T_LT, //<
     T_LE, //<=
     T_GE, //>=
     T_NE, // !=
+    T_OR,// |
+   // T_
+    T_LOGAND,// &&
+    T_LOGOR,// ||
+
 //type keyword
     T_VOID,// void
     T_CHAR,// char
@@ -54,7 +63,7 @@ enum class tokenType
 
     T_INTLIT,
     T_PRINT,
-    T_SEMI,
+    
     T_IDENT,
 //KEY WORD
     T_IF,
@@ -66,7 +75,8 @@ enum class tokenType
     T_RPAREN,// )
     T_LBRACKET, //[
     T_RBRACKET,//]
-    T_COMMA
+    T_COMMA, // ,
+    T_SEMI //;
 };
 struct location
 {
@@ -81,11 +91,11 @@ struct location
     }
     
 };
- struct token 
+ struct Token 
 {   
     int value;//store 
     std::string text;//store identi name;
-    tokenType type;
+    TokenType type;
     //location loc;
     std::string  tostring();
 };

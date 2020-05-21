@@ -3,50 +3,50 @@
 namespace Yan
 {
 
-std::string token::tostring()
+std::string Token::tostring()
 {
      switch (type)
     {
-        case tokenType::T_ADD:
+        case TokenType::T_ADD:
             return "+";
-        case tokenType::T_STAR:
+        case TokenType::T_STAR:
             return "*";
-        case tokenType::T_MINUS:
+        case TokenType::T_MINUS:
             return "-";
-        case tokenType::T_SLASH:
+        case TokenType::T_SLASH:
             return "/";
-        case tokenType::T_INTLIT :
+        case TokenType::T_INTLIT :
             return "number";
-        case tokenType::T_EOF:
+        case TokenType::T_EOF:
             return "eof";
-        case tokenType::T_PRINT:
+        case TokenType::T_PRINT:
             return "print";
-        case tokenType::T_SEMI:
+        case TokenType::T_SEMI:
             return ";";
-        case tokenType::T_INT:
+        case TokenType::T_INT:
             return "int";
-        case tokenType::T_EQ:
+        case TokenType::T_EQ:
             return "==";
-        case tokenType::T_IDENT:
+        case TokenType::T_IDENT:
             return "identi";
-        case tokenType::T_ASSIGN:
+        case TokenType::T_ASSIGN:
             return "=";
-        case tokenType::T_LT:
+        case TokenType::T_LT:
             return "<";
-         case tokenType::T_GT:
+         case TokenType::T_GT:
             return ">";
-        case tokenType::T_LE:
+        case TokenType::T_LE:
             return "<=";
-        case tokenType::T_GE:
+        case TokenType::T_GE:
             return ">=";
-        case tokenType::T_NE:
+        case TokenType::T_NE:
             return "!=";
-        case tokenType::T_IF: return "if";
-        case tokenType::T_ELSE: return "else";
-        case tokenType::T_LBRACE:return "{";
-        case tokenType::T_RBRACE: return "}";
-        case tokenType::T_LPAREN:return "(";
-        case tokenType::T_RPAREN: return ")";
+        case TokenType::T_IF: return "if";
+        case TokenType::T_ELSE: return "else";
+        case TokenType::T_LBRACE:return "{";
+        case TokenType::T_RBRACE: return "}";
+        case TokenType::T_LPAREN:return "(";
+        case TokenType::T_RPAREN: return ")";
 
         default:
             return "unknow value";

@@ -19,10 +19,10 @@ class Program;
 class IfStmt;
 class PrintStmt;
 class CompousedStmt;
-class AssginStmt;
 class FunctionCall;
 class JumpStmt;
 class ReturnStmt;
+class UnaryOp;
 
 
 class Ivisitor 
@@ -37,10 +37,10 @@ public:
    virtual void visit(IfStmt* node) = 0;
    virtual void visit(PrintStmt* node) = 0;
    virtual void visit(CompousedStmt* node) = 0;
-   virtual void visit(AssginStmt* node) = 0;
    virtual void visit(FunctionCall* node) = 0;
    virtual void visit(JumpStmt* node)=0;
    virtual void visit(ReturnStmt* node) = 0;
+   virtual void visit(UnaryOp*node)=0;
 
 };
 
@@ -69,13 +69,6 @@ struct CompousedStmt:public Stmt
     StmtList stmtlist_;
 };
 
-struct  AssginStmt: public Stmt
-{
-    AssginStmt(int id, Expr* expr):id_(id),expr_(expr){};
-    virtual void accept(Ivisitor*v) override{ v->visit(this);}
-    int id_;//symbol slot
-    Expr* expr_;
-};
 struct  PrintStmt: public Stmt
 {
     PrintStmt(Expr*expr):expr_(expr){}
@@ -115,34 +108,56 @@ struct Expr : public Stmt
     Expr(){};
     virtual ~Expr(){};
 };
+enum class OpType
+{ 
+    //BinaryOP
+    OP_ADD,
+    OP_SUBTRACT,
+    OP_MULTIPLY,
+    OP_DIVIDE,
+    OP_ASSIGN,
+    OP_EQ,
+    OP_NE,
+    OP_GT,
+    OP_LT,
+    OP_GE,
+    OP_LE,
+
+    //UnaryOP
+    OP_CAST,
+
+    OP_UNKOWN 
+};
 struct  BinaryOp: public Expr
 {
-    enum OpType
-    {   A_ADD,
-        A_SUBTRACT,
-        A_MULTIPLY,
-        A_DIVIDE,
-      //  A_INTLIT,
-        A_LVIDENT,
-        A_ASSIGN,
-       /// A_IDENTI,
-        A_EQ,
-        A_NE,
-        A_GT,
-        A_LT,
-        A_GE,
-        A_LE
-    };
-    
+
     //svirtual void accept(Ivisitor*v);
-    BinaryOp(int op, Expr*left, Expr* right);
+    BinaryOp(OpType op, Expr*left, Expr* right);
     virtual ~BinaryOp(){};  
     virtual void accept(Ivisitor*v) override{ v->visit(this);} 
+    static BinaryOp* create(OpType op, Expr*left, Expr* right){ return new BinaryOp(op, left,right);}
 
-    int    op;
+    OpType    op;
     Expr*  left;
     Expr*  right;
    // int intValue;
+};
+/*
+// unary = ("+" | "-" | "*" | "&" | "!" | "~")? cast
+
+//       | ("++" | "--") unary
+
+//       | postfix
+*/
+struct UnaryOp: public Expr
+{
+    UnaryOp(OpType op, Expr*operand,Type* ty):op_(op),operand_(operand),type_(ty){}
+    static UnaryOp*create(OpType op, Expr*operand,Type*ty){ return new UnaryOp(op,operand,ty);}
+    virtual void accept(Ivisitor*v){v->visit(this);}
+    OpType op_;
+    Expr* operand_;
+    Type* type_;
+
 };
 
 struct ConstantValue: public Expr 

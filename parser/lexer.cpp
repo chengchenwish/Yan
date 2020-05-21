@@ -44,7 +44,7 @@ namespace Yan
         }
         return true;
    }
-   bool lexer::scan(token* t)
+   bool lexer::scan(Token* t)
    {
        char c;
        if (skip(c))
@@ -52,44 +52,47 @@ namespace Yan
            switch(c)
            {
             case '+':
-                t->type = tokenType::T_ADD;
+                t->type = TokenType::T_ADD;
                 break;
             case '-':
-                t->type = tokenType::T_MINUS;
+                t->type = TokenType::T_MINUS;
                 break;
             case '*':
-                t->type = tokenType::T_STAR;
+                t->type = TokenType::T_STAR;
                 break;
             case '/':
-                t->type = tokenType::T_SLASH;
+                t->type = TokenType::T_SLASH;
                 break;
             case '{':
-                t->type = tokenType::T_LBRACE;
+                t->type = TokenType::T_LBRACE;
                 break;
             case '}':
-                t->type =  tokenType::T_RBRACE;
+                t->type =  TokenType::T_RBRACE;
                 break;
             case '(':
-                t->type = tokenType::T_LPAREN;
+                t->type = TokenType::T_LPAREN;
                 break;
             case ')':
-                t->type =  tokenType::T_RPAREN;
+                t->type =  TokenType::T_RPAREN;
                 break;
             case ';':
-                t->type = tokenType::T_SEMI;
+                t->type = TokenType::T_SEMI;
                 break;
             case ',':
-                t->type = tokenType::T_COMMA;
+                t->type = TokenType::T_COMMA;
+                break;
+            case '|':
+                t->type = TokenType::T_OR;
                 break;
             case '=':
                 if(peek() == '=')
                 {
                     consume();
-                    t->type = tokenType::T_EQ;
+                    t->type = TokenType::T_EQ;
                 }
                 else
                 {
-                   t->type = tokenType::T_ASSIGN;
+                   t->type = TokenType::T_ASSIGN;
                 }
                 break;
                 
@@ -98,11 +101,11 @@ namespace Yan
         
                 if(peek() =='=')
                 {   consume();
-                    t->type = tokenType::T_GE;
+                    t->type = TokenType::T_GE;
                 }
                 else
                 {
-                    t->type = tokenType::T_GT;
+                    t->type = TokenType::T_GT;
                 }
                 
                break;
@@ -110,11 +113,11 @@ namespace Yan
                 
                 if(peek() =='=')
                 {   consume();
-                    t->type = tokenType::T_LE;
+                    t->type = TokenType::T_LE;
                 }
                 else
                 {
-                    t->type = tokenType::T_LT;
+                    t->type = TokenType::T_LT;
                 }
                 
                break;
@@ -122,7 +125,7 @@ namespace Yan
                 if(peek() == '=')
                 {
                     consume();
-                    t->type = tokenType::T_NE;
+                    t->type = TokenType::T_NE;
                 }
                 else
                 {
@@ -153,14 +156,14 @@ namespace Yan
        }
        else
        {
-            t->type = tokenType::T_EOF;
+            t->type = TokenType::T_EOF;
             return true;
        }
    
        
    
    }
-   bool lexer::scanInt(char c, token* t)
+   bool lexer::scanInt(char c, Token* t)
    {
         int num = 0;
         while( isdigit(c) )
@@ -181,7 +184,7 @@ namespace Yan
         temp = peek();
         if(temp==')'||temp == ';'||temp == ' '||isOperator(temp)|| temp == '\n'|| temp == '\t'||temp=='\r'||temp == '\f'|| temp == EOF)
         {
-            t->type = tokenType::T_INTLIT;
+            t->type = TokenType::T_INTLIT;
             t->value = num;
 
         }
@@ -190,14 +193,14 @@ namespace Yan
           //  t->sourceLocation.colum = 122;
             //t->sourceLocation.fileName ="p";
             ExitWithError(loc,"error toekn");
-            //std::cout<<"ERROR: unknown token LINE:"<<lineNum<<" "<<temp<<std::endl;
+            //std::cout<<"ERROR: unknown Token LINE:"<<lineNum<<" "<<temp<<std::endl;
            // return false;
 
         }
         return true;
     }
 
-   void lexer::scanIdenti(char c, token*t)
+   void lexer::scanIdenti(char c, Token*t)
    {
        char identi[MAX_STR_LEN];
        int len = 0;
@@ -220,23 +223,23 @@ namespace Yan
        identi[len++]='\0';
     // if(strcmp(identi,"print")==0)
     // {
-    //     t->type = tokenType::T_PRINT;
+    //     t->type = TokenType::T_PRINT;
     // }
      if(strcmp(identi,"int") == 0)
     {
-        t->type = tokenType::T_INT;
+        t->type = TokenType::T_INT;
     }
     else if(strcmp(identi,"if") == 0)
     {
-        t->type = tokenType::T_IF;
+        t->type = TokenType::T_IF;
     }
     else if(strcmp(identi,"else") == 0)
     {
-        t->type = tokenType::T_ELSE;
+        t->type = TokenType::T_ELSE;
     }
     else
     {
-        t->type = tokenType::T_IDENT;
+        t->type = TokenType::T_IDENT;
         t->text = identi;
        // ExitWithError(loc,"unkown toekn:%s")
         //std::cout<<"unkown identi :"<<identi<<std::endl;
@@ -299,6 +302,27 @@ namespace Yan
        }
        
        
+   }
+
+   void lexer::putBack(const Token& t)
+   {
+       tokenCache_.push(t);
+
+   }
+   Token lexer::getToken()
+   {
+       if(tokenCache_.empty())
+       {
+           Token t;
+           scan(&t);
+           return t;
+       }
+       else
+       {
+           auto t = tokenCache_.front();
+           tokenCache_.pop();
+           return t;
+       }
    }
    lexer::~lexer()
    {

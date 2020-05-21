@@ -22,6 +22,7 @@ namespace Yan
         if ( outfstream.is_open())
         {
             outfstream.close();
+            Info("Successfully generated :%s ",outfileName.c_str());
 
         }
     }
@@ -59,22 +60,15 @@ namespace Yan
         outfstream<<"\t"<<inst<<"\n";
     }
 
-    int gen::genBinaryOp(BinaryOp* root)
-    {  
-        Info(__func__);
-        return 0;
-       
-    }
     //void gen::genLvalue(node* node);
     
     void gen::visit(BinaryOp* node)
     {
-        int reg;
         
         //i++;
        Info("binary");
        Info("fff:%d",node->op);
-       if(node->op == BinaryOp::A_ASSIGN)
+       if(node->op == OpType::OP_ASSIGN)
        {
           // node->left->accept(this);
           genLvalue(static_cast<Identifier*>(node->left));
@@ -86,36 +80,30 @@ namespace Yan
            emit("pushq %rax");
 
        }
-       else if(node->op ==BinaryOp::A_ADD)
+       else if(node->op ==OpType::OP_ADD)
        {
-           Info("addiii");
            node->left->accept(this);
            node->right->accept(this);
            genAdd();
        }
-       else if(node->op == BinaryOp::A_SUBTRACT)
+       else if(node->op == OpType::OP_SUBTRACT)
        {
            node->left->accept(this);
            node->right->accept(this);
            genSub();
        }
-       else if(node->op == BinaryOp::A_MULTIPLY)
+       else if(node->op == OpType::OP_MULTIPLY)
        {
            node->left->accept(this);
            node->right->accept(this);
            genMul();
        }
-       else if(node->op == BinaryOp::A_DIVIDE)
+       else if(node->op == OpType::OP_DIVIDE)
        {
             node->left->accept(this);
             node->right->accept(this);
-           genDiv();
-    
+            genDiv();    
        }
-      
-      //node->right->accept(this);
-       // reg = genBinaryOp(node);
-       // printint(reg);
  
     }
     
@@ -137,22 +125,19 @@ namespace Yan
     }
     void gen::genMul()
     {
-        emit("imul","rax","rdx");
-        emit("push rax");
+        emit("popq %rdx");
+        emit("popq %rax");
+
+        emit("imulq","%rdx","%rax");
+        emit("pushq %rax");
     }
     void gen::genDiv()
     {
-        emit("cqo");
-        emit("idiv rdi");
-    }
-    void  gen::printint(int r)
-    {   
-        std::cout<<r<<std::endl;
-        // outfstream<<"\tmovq\t"<<registerList[r]<<","<<"%rdi\n";
-        // outfstream<<"\tcall\tprintint\n";
-
-        // freeReg(r);
-
+        emit("popq %rdi");
+        emit("popq %rax");
+        emit("cqto");
+        emit("idivq %rdi");
+        emit("push %rax");
     }
    
 
@@ -193,7 +178,7 @@ void gen::genProgram(Program* node)
 {  
     //emit(".intel_syntax noprefix\n");
     emit(".LC0:");
-    emit("\t.string \"%d\"");
+    emit("\t.string \"%d\\n\"");
     emit(".text");
     emit(".global print");
     emit("print:");
@@ -216,11 +201,7 @@ void gen::genProgram(Program* node)
        // visit(decl);
     }
 }
-   
-   void gen::visit(AssginStmt* node)
-   {
-       Info("assign");
-   }
+                
    void gen::visit(ConstantValue* node)
    {
        emit("movq $" +std::to_string(node->ivalue_)+", %rax");

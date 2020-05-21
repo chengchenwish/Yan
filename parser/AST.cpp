@@ -7,7 +7,7 @@ namespace Yan
 //     v->visit(this);
 // }
 
-BinaryOp::BinaryOp(int op, Expr*left, Expr* right)
+BinaryOp::BinaryOp(OpType op, Expr*left, Expr* right)
 {
     this->op = op;
     this->left = left;

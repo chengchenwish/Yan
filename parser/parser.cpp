@@ -1,28 +1,12 @@
 #include "parser.h"
 namespace Yan{
-const parser::precedenceMap parser::opPrecedence({
-    std::pair<tokenType,int>(tokenType::T_EOF, 0),
- 
-    std::pair<tokenType,int>(tokenType::T_EQ, 70),
-    std::pair<tokenType,int>(tokenType::T_NE, 70),
-
-    std::pair<tokenType,int>(tokenType::T_GT, 80),
-    std::pair<tokenType,int>(tokenType::T_LT, 80),
-    std::pair<tokenType,int>(tokenType::T_LE, 80),
-    std::pair<tokenType,int>(tokenType::T_GE, 80),
-
-    std::pair<tokenType,int>(tokenType::T_ADD, 100),
-    std::pair<tokenType,int>(tokenType::T_MINUS, 100),
-    std::pair<tokenType,int>(tokenType::T_STAR, 110),
-    std::pair<tokenType,int>(tokenType::T_SLASH, 110)
-
-
-});// = parser::initPrecedenceMap();
+#define TOKEN_2_OP(xx) \
+    xx(TokenType::T_EOF,OpType::UNKOWN, 0,) \
+    xx(TokenType::T_EQ,OpType::OP_EQ, 70)
 
 
 parser::parser(lexer& s,symbolTable& t):scan(s),symb(t)
 {
-    cacheToken.hasvalue_ = false;
 }
 parser::~parser()
 {
@@ -33,17 +17,19 @@ Expr* parser::primary()
     Expr* node =nullptr;
     Info(__func__);
 
-        if(match(tokenType::T_INTLIT))
+        if(test(TokenType::T_INTLIT))
         {
-            Info(std::to_string(cacheToken.token_.value).c_str());
-            node =  ConstantValue::create(cacheToken.token_.value);
+            auto t = consume();
+            Info(std::to_string(t.value).c_str());
+            node =  ConstantValue::create(t.value);
         }
-        else if(match(tokenType::T_IDENT))
+        else if(test(TokenType::T_IDENT))
         {    Identifier* identi;
-             auto exist =symb.getIdentiInCurrentScope(cacheToken.token_.text,&identi);
+             auto t =consume();
+             auto exist =symb.getIdentiInCurrentScope(t.text,&identi);
              if(!exist)
             {
-                ExitWithError("undefined variable :%s",cacheToken.token_.text.c_str());
+                ExitWithError("undefined variable :%s",t.text.c_str());
              }
           // return Identifier::create(identi->name_,nullptr);
             return identi;
@@ -56,110 +42,67 @@ Expr* parser::primary()
 
     return node;
 }
-Expr* parser::binExpr( int ptp)
-{
-    Expr* left = nullptr, *right = nullptr;
-    tokenType tokenType;
-    Info("token000:%s",cacheToken.token_.tostring().c_str());
-    if(match(tokenType::T_SEMI))
-    {
-        return left;
-    }
-
-    left = primary();
-    
-    if(test(tokenType::T_SEMI)|| test(tokenType::T_RPAREN))
-    {
-        return left;
-    }
-    tokenType = cacheToken.token_.type;
-     Info("token222:%s",cacheToken.token_.tostring().c_str()); 
-    while(getOpPrecedence(tokenType)>ptp)
-    {
-        auto t = consume();
-              
-        int current_ptp = getOpPrecedence(tokenType);
-        right = binExpr(current_ptp);
-        left = new BinaryOp(tokenType2ASTop(tokenType),left,right);
-        tokenType = t.type; 
-        Info("token:111%s",t.tostring().c_str());  
-        if(test(tokenType::T_SEMI))
-        {
-            return left;
-        }
-    }
-    return left;    
-       
-}
 //if the front token doesn't match the specific token exit with error
-void parser::expect(tokenType t, const std::string& what)
+void parser::expect(TokenType t, const std::string& what)
 {
-    if(!match(t))
+    if(!test(t))
     {
-         ExitWithError(scan.getLocation(),"matchTed %s,but current token is %s ",what.c_str(),cacheToken.token_.tostring().c_str());
+         ExitWithError(scan.getLocation(),"matchTed %s,but current token is %s ",what.c_str(),scan.getToken().tostring().c_str());
+    }
+    else
+    {
+        consume();
     }
    
 }
 //Test the front token, if matched consume it,if not put back
-bool parser::match(tokenType t)
+bool parser::match(TokenType t)
 {
-    if(!cacheToken.hasvalue_)
-    {        
-        scan.scan(&cacheToken.token_);
-        Info(cacheToken.token_.tostring().c_str());
-        cacheToken.hasvalue_ = true;
-    }
-    if(cacheToken.token_.type == t)
+    auto token = scan.getToken();
+    if(token.type == t)
     {
-        //consume the token
-          cacheToken.hasvalue_ = false;
-          return true;     
-    }
-    else
-    {
-        return false;
-    } 
-
-}
-bool  parser::test(tokenType t)
-{
-    if(match(t))
-    {
-        cacheToken.hasvalue_ = true;
+        //current_token_ = token;
         return true;
     }
     else
     {
-        cacheToken.hasvalue_ = true;
+      //  current_token_ = token;
+        scan.putBack(token);
         return false;
     }
+
 }
-token  parser::consume()
+bool  parser::test(TokenType t)
 {
-     if(cacheToken.hasvalue_)
-     {
-         cacheToken.hasvalue_ = false;
-         return cacheToken.token_;
-     }
-     else
-     {
-         scan.scan(&cacheToken.token_);
-         cacheToken.hasvalue_ = true;
-         return cacheToken.token_;
-     }
+     auto token = scan.getToken();
+    if(token.type == t)
+    {
+        scan.putBack(token); 
+        return true;
+    }
+    else
+    {
+        scan.putBack(token);
+        return false;
+    }
+
+}
+Token  parser::consume()
+{
+    return scan.getToken();
      
 }
 
 
 PrintStmt* parser::parserPrintStmt()
 {
-    auto expr = binExpr();
-    expect(tokenType::T_SEMI,";");
+    auto expr = sum();
+    expect(TokenType::T_SEMI,";");
     return PrintStmt::create(expr);
 }
 
 
-BinaryOp* parser::parserAssignExpr(token var)
+BinaryOp* parser::parserAssignExpr(Token var)
 {
     //int id = symb.findGlob(cacheToken.token_.text);
     Identifier* identi;
@@ -173,37 +116,132 @@ BinaryOp* parser::parserAssignExpr(token var)
      
 
      left = identi;
-     expect(tokenType::T_ASSIGN,"=");
-     right = binExpr();
-     tree = new BinaryOp(BinaryOp::A_ASSIGN, left, right);
-     expect(tokenType::T_SEMI,";");
+     expect(TokenType::T_ASSIGN,"=");
+     right = sum();
+     tree = new BinaryOp(OpType::OP_ASSIGN, left, right);
+     expect(TokenType::T_SEMI,";");
      Info(__func__);
      return tree;
      
 
 }
+//sum -> factor (('+' factor)|('-' factor))*
+Expr* parser::sum()
+{
+    Expr* node = factor();
+    for(;;)
+    {
+         if(match(TokenType::T_ADD))
+         {
+             node = BinaryOp::create(OpType::OP_ADD, node, factor());
+         }
+         else if(match(TokenType::T_MINUS))
+         {
+             node = BinaryOp::create(OpType::OP_SUBTRACT, node, factor());
+         }
+         else
+         {
+             return node;
+         }
+         
+    }
+ 
+}
+//sum -> primary (('+' primary)|('-' primary))*
+Expr* parser::factor()
+{
+    Expr* node = primary();
+    for(;;)
+    {
+         if(match(TokenType::T_STAR))
+         {
+             node = BinaryOp::create(OpType::OP_MULTIPLY, node, primary());
+         }
+         else if(match(TokenType::T_SLASH))
+         {
+             node = BinaryOp::create(OpType::OP_DIVIDE, node, primary());
+         }
+         else
+         {
+             return node;
+         }
+         
+    }
 
 
+}
+//cast = (type)cast|unary
+ Expr*parser::cast()
+ {
+     if(test(TokenType::T_RPAREN))
+     {
+         auto t = consume();//consume '('
+        if(isTypeName())
+        {
+         
+          auto ty = baseType(nullptr);
+         
+             expect(TokenType::T_LPAREN,")");
+            if(!test(TokenType::T_LBRACE))
+            {
+                 consume();
+                return UnaryOp::create(OpType::OP_CAST,cast(),ty);
+            }
+        }
+        scan.putBack(t);//puback token'('
+     }
+     return unary();
+     
+ }
+ Expr* parser::unary()
+ {
+     if(match(TokenType::T_ADD))
+     {
+         return cast();
+     }
+     if(match(TokenType::T_MINUS))
+     {
+         return BinaryOp::create(OpType::OP_SUBTRACT,ConstantValue::create(0),cast());
+     }
+     if(match(TokenType::T_STAR))
+     {
 
+     }
+     return postfix();
+ }
+
+ Expr* parser::postfix()
+ {
+     return primary();
+ }
+
+// Expr* parser::term()
+// {
+
+// }
+// Expr* parser::group()
+// {
+
+// }
  CompousedStmt* parser::parserCompoundStmt()
  {
       Info(__func__);
-     expect(tokenType::T_LBRACE,"{");
+     expect(TokenType::T_LBRACE,"{");
      auto compoused = CompousedStmt::create();
-     while(!match(tokenType::T_RBRACE))
+     while(!match(TokenType::T_RBRACE))
      {
-     if(match(tokenType::T_EOF))
+     if(match(TokenType::T_EOF))
         {
             ExitWithError(__func__);
         }
-        if (match(tokenType::T_PRINT))
+        if (match(TokenType::T_PRINT))
         {
            compoused->addStmt(parserPrintStmt());
         }
-        else if(match(tokenType::T_INT))
+        else if(match(TokenType::T_INT))
         {
             auto ty = IntType::create();
-            if(test(tokenType::T_IDENT))
+            if(test(TokenType::T_IDENT))
             {
                 auto t = consume();
 
@@ -217,18 +255,18 @@ BinaryOp* parser::parserAssignExpr(token var)
             }
             
         }
-        else if(match(tokenType::T_IF))
+        else if(match(TokenType::T_IF))
         {
             //ifStatement();
         }
-        else if(match(tokenType::T_LBRACE))
+        else if(match(TokenType::T_LBRACE))
         {
 
         }
-        else if(match(tokenType::T_IDENT))
+        else if(test(TokenType::T_IDENT))
         {
-             auto varToken = cacheToken.token_;
-             if(match(tokenType::T_LPAREN))
+             auto varToken = consume();
+             if(match(TokenType::T_LPAREN))
              {
                  compoused->addStmt(parserFuncCall(varToken));
              }
@@ -240,13 +278,13 @@ BinaryOp* parser::parserAssignExpr(token var)
         else
         {
      
-           ExitWithError("unkown token :%s",cacheToken.token_.tostring().c_str());   
+           ExitWithError("unkown token :%s",scan.getToken().tostring().c_str());   
         } 
      }
      return compoused;
 
  }
-  FunctionCall* parser::parserFuncCall(token var)
+  FunctionCall* parser::parserFuncCall(Token var)
   {
        Identifier* identi;
     auto exist =symb.getIdentiInCurrentScope(var.text,&identi);
@@ -266,11 +304,11 @@ BinaryOp* parser::parserAssignExpr(token var)
     }
       auto funcCall = FunctionCall::create(identi);
 
-      auto expr = binExpr();
+      auto expr = sum();
       Info("add args");
       funcCall->addArg(expr);
-      expect(tokenType::T_RPAREN,")");
-      expect(tokenType::T_SEMI,";");
+      expect(TokenType::T_RPAREN,")");
+      expect(TokenType::T_SEMI,";");
       return funcCall;
  
   }
@@ -285,7 +323,7 @@ BinaryOp* parser::parserAssignExpr(token var)
  }
 Declaration* parser::parserDeclaration(Identifier* identi)
 {
-    expect(tokenType::T_SEMI,";");
+    expect(TokenType::T_SEMI,";");
     return Declaration::create(identi);
 }
  Program* parser::parserProgram()
@@ -293,12 +331,12 @@ Declaration* parser::parserDeclaration(Identifier* identi)
 
      auto program = Program::create();
      
-     while(!match(tokenType::T_EOF))
+     while(!match(TokenType::T_EOF))
      {
         storageClass sclass;     
         auto type = baseType(&sclass);
         Identifier* identi =nullptr;
-        if(test(tokenType::T_IDENT))
+        if(test(TokenType::T_IDENT))
         {
             auto t = consume();
             identi = Identifier::create(t.text,type);
@@ -307,30 +345,30 @@ Declaration* parser::parserDeclaration(Identifier* identi)
         {
             ExitWithError(__func__);
         }
-        if(match(tokenType::T_LPAREN))
+        if(match(TokenType::T_LPAREN))
         {
             identi->type_ = FuncType::create(type);
-            if(match(tokenType::T_INT))
+            if(match(TokenType::T_INT))
             {
-                while(!match(tokenType::T_RPAREN))
+                while(!match(TokenType::T_RPAREN))
                 {
                     auto t = consume();
                     auto param = Identifier::create(t.text, IntType::create());
                     static_cast<FuncType*>(identi->type_)->addParam(param);
-                    if(!test(tokenType::T_RPAREN))
+                    if(!test(TokenType::T_RPAREN))
                     {
-                        match(tokenType::T_COMMA);
+                        match(TokenType::T_COMMA);
                     }
                 }
               
             }
             else
             {
-                expect(tokenType::T_RPAREN,")");
+                expect(TokenType::T_RPAREN,")");
                // ExitWithError("function paser expect int");
             }
             
-           // expect(tokenType::T_RPAREN,")");
+           // expect(TokenType::T_RPAREN,")");
         }
         
         symb.addSymoble(identi->name_,identi);
@@ -352,7 +390,7 @@ Declaration* parser::parserDeclaration(Identifier* identi)
  bool parser::isTypeName()
  {
      //current only support int/char
-     return (test(tokenType::T_INT) ||test(tokenType::T_CHAR));
+     return (test(TokenType::T_INT) ||test(TokenType::T_CHAR));
  }
  Type*parser::baseType(storageClass* sclass)
  {
@@ -361,11 +399,11 @@ Declaration* parser::parserDeclaration(Identifier* identi)
          ExitWithError("match type token ");
      }
      
-     if(match(tokenType::T_INT))
+     if(match(TokenType::T_INT))
      {
          return IntType::create();
      }
-     else if(match(tokenType::T_CHAR))
+     else if(match(TokenType::T_CHAR))
      {
          return CharType::create();
      }
@@ -376,49 +414,48 @@ Declaration* parser::parserDeclaration(Identifier* identi)
      
 
  }
-int parser::getOpPrecedence(tokenType  optype) const
-{
-    
-    return opPrecedence.at(optype);
-}
-int parser::tokenType2ASTop(tokenType type)
+ 
+
+OpType parser::TokenType2ASTop(TokenType type)
 { 
     Info(__func__);
-    int op;
+    OpType op;
 
  switch (type)
 {
-    case tokenType::T_ADD:
-        op = BinaryOp::A_ADD;
+    case TokenType::T_ADD:
+        op = OpType::OP_ADD;
         break;
-    case tokenType::T_STAR:
-        op =  BinaryOp::A_MULTIPLY;
+    case TokenType::T_STAR:
+        op =  OpType::OP_MULTIPLY;
         break;
-    case tokenType::T_MINUS:
+    case TokenType::T_MINUS:
         Info("ooooo-----");
-        op = BinaryOp::A_SUBTRACT;
+        op = OpType::OP_SUBTRACT;
         break;
-    case tokenType::T_SLASH:
-        op =  BinaryOp::A_DIVIDE;
+    case TokenType::T_SLASH:
+        op =  OpType::OP_DIVIDE;
         break;
-    case tokenType::T_EQ:
-        op =  BinaryOp::A_EQ;
+    case TokenType::T_EQ:
+        op =  OpType::OP_EQ;
         break;
-    case tokenType::T_NE:
-        op =  BinaryOp::A_NE;
+    case TokenType::T_NE:
+        op =  OpType::OP_NE;
         break;
-    case tokenType::T_LT:
-        op =  BinaryOp::A_LT;
+    case TokenType::T_LT:
+        op =  OpType::OP_LT;
         break;
-    case tokenType::T_GT:
-        op =  BinaryOp::A_GT;
+    case TokenType::T_GT:
+        op =  OpType::OP_GT;
         break;
-    case tokenType::T_LE:
-        op =  BinaryOp::A_LE;
+    case TokenType::T_LE:
+        op =  OpType::OP_LE;
         break;
-    case tokenType::T_GE:
-        op =  BinaryOp::A_GE;
+    case TokenType::T_GE:
+        op =  OpType::OP_GE;
         break;
+    default:
+        op= OpType::OP_UNKOWN;
 
     
 }

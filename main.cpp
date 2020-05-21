@@ -64,7 +64,6 @@ static void parseArgs(int argc, char* argv[])
         else if(argv[i][0]!='-')
         {
             inputFiles.emplace_back(argv[i]);
-            std::cout<<std::string(argv[i]);
         }
         else
         {

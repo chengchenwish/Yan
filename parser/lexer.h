@@ -3,6 +3,7 @@
 #include <fstream> 
 #include <iostream>
 #include <string>
+#include <queue>
 #include "token.h"
 #include "error.h"
 namespace Yan{
@@ -13,7 +14,10 @@ class lexer
 public:
    explicit lexer(std::string& filename);
    ~lexer();  
-   bool scan(token* t);
+   bool scan(Token* t);
+   void putBack(const Token& t);
+   Token getToken();
+
    int peek();
    location& getLocation(){ return loc;}
 private:
@@ -23,9 +27,10 @@ private:
    bool isdigit(char c);
    bool isalpha(char c);
    bool isOperator(char c);
-   bool scanInt(char c, token*t);
-   void scanIdenti(char c, token*t);
+   bool scanInt(char c, Token*t);
+   void scanIdenti(char c, Token*t);
 private:
+   std::queue<Token> tokenCache_;
    location loc;
   //std::string fileName;
   //int lineNum;

@@ -18,20 +18,19 @@ public:
     virtual void visit(FunctionDef* node)override;
     virtual void visit(Declaration* node)override;
     virtual void visit(Program* node)override;
-   virtual void visit(AssginStmt* node) override;
    virtual void visit(IfStmt* node)override;
    virtual void visit(PrintStmt* node)override;
    virtual void visit(CompousedStmt* node)override;
    virtual void visit(FunctionCall* node)override;
     virtual void visit(JumpStmt* node)override {}
    virtual void visit(ReturnStmt* node)override {}
+   virtual void visit(UnaryOp* node)override{}
 
     void genProgram(Program* node);
     void genLvalue(Identifier*node);
    // void genLvalue(node* node);
 
-  
-    int genBinaryOp(BinaryOp* root);
+
     //operator
     void genAdd();
     void genSub();
@@ -45,10 +44,6 @@ public:
     void  genLE();
     void  genCmp(const std::string& how);
 
-    void printint(int r);
-    // void genGlobalSymbol(std::string& s);
-    // int loadGlobal(std::string& text);
-    // int storeGlobal(int reg,std::string& text);
 private:
     void emit(std::string inst, std::string dest, std::string source);
     void emit(std::string inst);
