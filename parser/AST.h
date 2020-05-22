@@ -91,7 +91,7 @@ struct ReturnStmt:public Stmt
 {
     ReturnStmt(Expr*expr):expr_(expr){}
     static ReturnStmt* create(Expr* expr){ return new ReturnStmt(expr);}
-    virtual void accept(Ivisitor* v){ v->visit(this);}
+    virtual void accept(Ivisitor* v)override{ v->visit(this);}
     Expr* expr_;
 };
 struct JumpStmt:public Stmt
@@ -116,6 +116,18 @@ enum class OpType
     OP_MULTIPLY,
     OP_DIVIDE,
     OP_ASSIGN,
+    OP_ASSPLUS,//+=
+    OP_ASSSUB, // -=
+    OP_ASSMUL, //*=
+    OP_ASSDIV,// /=
+    OP_ASSMOD, // %=
+    OP_SHLASSIGN,// <<=
+    OP_SHRASSIGN,
+    OP_ANDASSIGN,
+    OP_ORASSIGN,
+    OP_XORASSIGN,
+    OP_COMMA,// ,
+
     OP_EQ,
     OP_NE,
     OP_GT,
@@ -186,9 +198,13 @@ struct Identifier :public Expr
 {
     Type* type_;
     std::string name_;
+    bool isLocal_;
+    //only for local varibale
+    int offset_ = 0;
     virtual void accept(Ivisitor*v) override{v->visit(this);}
-    Identifier(const std::string& name, Type* type):type_(type),name_(name){}
-    static Identifier* create(const std::string& name, Type* type){ return new Identifier(name,type);}
+    void setoffset(int offset){ offset_ = offset;}
+    Identifier(const std::string& name, Type* type, bool islocal):type_(type),name_(name), isLocal_(islocal){}
+    static Identifier* create(const std::string& name, Type* type, bool islocal){ return new Identifier(name,type,islocal);}
 };
 //using ExtDecl = Node;
 struct FunctionDef:Node

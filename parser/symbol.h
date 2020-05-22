@@ -36,11 +36,26 @@ public:
     //new 
     void addSymoble(const std::string& name,  Identifier* indenti);
    bool  getIdentiInCurrentScope(const std::string& name,  Identifier** indenti);
+    bool  getIdentiInAllScope(const std::string& name,  Identifier** indenti);
    void setParent(symbolTable* parent){ parent_ = parent;}
    void setScope(const Scope s){ scope_ = s;}
+   symbolTable* getParentScop(){ return parent_;}
+   int caculateOffset(const std::string& name)
+   {
+       int off = 0;
+       for (const auto&kv:map_)
+       {    off += kv.second->type_->getsize();
+
+           if (kv.first == name)
+           {
+               break;
+           }
+       }
+       return off;
+   }
 
 private:
-     Scope scope_;
+    Scope scope_;
     std::map<std::string, Identifier*> map_;
     symbolTable* parent_;
 

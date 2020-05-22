@@ -13,44 +13,41 @@ namespace Yan
 
     }
 
-   bool lexer::next(char& c)
+   int lexer::next()
    {
-        if(infile.get(c))
-        {
-            loc.colum++;
-            if(c == '\n')
-            {
-                loc.line++;
-                loc.colum = 0;
-            }
-            return true;
-        }
-        return false;
+      int c = infile.get();
+
+       loc.colum++;
+       if(c == '\n')
+      {
+         loc.line++;
+         loc.colum = 0;
+      }
+      return c;
+
    }
-   bool  lexer::skip(char& c)
+   //skip the the charecter that we didn't care about when hanging token's beginnig
+   int lexer::skip()
    {
         
-        if(!next(c))
-        {
-            return false;
-        }
+        int c = next();
         while (c == '\t'||c == ' '|| c=='\n' || c == '\r' || c == '\f')
         {
-            if(!next(c))
-            {
-                return false;
-            }
+           c = next();             
         
         }
-        return true;
+        return c;
    }
-   bool lexer::scan(Token* t)
+   void lexer::scan(Token* t)
    {
-       char c;
-       if (skip(c))
-       {
+       int c = skip();
+     
            switch(c)
            {
+            case EOF:
+            Info("eof");
+                t->type = TokenType::T_EOF;
+                break;
             case '+':
                 t->type = TokenType::T_ADD;
                 break;
@@ -59,9 +56,6 @@ namespace Yan
                 break;
             case '*':
                 t->type = TokenType::T_STAR;
-                break;
-            case '/':
-                t->type = TokenType::T_SLASH;
                 break;
             case '{':
                 t->type = TokenType::T_LBRACE;
@@ -81,13 +75,38 @@ namespace Yan
             case ',':
                 t->type = TokenType::T_COMMA;
                 break;
+            case '/':
+                if(peek() == '*')
+                {
+                    consume('*');
+                    int pre;
+                   while(1)
+                   {
+                       pre = next();
+                       if(pre == EOF)
+                       {
+                           ExitWithError("Expect end of file");
+                       }
+                       if(peek() == '/' && pre =='*')
+                       { 
+                           consume('/');
+                            t->type = TokenType::T_COMMENTS;
+                           break;
+                       }
+                   }
+                }
+                else
+                {
+                     t->type = TokenType::T_SLASH;
+                }
+                break;
             case '|':
                 t->type = TokenType::T_OR;
                 break;
             case '=':
                 if(peek() == '=')
                 {
-                    consume();
+                    consume('=');
                     t->type = TokenType::T_EQ;
                 }
                 else
@@ -100,7 +119,7 @@ namespace Yan
             case '>':
         
                 if(peek() =='=')
-                {   consume();
+                {   consume('=');
                     t->type = TokenType::T_GE;
                 }
                 else
@@ -112,7 +131,7 @@ namespace Yan
              case '<':
                 
                 if(peek() =='=')
-                {   consume();
+                {   consume('=');
                     t->type = TokenType::T_LE;
                 }
                 else
@@ -124,7 +143,8 @@ namespace Yan
             case '!':
                 if(peek() == '=')
                 {
-                    consume();
+                   
+                    consume('=');
                     t->type = TokenType::T_NE;
                 }
                 else
@@ -135,10 +155,7 @@ namespace Yan
             default:
                 if(isdigit(c))
                 {
-                    if(scanInt(c, t)==false)
-                    {
-                        exit(1);
-                    } 
+                    scanInt(c, t);
                 }
                 else if(isalpha(c))
                 {
@@ -146,24 +163,16 @@ namespace Yan
                 }
                 else
                 {
-                    std::cout<<"unkown char:"<<c<<std::endl;
-                    exit(1);
+                    ExitWithError(loc,"unexpect charector:%c",c);
                 }
            }
          
 
-        return true;
-       }
-       else
-       {
-            t->type = TokenType::T_EOF;
-            return true;
-       }
    
        
    
    }
-   bool lexer::scanInt(char c, Token* t)
+   void lexer::scanInt(char c, Token* t)
    {
         int num = 0;
         while( isdigit(c) )
@@ -172,7 +181,7 @@ namespace Yan
             num = num*10+tempnum;
             if (isdigit(peek()))
             {   
-                skip(c);
+               c = skip();
 
             }
             else
@@ -185,7 +194,7 @@ namespace Yan
         if(temp==')'||temp == ';'||temp == ' '||isOperator(temp)|| temp == '\n'|| temp == '\t'||temp=='\r'||temp == '\f'|| temp == EOF)
         {
             t->type = TokenType::T_INTLIT;
-            t->value = num;
+            t->text = num;
 
         }
         else
@@ -197,7 +206,6 @@ namespace Yan
            // return false;
 
         }
-        return true;
     }
 
    void lexer::scanIdenti(char c, Token*t)
@@ -210,7 +218,8 @@ namespace Yan
        {
             if(isalpha(peek())||isdigit(peek())|| peek() == '_')
             {
-                next(ch);
+                ch = next();
+                
                 identi[len++]=ch;
             }
            
@@ -221,32 +230,42 @@ namespace Yan
            
        }
        identi[len++]='\0';
+       if(len>MAX_STR_LEN)
+       {
+           ExitWithError(loc,"Identifier too long");
+       }
+    //    char end = peek();
+    //    if(end !=' '|| end !='('|| end ! = ')' || end != ';' || end != ',')
     // if(strcmp(identi,"print")==0)
     // {
     //     t->type = TokenType::T_PRINT;
     // }
-     if(strcmp(identi,"int") == 0)
+   
+     if(keyword(identi,t))
     {
-        t->type = TokenType::T_INT;
-    }
-    else if(strcmp(identi,"if") == 0)
-    {
-        t->type = TokenType::T_IF;
-    }
-    else if(strcmp(identi,"else") == 0)
-    {
-        t->type = TokenType::T_ELSE;
-    }
-    else
-    {
-        t->type = TokenType::T_IDENT;
-        t->text = identi;
+        return;
+    }   
+  
+    t->type = TokenType::T_IDENT;
+    t->text = identi;
        // ExitWithError(loc,"unkown toekn:%s")
         //std::cout<<"unkown identi :"<<identi<<std::endl;
         //exit(1);
-    }
+  
          
       
+   }
+   bool lexer::keyword(char* s,Token*t)
+   {
+       #define xx(ty,str) \
+       if(strcmp(s,str)==0)\
+       {\
+           t->type = TokenType::ty;\
+           return true;\
+       }
+       KEYWORD(xx)
+       #undef xx
+       return false;
    }
 
    bool lexer::isdigit(char c)
@@ -287,20 +306,13 @@ namespace Yan
        return infile.peek();
 
    }
-   void lexer::consume()
+   //consume the match char
+   void lexer::consume(char c)
    {
-       char c;
-       next(c);
-       if(c == '\n')
+       if(peek() == c)
        {
-           loc.line++;
-           loc.colum = 0;
-       }
-       else
-       {
-           loc.colum++;
-       }
-       
+           next();
+       }      
        
    }
 
@@ -322,6 +334,20 @@ namespace Yan
            auto t = tokenCache_.front();
            tokenCache_.pop();
            return t;
+       }
+   }
+   Token lexer::peektoken()
+   {
+        if(tokenCache_.empty())
+       {
+           Token t;
+           scan(&t);
+           tokenCache_.push(t);
+           return t;
+       }
+       else
+       {
+          return  tokenCache_.front();
        }
    }
    lexer::~lexer()

@@ -33,5 +33,19 @@ namespace Yan
         
 
     }
+     bool symbolTable::getIdentiInAllScope(const std::string& name,  Identifier** indenti)
+     {
+         if(getIdentiInCurrentScope(name, indenti))
+         {
+             return true;
+         }
+        if(parent_)
+        {
+           return  parent_->getIdentiInAllScope(name,indenti);
+        }
+        return false;
+     }
+
+
 
 }

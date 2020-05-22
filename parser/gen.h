@@ -9,7 +9,7 @@ namespace Yan{
 class gen:public Ivisitor
 {
 public:
-    explicit gen(symbolTable& sym,const std::string& fileName = "a.s");
+    explicit gen(const std::string& fileName = "a.s");
     ~gen();
     //impliment Ivistor
     virtual void visit(BinaryOp* node)override;
@@ -17,7 +17,7 @@ public:
     virtual void visit(ConstantValue* node)override;
     virtual void visit(FunctionDef* node)override;
     virtual void visit(Declaration* node)override;
-    virtual void visit(Program* node)override;
+    virtual void visit(Program* node)override{};
    virtual void visit(IfStmt* node)override;
    virtual void visit(PrintStmt* node)override;
    virtual void visit(CompousedStmt* node)override;
@@ -29,6 +29,7 @@ public:
     void genProgram(Program* node);
     void genLvalue(Identifier*node);
    // void genLvalue(node* node);
+   void loardArgs(Identifier* node, int index);
 
 
     //operator
@@ -57,7 +58,6 @@ private:
     //8 byte
     static const std::vector<std::string> argReg8;
     
-    symbolTable& symb;
     std::string outfileName; 
     std::fstream outfstream;
 

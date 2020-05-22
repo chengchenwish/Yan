@@ -20,11 +20,11 @@ static void compile(std::vector<std::string>&files)
 {
     Yan::lexer pp(files.front());
 
-    Yan::symbolTable symb;
-    Yan::gen gen(symb);
-    Yan::parser pars(pp,symb);
+    std::string out_asmeble_file = "a.s";
+    Yan::gen gencode(out_asmeble_file);
+    Yan::parser pars(pp);
     auto pp1= pars.parserProgram();
-    gen.genProgram(pp1);
+    gencode.genProgram(pp1);
         
 }
 static void compile_link(std::vector<std::string>&files)

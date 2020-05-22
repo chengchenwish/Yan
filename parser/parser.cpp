@@ -1,11 +1,11 @@
 #include "parser.h"
 namespace Yan{
-#define TOKEN_2_OP(xx) \
-    xx(TokenType::T_EOF,OpType::UNKOWN, 0,) \
-    xx(TokenType::T_EQ,OpType::OP_EQ, 70)
+// #define TOKEN_2_OP(xx) \
+//     xx(TokenType::T_EOF,OpType::UNKOWN, 0,) \
+//     xx(TokenType::T_EQ,OpType::OP_EQ, 70)
 
 
-parser::parser(lexer& s,symbolTable& t):scan(s),symb(t)
+parser::parser(lexer& s):scan(s)
 {
 }
 parser::~parser()
@@ -20,19 +20,27 @@ Expr* parser::primary()
         if(test(TokenType::T_INTLIT))
         {
             auto t = consume();
-            Info(std::to_string(t.value).c_str());
-            node =  ConstantValue::create(t.value);
+            
+            Info(std::to_string(t.getValue()).c_str());
+            node =  ConstantValue::create(t.getValue());
         }
         else if(test(TokenType::T_IDENT))
         {    Identifier* identi;
              auto t =consume();
-             auto exist =symb.getIdentiInCurrentScope(t.text,&identi);
+             auto exist =currentScop_->getIdentiInAllScope(t.getText(),&identi);
              if(!exist)
             {
-                ExitWithError("undefined variable :%s",t.text.c_str());
+                ExitWithError("undefined variable :%s",t.getText().c_str());
              }
           // return Identifier::create(identi->name_,nullptr);
             return identi;
+        }
+        else if(match(TokenType::T_LPAREN))
+        {
+            auto expr = sum();
+            expect(TokenType::T_RPAREN,")");
+            return expr;
+
         }
         else
         {
@@ -104,12 +112,12 @@ PrintStmt* parser::parserPrintStmt()
 
 BinaryOp* parser::parserAssignExpr(Token var)
 {
-    //int id = symb.findGlob(cacheToken.token_.text);
+    //int id = currentScop_->findGlob(cacheToken.token_.getText());
     Identifier* identi;
-    auto exist =symb.getIdentiInCurrentScope(var.text,&identi);
+    auto exist =currentScop_->getIdentiInAllScope(var.getText(),&identi);
     if(!exist)
     {
-        ExitWithError("undefined variable :%s",var.text.c_str());
+        ExitWithError("undefined variable :%s",var.getText().c_str());
     }
      Expr *left, *right;
      BinaryOp* tree;
@@ -125,19 +133,77 @@ BinaryOp* parser::parserAssignExpr(Token var)
      
 
 }
-//sum -> factor (('+' factor)|('-' factor))*
+// expr = assign(","assign")*
+Expr* parser::expr()
+{
+    Expr* left = assign();
+    while(match(TokenType::T_COMMA))
+    {
+        auto right = assign();
+        left = BinaryOp::create(OpType::OP_COMMA,left,right);
+
+    }
+    return left;
+
+}
+// assign    = conditional (assign-op assign)?
+// assign-op = "=" | "+=" | "-=" | "*=" | "/=" | "<<=" | ">>="
+//           | "&=" | "|=" | "^="
+Expr* parser::assign()
+{
+    auto node = conditional();
+    if (match(TokenType::T_ASSIGN))//=
+    {
+        return BinaryOp::create(OpType::OP_ASSIGN,node,assign());
+    }
+    if (match(TokenType::T_ASSLASH))// /=
+    {
+        return BinaryOp::create(OpType::OP_ASSMOD,node,assign());
+    }
+     if (match(TokenType::T_ASSTAR))//*=
+    {
+        return BinaryOp::create(OpType::OP_ASSMUL,node,assign());
+    }
+     if (match(TokenType::T_ASPLUS))// +=
+    {
+        return BinaryOp::create(OpType::OP_ASSPLUS,node,assign());
+    }
+     if (match(TokenType::T_ASMINUS)) // -=
+    {
+        return BinaryOp::create(OpType::OP_ASSSUB,node,assign());
+    }
+
+     if (match(TokenType::T_ASMOD)) // %=
+    {
+        return BinaryOp::create(OpType::OP_ASSMOD,node,assign());
+    }
+
+     if (match(TokenType::T_ASSIGN))
+    {
+        return BinaryOp::create(OpType::OP_ASSIGN,node,assign());
+    }
+    //TODO <<= >>= &= ^= |=
+    return node;
+    
+}
+Expr* parser::conditional()
+{
+    return sum();
+}
+
+//sum -> mul (('+' mul)|('-' mul))*
 Expr* parser::sum()
 {
-    Expr* node = factor();
+    Expr* node = mul();
     for(;;)
     {
          if(match(TokenType::T_ADD))
          {
-             node = BinaryOp::create(OpType::OP_ADD, node, factor());
+             node = BinaryOp::create(OpType::OP_ADD, node, mul());
          }
          else if(match(TokenType::T_MINUS))
          {
-             node = BinaryOp::create(OpType::OP_SUBTRACT, node, factor());
+             node = BinaryOp::create(OpType::OP_SUBTRACT, node, mul());
          }
          else
          {
@@ -148,18 +214,18 @@ Expr* parser::sum()
  
 }
 //sum -> primary (('+' primary)|('-' primary))*
-Expr* parser::factor()
+Expr* parser::mul()
 {
-    Expr* node = primary();
+    Expr* node = cast();
     for(;;)
     {
          if(match(TokenType::T_STAR))
          {
-             node = BinaryOp::create(OpType::OP_MULTIPLY, node, primary());
+             node = BinaryOp::create(OpType::OP_MULTIPLY, node, cast());
          }
          else if(match(TokenType::T_SLASH))
          {
-             node = BinaryOp::create(OpType::OP_DIVIDE, node, primary());
+             node = BinaryOp::create(OpType::OP_DIVIDE, node, cast());
          }
          else
          {
@@ -245,9 +311,10 @@ Expr* parser::factor()
             {
                 auto t = consume();
 
-                auto identi = Identifier::create(t.text,ty);
-                symb.addSymoble(identi->name_,identi);
+                auto identi = Identifier::create(t.getText(),ty, true);
+                currentScop_->addSymoble(identi->name_,identi);
                  compoused->addStmt(parserDeclaration(identi));
+                 identi->setoffset(currentScop_->caculateOffset(t.getText()));
             }
             else
             {
@@ -287,16 +354,16 @@ Expr* parser::factor()
   FunctionCall* parser::parserFuncCall(Token var)
   {
        Identifier* identi;
-    auto exist =symb.getIdentiInCurrentScope(var.text,&identi);
+    auto exist =currentScop_->getIdentiInAllScope(var.getText(),&identi);
     if(!exist)
     {
-        if(var.text == "print")
+        if(var.getText() == "print")
         {
-            identi = Identifier::create(var.text,FuncType::create(VoidType::create()));
+            identi = Identifier::create(var.getText(),FuncType::create(VoidType::create()),false);
         }
         else
 
-            ExitWithError("undefined variable :%s",var.text.c_str());
+            ExitWithError("undefined variable :%s",var.getText().c_str());
     }
     else if(identi->type_->getType()!=Type::T_FUNC)
     {
@@ -327,19 +394,26 @@ Declaration* parser::parserDeclaration(Identifier* identi)
     return Declaration::create(identi);
 }
  Program* parser::parserProgram()
- {
-
-     auto program = Program::create();
+ {  
+    auto program = Program::create();
+    currentScop_ = new symbolTable();
+    currentScop_->setScope(Scope::GLOBAL);
+     symbolTable*funcScop = nullptr;
      
      while(!match(TokenType::T_EOF))
      {
+        if(match(TokenType::T_COMMENTS))
+        {
+            Info("comments");
+             continue;
+        }
         storageClass sclass;     
         auto type = baseType(&sclass);
         Identifier* identi =nullptr;
         if(test(TokenType::T_IDENT))
         {
             auto t = consume();
-            identi = Identifier::create(t.text,type);
+            identi = Identifier::create(t.getText(),type,false);
         }
         else
         {
@@ -348,12 +422,18 @@ Declaration* parser::parserDeclaration(Identifier* identi)
         if(match(TokenType::T_LPAREN))
         {
             identi->type_ = FuncType::create(type);
+            funcScop = new symbolTable();
+            funcScop->setScope(Scope::FUNC);
             if(match(TokenType::T_INT))
             {
                 while(!match(TokenType::T_RPAREN))
                 {
                     auto t = consume();
-                    auto param = Identifier::create(t.text, IntType::create());
+                    auto text = t.getText();
+                    auto param = Identifier::create(text, IntType::create(),true);
+                    funcScop->addSymoble(text,param);
+                    funcScop->caculateOffset(text);
+                    param->offset_ = funcScop->caculateOffset(text);
                     static_cast<FuncType*>(identi->type_)->addParam(param);
                     if(!test(TokenType::T_RPAREN))
                     {
@@ -371,11 +451,14 @@ Declaration* parser::parserDeclaration(Identifier* identi)
            // expect(TokenType::T_RPAREN,")");
         }
         
-        symb.addSymoble(identi->name_,identi);
+        currentScop_->addSymoble(identi->name_,identi);
 
          if(identi->type_->getType() == Type::T_FUNC)
          {
+            funcScop->setParent(currentScop_);
+            currentScop_ = funcScop;
             program->add(parserFuncDef(identi));
+            currentScop_= currentScop_-> getParentScop();
          }
          else
          {
@@ -383,6 +466,7 @@ Declaration* parser::parserDeclaration(Identifier* identi)
          }
 
      }
+     Info("hello");
      Info(__func__);
      return program;
  }
@@ -390,13 +474,27 @@ Declaration* parser::parserDeclaration(Identifier* identi)
  bool parser::isTypeName()
  {
      //current only support int/char
-     return (test(TokenType::T_INT) ||test(TokenType::T_CHAR));
+     return (test(TokenType::T_INT) ||test(TokenType::T_CHAR)|| test(TokenType::T_BOOL)
+             || test(TokenType::T_ENUM) || test(TokenType::T_SHORT)|| test(TokenType::T_SIGNED)||
+             test(TokenType::T_STATIC)|| test(TokenType::T_STRUCT)|| test(TokenType::T_VOID)||
+             test(TokenType::T_TYPDEF) || test(TokenType::T_EXTERN) || test(TokenType::T_LONG) 
+             ||(test(TokenType::T_IDENT) && findtypedef(peek().getText())));
  }
+ bool parser::findtypedef(const std::string& name )
+ {
+     //todo
+     return false;
+ }
+
+ // basetype = builtin-type | struct-decl | typedef-name | enum-specifier
+//
+// builtin-type = "void" | "_Bool" | "char" | "short" | "int"
+//              | "long" | "long" "long"
  Type*parser::baseType(storageClass* sclass)
  {
      if(!isTypeName())
      {
-         ExitWithError("match type token ");
+         ExitWithError("Type name expected");
      }
      
      if(match(TokenType::T_INT))
@@ -430,7 +528,7 @@ OpType parser::TokenType2ASTop(TokenType type)
         op =  OpType::OP_MULTIPLY;
         break;
     case TokenType::T_MINUS:
-        Info("ooooo-----");
+
         op = OpType::OP_SUBTRACT;
         break;
     case TokenType::T_SLASH:

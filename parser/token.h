@@ -1,83 +1,94 @@
 #ifndef _TOKEN_H_
 #define _TOKEN_H_
 #include<string>
+#include<variant>
 namespace Yan{
 
 //max str len for one token
 
 constexpr int MAX_STR_LEN = 100;
-/*
-#define TOKEN_MAP(xx) \
-        xx(T_EOF,'eof')\
-        xx(T_ASSGIN, '=')\
-        xx(T_ASPLUS,'+=')\
-*/
-/*
-std::string getstring(Token t)
-{
 
-    #define c(Type,Text)\
-        case Type: return #Text;
-    switch(t)
-    {
-        TOKEN_MAP(c)
-    }
-    #undef c
+#define KEYWORD(xx) \
+    xx(T_VOID ,"void") \
+     xx(T_CHAR, "char") \
+     xx(T_INT, "int" ) \
+     xx(T_LONG, "long") \
+     xx(T_SHORT, "short")\
+     xx(T_ENUM, "enum")\
+     xx(T_STRUCT, "struct")\
+     xx(T_BOOL,"bool")\
+     xx(T_EXTERN,"extern")\
+     xx(T_STATIC,"static")\
+     xx(T_TYPDEF,"typedef")\
+     xx(T_SIGNED, "signed")\
+     xx(T_IF,"if")\
+     xx(T_ELSE,"else")\
+     xx(T_RETURN,"return")\
+     xx(T_SWITCH,"switch")\
+     xx(T_CASE,"case")\
+     xx(T_BREAK,"break")\
+     xx(T_CONTINUE,"continue")
+    
 
-}
-*/
+#define RESERVED(xx) \
+    xx(T_ASSIGN, "=") \
+    xx(T_ASPLUS, "+=") \
+    xx(T_ASMINUS,"-=")\
+    xx(T_ASSTAR,"*=")\
+    xx(T_ASSLASH,"/=")\
+    xx(T_ASMOD, "%=")\
+    xx(T_ANDASSIGN, "&=")\
+    xx(T_ORASSIGN, "|=" )\
+    xx(T_XORASSIGN ,"^=")\
+    xx(T_LSHIFASSIGN, "<<=")\
+    xx(T_RSHIFTASSIGN, ">>=")\
+    xx(T_QUSTION, "?")\
+    xx(T_ADD,   "+")\
+    xx(T_MINUS ,"-")\
+    xx(T_STAR ,"*")\
+    xx(T_SLASH , "/")\
+    xx(T_MOD, "%")\
+    xx(T_EQ, "==")\
+    xx(T_GT, ">")\
+    xx(T_LT, "<")\
+    xx(T_LE, "<=")\
+    xx(T_GE, ">=")\
+    xx(T_NE, "!=")\
+    xx(T_OR, "|")\
+    xx(T_LOGAND,"&&")\
+    xx(T_LOGOR,"||")\
+    xx(T_LBRACE,"{")\
+    xx(T_RBRACE,"}")\
+    xx(T_LPAREN, "(")\
+    xx(T_RPAREN,")")\
+    xx(T_LBRACKET,"[")\
+    xx(T_RBRACKET,"]")\
+    xx(T_COMMA, ",")\
+    xx(T_SEMI, ";")
+
+
+
+
 
 enum class TokenType 
 { 
-    //The token is a meaningful string
+    #define xx(type, text) type,
+    KEYWORD(xx)
+    RESERVED(xx)
+    #undef xx
+
     T_EOF,
-    //op
-    T_ASSIGN, //=
-    T_ASPLUS,// +=
-    T_ASMINUS,//-=
-    T_ASSTAR,//*=
-    T_ASSLASH,// /=
-    T_ASMOD,// %=
-    T_QUSTION,//?
-    T_ADD    ,//+
-    T_MINUS ,//-
-    T_STAR ,//*
-    T_SLASH ,// /
-    T_MOD,// %
-    T_EQ, //==
-    T_GT, //>
-    T_LT, //<
-    T_LE, //<=
-    T_GE, //>=
-    T_NE, // !=
-    T_OR,// |
-   // T_
-    T_LOGAND,// &&
-    T_LOGOR,// ||
-
-//type keyword
-    T_VOID,// void
-    T_CHAR,// char
-    T_INT, // int
-    T_LONG, // long
-
     T_INTLIT,
+    T_STRLIT,
     T_PRINT,
     
+    //other
+    T_COMMENTS,
     T_IDENT,
-//KEY WORD
-    T_IF,
-    T_ELSE,
-
-    T_LBRACE,// {
-    T_RBRACE,// }
-    T_LPAREN, // (
-    T_RPAREN,// )
-    T_LBRACKET, //[
-    T_RBRACKET,//]
-    T_COMMA, // ,
-    T_SEMI //;
+ 
+    T_UNKOWN_TOKEN
 };
+
 struct location
 {
     std::string fileName;
@@ -93,11 +104,13 @@ struct location
 };
  struct Token 
 {   
-    int value;//store 
-    std::string text;//store identi name;
+    // store identifier name or num litri
+    std::variant<int,std::string> text;
     TokenType type;
     //location loc;
     std::string  tostring();
+    std::string getText(){return std::get<std::string>(text);}
+    int getValue(){return std::get<int>(text);}
 };
 }
 

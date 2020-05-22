@@ -24,15 +24,18 @@ if(YAN_BUILD_TESTS)
     set(install_gmock OFF)
     set(build_gmock ON)
     # This project is tested using GoogleTest.
-    add_subdirectory("third_party/googletest")
+    add_subdirectory("third_part/googletest")
     set_property(TARGET gtest
                       APPEND PROPERTY COMPILE_OPTIONS -Wno-missing-field-initializers)
     set_property(TARGET gmock
                       APPEND PROPERTY COMPILE_OPTIONS -Wno-missing-field-initializers)
     add_executable(UT UT/test_parser.cpp
                         UT/testAll.cpp)
+    add_custom_target(FT ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/test/run_test.py)
     target_link_libraries(UT gtest)
+    target_link_libraries(UT compiler)
     add_test(NAME UT COMMAND UT)
+    add_test(NAME FT COMMAND  FT)
 endif(YAN_BUILD_TESTS)
 
 

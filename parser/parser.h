@@ -15,7 +15,7 @@ class parser
         using precedenceMap = std::map<TokenType,int>;
        // static precedenceMap initPrecedenceMap();
     public:
-        parser(lexer& s,symbolTable& t);
+        parser(lexer& s);
         ~parser();
         Expr*primary();
         Program* parserProgram();
@@ -27,35 +27,38 @@ class parser
         FunctionCall* parserFuncCall(Token var);
        
         //EXPR
+        Expr* expr();
+        Expr* assign();
+        Expr* conditional();
         Expr* sum();
-        Expr* factor();
+        Expr* mul();
         Expr* cast();
         Expr* unary();
         Expr* postfix();
         // Expr* term();
-        // Expr* group();
-
-
-        
+        // Expr* group();        
 
 
         OpType TokenType2ASTop(TokenType type);
        
     private:
         bool isTypeName();
+         bool findtypedef(const std::string& name );
         Type*baseType(storageClass* sclass);
         Type*Declarator(Type*type);
-        
+
         //Token ralated function
         bool match(TokenType t);
         bool test(TokenType t);
         Token consume();
+        void putBack(const Token& t){ scan.putBack(t);}
+        Token peek(){ return scan.peektoken();}
         void expect(TokenType t, const std::string& what);
 
     private:
         lexer& scan;
         
-        symbolTable& symb;     
+        symbolTable* currentScop_;     
 
         //disable copy and assign
         parser(const parser&) = delete;
