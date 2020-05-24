@@ -1,2 +1,2 @@
 # Yan
-## a tiny c complier writen by C++ 
+## a tiny c complier written by C++ 
