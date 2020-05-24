@@ -23,6 +23,7 @@ public:
 private:
    int next();
    int peek();
+   void skipcomment();
    void consume(char c);
    bool isdigit(char c);
    bool isalpha(char c);

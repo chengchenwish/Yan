@@ -48,6 +48,8 @@ constexpr int MAX_STR_LEN = 100;
     xx(T_STAR ,"*")\
     xx(T_SLASH , "/")\
     xx(T_MOD, "%")\
+    xx(T_INC, "++")\
+    xx(T_DEC, "--")\
     xx(T_EQ, "==")\
     xx(T_GT, ">")\
     xx(T_LT, "<")\

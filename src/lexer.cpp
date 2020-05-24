@@ -25,6 +25,41 @@ namespace Yan
       }
       return c;
 
+   }
+   void lexer::skipcomment()
+   {
+       char c = next();
+       if(c == '*')
+       {
+           int pre;
+           while(1)
+           {
+                pre = next();
+                if(pre == EOF)
+                {
+                    ExitWithError("Expect end of file");
+                }
+                if(peek() == '/' && pre =='*')
+                { 
+                   consume('/');
+                   break;
+                }
+            }
+
+       }
+       else if(c == '/')
+       {
+           int ch = peek();
+           int i = 0;
+           while(ch !='\n' && ch != EOF)
+           {
+               consume(ch);
+
+               ch = peek();   
+           }
+       }
+                    
+
    }             
    
    void lexer::scan(Token* t)
@@ -67,11 +102,48 @@ namespace Yan
      switch(c)
      {
         case '+':
-            t->type = TokenType::T_ADD; return;
+            if('+' == peek())
+            {
+                consume('+');
+                t->type = TokenType::T_INC;
+            }
+            else if('=' == peek())
+            {
+                consume('=');
+                t->type = TokenType::T_ASPLUS;
+            }
+            else
+            {
+                t->type = TokenType::T_ADD;
+            }            
+             return;
         case '-':
-            t->type = TokenType::T_MINUS; return;
+            if('-' == peek())
+            {
+                consume('-');
+                t->type = TokenType::T_DEC;
+            }
+            else if('='== peek())
+            {
+                consume('=');
+                t->type = TokenType::T_ASMINUS;
+            }
+            else
+            {
+                t->type = TokenType::T_MINUS;
+            } 
+            return;
         case '*':
-            t->type = TokenType::T_STAR;return;
+            if('='== peek())
+            {
+                consume('=');
+                t->type = TokenType::T_ASSTAR;
+            }
+            else
+            {            
+                t->type = TokenType::T_STAR;
+            }
+            return;
         case '{':
             t->type = TokenType::T_LBRACE; return;            
         case '}':
@@ -95,24 +167,16 @@ namespace Yan
                 t->text =  scanstr();
                 return;
         case '/':
-                if(peek() == '*')
+
+                if(peek() == '*' || peek() == '/')
                 {
-                    consume('*');
-                    int pre;
-                   while(1)
-                   {
-                       pre = next();
-                       if(pre == EOF)
-                       {
-                           ExitWithError("Expect end of file");
-                       }
-                       if(peek() == '/' && pre =='*')
-                       { 
-                           consume('/');
-                            t->type = TokenType::T_COMMENTS;
-                           break;
-                       }
-                   }
+                    skipcomment();
+                    t->type =TokenType::T_COMMENTS;                   
+                }
+                else if('='==peek())
+                {
+                    consume('=');
+                    t->type = TokenType::T_ASSLASH;
                 }
                 else
                 {
@@ -393,6 +457,10 @@ namespace Yan
        {
            Token t;
            scan(&t);
+          while(t.type == TokenType::T_COMMENTS)
+           {
+               scan(&t);
+           }
            return t;
        }
        else
@@ -408,6 +476,10 @@ namespace Yan
        {
            Token t;
            scan(&t);
+           while(t.type == TokenType::T_COMMENTS)
+           {
+               scan(&t);
+           }
            tokenCache_.push(t);
            return t;
        }

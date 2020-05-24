@@ -38,56 +38,23 @@ private:
      TypeKind kind_ ;
      bool isIncomplete_;
 };
-
-class VoidType: public Type
-{
-public:
-    static VoidType* create(){ return new VoidType();}
-private:
-    VoidType():Type(1,1,T_VOID){}
+#define BASIC(xx,size,align,kind)\
+class xx :public Type{ \
+public:\
+    static xx* create(){ return new xx();}\
+private:\
+    xx():Type(size,align,kind){}\
+\
 };
-
-class BoolType: public Type
-{
- public:
-    static BoolType* create(){ return new BoolType();}
-private:
-    BoolType():Type(1,1,T_BOOL){}
-};
-
-
-class CharType: public Type
-{
-public:
-    static CharType* create(){ return new CharType();}
-private:
-    CharType():Type(1,1,T_CHAR){}
-};
-class ShortType: public Type
-{
-public:
-    static ShortType* create(){ return new ShortType();}
-private:
-    ShortType():Type(2,2,T_SHORT){}
-};
+BASIC(IntType,4,4,T_INT)
+BASIC(VoidType,1,1,T_VOID)
+BASIC(BoolType,1,1,T_BOOL)
+BASIC(CharType,1,1,T_CHAR)
+BASIC(ShortType,2,2,T_SHORT)
+BASIC(LongType,8,8,T_LONG)
+#undef BASIC        
 
 
-class IntType: public Type
-{
-public:
-    static IntType* create(){ return new IntType();}
-private:
-    IntType():Type(4,4,T_INT){}
-};
-
-
-class LongType: public Type
-{
-public:
-    static LongType* create(){ return new LongType();}
-private:
-    LongType():Type(8,8,T_LONG){}
-};
 class PtrType:public Type
 {
 public:
