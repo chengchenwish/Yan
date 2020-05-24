@@ -1,11 +1,10 @@
 #include<cstring>
 
 #include<stdio.h>
-#include "parser/lexer.h"
-#include "parser/AST.h"
-#include "parser/interp.h"
-#include "parser/gen.h"
-#include "parser/parser.h"
+#include "src/lexer.h"
+#include "src/AST.h"
+#include "src/gen.h"
+#include "src/parser.h"
 //namespace Yan{
 
 static void help()

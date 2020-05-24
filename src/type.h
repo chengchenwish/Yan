@@ -5,7 +5,7 @@
 namespace Yan
 {
 
-class Identifier;
+struct Identifier;
 
 class Type
 {

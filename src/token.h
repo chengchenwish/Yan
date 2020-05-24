@@ -57,6 +57,7 @@ constexpr int MAX_STR_LEN = 100;
     xx(T_OR, "|")\
     xx(T_LOGAND,"&&")\
     xx(T_LOGOR,"||")\
+    xx(T_LOGNOT,"!")\
     xx(T_LBRACE,"{")\
     xx(T_RBRACE,"}")\
     xx(T_LPAREN, "(")\

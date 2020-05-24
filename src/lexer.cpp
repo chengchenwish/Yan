@@ -25,57 +25,76 @@ namespace Yan
       }
       return c;
 
-   }
-   //skip the the charecter that we didn't care about when hanging token's beginnig
-   int lexer::skip()
-   {
-        
-        int c = next();
-        while (c == '\t'||c == ' '|| c=='\n' || c == '\r' || c == '\f')
-        {
-           c = next();             
-        
-        }
-        return c;
-   }
+   }             
+   
    void lexer::scan(Token* t)
    {
-       int c = skip();
-     
-           switch(c)
-           {
-            case EOF:
-            Info("eof");
-                t->type = TokenType::T_EOF;
-                break;
-            case '+':
-                t->type = TokenType::T_ADD;
-                break;
-            case '-':
-                t->type = TokenType::T_MINUS;
-                break;
-            case '*':
-                t->type = TokenType::T_STAR;
-                break;
-            case '{':
-                t->type = TokenType::T_LBRACE;
-                break;
-            case '}':
-                t->type =  TokenType::T_RBRACE;
-                break;
-            case '(':
-                t->type = TokenType::T_LPAREN;
-                break;
-            case ')':
-                t->type =  TokenType::T_RPAREN;
-                break;
-            case ';':
-                t->type = TokenType::T_SEMI;
-                break;
-            case ',':
-                t->type = TokenType::T_COMMA;
-                break;
-            case '/':
+       //skip the the charecter that we didn't care about
+       int c = next();
+       while (c == '\t'||c == ' '|| c=='\n' || c == '\r' || c == '\f')
+       {
+           c = next();             
+        
+       }
+       if(c == EOF)
+       {
+         t->type = TokenType::T_EOF;  
+         return; 
+       }
+       if(ispunct(c))
+       {
+           scanpunct( c, t);
+           return;
+       }
+       if(isdigit(c))
+        {
+            scanInt(c, t);
+            return;
+        }
+      if(isalpha(c))
+      {
+         scanIdenti(c,t);
+         return;
+      }
+
+        ExitWithError(loc,"unexpect charector:%c",c);
+        
+   
+   }
+  void lexer::scanpunct(char c,Token*t)
+  {
+
+     switch(c)
+     {
+        case '+':
+            t->type = TokenType::T_ADD; return;
+        case '-':
+            t->type = TokenType::T_MINUS; return;
+        case '*':
+            t->type = TokenType::T_STAR;return;
+        case '{':
+            t->type = TokenType::T_LBRACE; return;            
+        case '}':
+            t->type =  TokenType::T_RBRACE;return;
+        case '(':
+            t->type = TokenType::T_LPAREN; return;
+        case ')':
+            t->type =  TokenType::T_RPAREN;return;
+        case ';':
+            t->type = TokenType::T_SEMI; return;
+        case ',':
+                t->type = TokenType::T_COMMA; return;
+        case '\'':
+                t->text = scanchar();
+                t->type = TokenType::T_INTLIT;
+                consume('\'');
+                return;
+        case '"':
+                
+                t->type = TokenType::T_STRLIT;                
+                t->text =  scanstr();
+                return;
+        case '/':
                 if(peek() == '*')
                 {
                     consume('*');
@@ -99,11 +118,10 @@ namespace Yan
                 {
                      t->type = TokenType::T_SLASH;
                 }
-                break;
-            case '|':
-                t->type = TokenType::T_OR;
-                break;
-            case '=':
+                return;
+         case '|':
+                t->type = TokenType::T_OR;return;
+         case '=':
                 if(peek() == '=')
                 {
                     consume('=');
@@ -113,7 +131,7 @@ namespace Yan
                 {
                    t->type = TokenType::T_ASSIGN;
                 }
-                break;
+                return;
                 
                 
             case '>':
@@ -127,7 +145,7 @@ namespace Yan
                     t->type = TokenType::T_GT;
                 }
                 
-               break;
+               return;
              case '<':
                 
                 if(peek() =='=')
@@ -139,7 +157,7 @@ namespace Yan
                     t->type = TokenType::T_LT;
                 }
                 
-               break;
+               return;
             case '!':
                 if(peek() == '=')
                 {
@@ -149,28 +167,67 @@ namespace Yan
                 }
                 else
                 {
-                    exit(1);
+                    t->type = TokenType::T_LOGNOT;
                 }
-                break;
-            default:
-                if(isdigit(c))
-                {
-                    scanInt(c, t);
-                }
-                else if(isalpha(c))
-                {
-                    scanIdenti(c,t);
-                }
-                else
-                {
-                    ExitWithError(loc,"unexpect charector:%c",c);
-                }
-           }
-         
+                return;
+        default:
+           ExitWithError(loc,"unexpected charecter %c",c);
+        } 
+  }
+  std::string lexer::scanstr()
+  {
+      char str[MAX_STR_LEN];
+      char c = next();
+      int i = 0;
+      while(c!='"')
+      {
+          str[i++] = c;
+          if(i>=MAX_STR_LEN)
+          {
+              ExitWithError(loc,"string too long");
+          }
+          c = next();
+      }
+      return std::string(str,i);
+  }
+  int lexer::scanchar()
+   {       
+     int c = next();
+     int c2,i;
+     if (c == '\\') {
+         switch (c = next()) 
+         {
+            case 'a': return ('\a');
+            case 'b': return ('\b');
+            case 'f': return ('\f');
+            case 'n': return ('\n');
+            case 'r': return ('\r');
+            case 't': return ('\t');
+            case 'v': return ('\v');
+            case '\\': return ('\\');
+            case '"': return ('"');
+            case '\'': return ('\'');
+            // Deal with octal constants by reading in
+	        // characters until we hit a non-octal digit.
+	        // Build up the octal value in c2 and count
+	        // # digits in i. Permit only 3 octal digits.
+             case '0': case '1': case '2':case '3':case '4':
+             case '5': case '6': case '7':
+	           for (i = c2 = 0; isdigit(c) && c < '8'; c = peek()) 
+               {
+	                if (++i > 3) break;
+                    consume(c);
+	                c2 = c2 * 8 + (c - '0');
+	           }
+               return c2;
 
-   
-       
-   
+         }
+     }
+     else
+     {
+         return c;
+     }
+     
    }
    void lexer::scanInt(char c, Token* t)
    {
@@ -181,7 +238,7 @@ namespace Yan
             num = num*10+tempnum;
             if (isdigit(peek()))
             {   
-               c = skip();
+               c = next();
 
             }
             else
@@ -191,7 +248,7 @@ namespace Yan
         }
         int temp;
         temp = peek();
-        if(temp==')'||temp == ';'||temp == ' '||isOperator(temp)|| temp == '\n'|| temp == '\t'||temp=='\r'||temp == '\f'|| temp == EOF)
+        if(temp == ' '||ispunct(temp)|| temp == '\n'|| temp == '\t'||temp=='\r'||temp == '\f'|| temp == EOF)
         {
             t->type = TokenType::T_INTLIT;
             t->text = num;
@@ -290,9 +347,12 @@ namespace Yan
            return false;
        }
    }
-   bool lexer:: isOperator(char c)
+   //single letter punctuation
+   bool lexer::ispunct(char c)
    {
-       if(c=='+'||c == '-'||c=='*'||c=='/'||c=='<'||c=='>'||c == '!'||c == '=')
+       if(c=='+'||c == '-'||c=='*'||c=='/'||c=='<'||c=='>'||c == '!'||c == '='||
+          c == ','|| c == ';' ||c == '('||c== ')'||c=='['||c==']'||c=='{'||c =='}'||
+          c=='%'||c==':'||c == '?'||c == '\''||c == '"')
        {
            return true;
        }
@@ -301,6 +361,7 @@ namespace Yan
            return false;
        }
    }
+  
    int lexer::peek()
    {
        return infile.peek();
@@ -312,7 +373,12 @@ namespace Yan
        if(peek() == c)
        {
            next();
-       }      
+       }
+       else
+       {
+           ExitWithError("expected charecter :%c",c);
+       }
+             
        
    }
 

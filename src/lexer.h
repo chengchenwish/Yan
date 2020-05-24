@@ -18,18 +18,22 @@ public:
    Token getToken();
    Token peektoken();
 
-   int peek();
+   
    location& getLocation(){ return loc;}
 private:
    int next();
-   int skip();
+   int peek();
    void consume(char c);
    bool isdigit(char c);
    bool isalpha(char c);
-   bool isOperator(char c);
+   bool ispunct(char c);
    bool keyword(char* s, Token*t);
+
+   void scanpunct(char c,Token*t);
    void scanInt(char c, Token*t);
    void scanIdenti(char c, Token*t);
+   int  scanchar();
+   std::string scanstr();
 private:
    std::queue<Token> tokenCache_;
    location loc;

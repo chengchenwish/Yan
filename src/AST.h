@@ -8,21 +8,21 @@
 
 namespace Yan{
 
-class Expr;
-class BinaryOp;
-class Identifier;
-class ConstantValue;
-class FunctionDef;
-class Declaration;
-class Program;
+struct Expr;
+struct BinaryOp;
+struct Identifier;
+struct ConstantValue;
+struct FunctionDef;
+struct Declaration;
+struct Program;
 
-class IfStmt;
-class PrintStmt;
-class CompousedStmt;
-class FunctionCall;
-class JumpStmt;
-class ReturnStmt;
-class UnaryOp;
+struct IfStmt;
+struct PrintStmt;
+struct CompousedStmt;
+struct FunctionCall;
+struct JumpStmt;
+struct ReturnStmt;
+struct UnaryOp;
 
 
 class Ivisitor 
