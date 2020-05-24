@@ -16,9 +16,7 @@ public:
    void scan(Token* t);
    void putBack(const Token& t);
    Token getToken();
-   Token peektoken();
-
-   
+   Token peektoken();   
    location& getLocation(){ return loc;}
 private:
    int next();
@@ -34,7 +32,9 @@ private:
    void scanInt(char c, Token*t);
    void scanIdenti(char c, Token*t);
    int  scanchar();
+   int hexchar();
    std::string scanstr();
+
 private:
    std::queue<Token> tokenCache_;
    location loc;

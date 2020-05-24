@@ -81,7 +81,7 @@ namespace Yan
            scanpunct( c, t);
            return;
        }
-       if(isdigit(c))
+       if(isdigit(c) || c == '_')
         {
             scanInt(c, t);
             return;
@@ -128,6 +128,11 @@ namespace Yan
                 consume('=');
                 t->type = TokenType::T_ASMINUS;
             }
+            else if('>' == peek())
+            {
+                consume('>');
+                t->type = TokenType::T_ARROW;
+            }
             else
             {
                 t->type = TokenType::T_MINUS;
@@ -144,6 +149,20 @@ namespace Yan
                 t->type = TokenType::T_STAR;
             }
             return;
+        case '.':
+            t->type = TokenType::T_DOT; return;
+        case '%':
+            if('='==peek())
+            {
+                consume('=');
+                t->type = TokenType::T_ASMOD;
+            }
+            else
+            {
+                t->type = TokenType::T_PERCENT;
+            }
+            break;
+            
         case '{':
             t->type = TokenType::T_LBRACE; return;            
         case '}':
@@ -184,7 +203,31 @@ namespace Yan
                 }
                 return;
          case '|':
-                t->type = TokenType::T_OR;return;
+                if('|' == peek())
+                {
+                    consume('|');
+                    t->type = TokenType::T_LOGOR;
+                }
+                else
+                {
+                    t->type = TokenType::T_BITOR;
+                }
+                return;
+        case '&':
+            if('&'== peek())
+            {
+                consume('&');
+                t->type = TokenType::T_LOGAND;
+            }
+            else
+            {
+                t->type = TokenType::T_AMPER;
+            }
+            return;
+        case '~':
+            t->type = TokenType::T_INVERT; return;
+        case '^':
+            t->type = TokenType::T_BITXOR; return;            
          case '=':
                 if(peek() == '=')
                 {
@@ -284,6 +327,10 @@ namespace Yan
 	                c2 = c2 * 8 + (c - '0');
 	           }
                return c2;
+            case 'x':
+              return hexchar();
+            break;
+              
 
          }
      }
@@ -292,6 +339,11 @@ namespace Yan
          return c;
      }
      
+   }
+   int  lexer::hexchar()
+   {
+       //TODO
+       return 0;
    }
    void lexer::scanInt(char c, Token* t)
    {
@@ -416,7 +468,7 @@ namespace Yan
    {
        if(c=='+'||c == '-'||c=='*'||c=='/'||c=='<'||c=='>'||c == '!'||c == '='||
           c == ','|| c == ';' ||c == '('||c== ')'||c=='['||c==']'||c=='{'||c =='}'||
-          c=='%'||c==':'||c == '?'||c == '\''||c == '"')
+          c=='%'||c==':'||c == '?'||c == '\''||c == '"'||c == '.'||c=='^')
        {
            return true;
        }

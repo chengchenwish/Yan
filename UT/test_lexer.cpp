@@ -6,10 +6,66 @@
 class lexerTest :public testing::Test {
 
 };
+TEST(lexerTest, test_scan_program)
+{
+  std::string yy = "yy.c";
+  std::ofstream f("yy.c");
+  f<<"int main () {\n"
+  " int i = 10, b = 20, c= 30;\n"
+   "i = b, c;\n"
+   "i%=8;b = b^c;\n"
+   "if(!a)\n"
+   "printf(\"%i\\n\", i);\n"
+
+  " i = (b, c);\n"
+   "printf(\"%i\\n\", i);\n"
+  "}\n";
+
+  f.flush();
+  f.close();
+  using namespace Yan;
+  lexer l(yy);
+  Token t;
+  l.scan(&t);
+  std::vector<Token> tlist;
+  std::vector<std::string> expect_token{
+" int"  , 
+" Identi: main"  , " ("  , " )"  , " {"  , " int"  , 
+" Identi: i"  , " ="  , " intlit: 10"  , " ,"  , " Identi: b"  , 
+" ="  , " intlit: 20"  , " ,"  , " Identi: c"  , " ="  , 
+" intlit: 30"  , " ;"  , " Identi: i"  , " ="  , " Identi: b"  , 
+" ,"  , " Identi: c"  , " ;"  , " Identi: i"  , " %="  , 
+" intlit: 8"  , " ;"  , " Identi: b"  , " ="  , " Identi: b"  , 
+" ^"  , " Identi: c"  , " ;"  , " if"  , " ("  , 
+" !"  , " Identi: a"  , " )"  , " Identi: printf"  , " ("  , 
+" strlit: %i\\n"  , " ,"  , " Identi: i"  , " )"  , " ;"  , 
+" Identi: i"  , " ="  , " ("  , " Identi: b"  , " ,"  , 
+" Identi: c"  , " )"  , " ;"  , " Identi: printf"  , " ("  , 
+" strlit: %i\\n"  , " ,"  , " Identi: i"  , " )"  , " ;"  , 
+" }"
+  };
+ 
+  while(t.type !=TokenType::T_EOF)
+  {
+    tlist.push_back(t);    
+    l.scan(&t);
+  }
+
+  ASSERT_TRUE(tlist.size()== expect_token.size());
+
+  for (int i= 0;i<tlist.size();i++)
+  {
+    std::string wrapper = " "+tlist[i].tostring();
+    ASSERT_TRUE(wrapper == expect_token[i]);
+  }
+
+
+
+}
 TEST(lexerTest, test_basic)
 {
   std::ofstream f(inputfile);
-  f<<"int main; long a; a += 1; a /=2; -=,*=";
+  f<<"int main; long a; a += 1; a /=2; -=,*= b->x";
   f.flush();
   f.close();
   using namespace Yan;
@@ -20,7 +76,8 @@ TEST(lexerTest, test_basic)
   std::vector<TokenType>expect {TokenType::T_INT,TokenType::T_IDENT,TokenType::T_SEMI,
   TokenType::T_LONG,TokenType::T_IDENT,TokenType::T_SEMI,TokenType::T_IDENT,
   TokenType::T_ASPLUS,TokenType::T_INTLIT,TokenType::T_SEMI,TokenType::T_IDENT,TokenType::T_ASSLASH,
-  TokenType::T_INTLIT,TokenType::T_SEMI, TokenType::T_ASMINUS, TokenType::T_COMMA,TokenType::T_ASSTAR};
+  TokenType::T_INTLIT,TokenType::T_SEMI, TokenType::T_ASMINUS, TokenType::T_COMMA,TokenType::T_ASSTAR,
+  TokenType::T_IDENT,TokenType::T_ARROW,TokenType::T_IDENT};
   while(t.type !=TokenType::T_EOF)
   {
     tlist.push_back(t);

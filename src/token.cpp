@@ -14,8 +14,21 @@ std::string Token::tostring()
         RESERVED(xx)
         KEYWORD(xx)
         case TokenType::T_EOF: return "EOF";
-        case TokenType::T_IDENT: return "identi";
-        case TokenType::T_INTLIT: return "intlit";
+        case TokenType::T_IDENT:
+        {
+             std::string str = "Identi: "+getText();
+            return str;
+        }
+        case TokenType::T_STRLIT:
+        {
+             std::string str = "strlit: "+getText();
+            return str;
+        }
+        case TokenType::T_INTLIT:
+        {
+            std::string str = "intlit: "+std::to_string(getValue());
+            return  str;
+        }
         default:
         return "unkown";
     }

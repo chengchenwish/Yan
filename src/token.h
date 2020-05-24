@@ -27,7 +27,8 @@ constexpr int MAX_STR_LEN = 100;
      xx(T_SWITCH,"switch")\
      xx(T_CASE,"case")\
      xx(T_BREAK,"break")\
-     xx(T_CONTINUE,"continue")
+     xx(T_CONTINUE,"continue")\
+     xx(T_DEFALT, "default")
     
 
 #define RESERVED(xx) \
@@ -47,7 +48,7 @@ constexpr int MAX_STR_LEN = 100;
     xx(T_MINUS ,"-")\
     xx(T_STAR ,"*")\
     xx(T_SLASH , "/")\
-    xx(T_MOD, "%")\
+    xx(T_PERCENT, "%")\
     xx(T_INC, "++")\
     xx(T_DEC, "--")\
     xx(T_EQ, "==")\
@@ -56,7 +57,12 @@ constexpr int MAX_STR_LEN = 100;
     xx(T_LE, "<=")\
     xx(T_GE, ">=")\
     xx(T_NE, "!=")\
-    xx(T_OR, "|")\
+    xx(T_BITOR, "|")\
+    xx(T_AMPER,"&")\
+    xx(T_BITXOR,"^")\
+    xx(T_INVERT,"~")\
+    xx(T_ARROW, "->")\
+    xx(T_DOT, ".")\
     xx(T_LOGAND,"&&")\
     xx(T_LOGOR,"||")\
     xx(T_LOGNOT,"!")\
