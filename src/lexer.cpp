@@ -507,7 +507,7 @@ namespace Yan
    {
        if(tokenCache_.empty())
        {
-           Token t;
+           Token t(loc);
            scan(&t);
           while(t.type == TokenType::T_COMMENTS)
            {
@@ -526,7 +526,7 @@ namespace Yan
    {
         if(tokenCache_.empty())
        {
-           Token t;
+           Token t(loc);
            scan(&t);
            while(t.type == TokenType::T_COMMENTS)
            {

@@ -17,7 +17,7 @@ public:
    void putBack(const Token& t);
    Token getToken();
    Token peektoken();   
-   location& getLocation(){ return loc;}
+   location getLocation(){ return loc;}
 private:
    int next();
    int peek();
@@ -38,9 +38,7 @@ private:
 private:
    std::queue<Token> tokenCache_;
    location loc;
-  //std::string fileName;
-  //int lineNum;
-  std::ifstream infile;
+   std::ifstream infile;
 };
 }
 

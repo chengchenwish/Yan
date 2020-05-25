@@ -7,6 +7,15 @@ namespace Yan
 
 struct Identifier;
 
+#define BASIC(xx,size,align,kind)            \
+class xx :public Type{                       \
+public:                                      \
+    static xx* create(){ return new xx();}   \
+private:                                     \
+    xx():Type(size,align,kind){}             \
+                                             \
+};
+
 class Type
 {
 public:
@@ -25,12 +34,10 @@ public:
         T_STRUCT,
         T_FUNC,
     };
-    Type(int size, int align, TypeKind kind, bool incomplete = false):size_(size),align_(align), 
-    kind_(kind),isIncomplete_(incomplete){}
-
-    TypeKind getType(){return kind_;}
-    int getalign()const{return align_;}
-    int getsize()const {return size_;}
+    Type(int size, int align, TypeKind kind, bool incomplete = false);
+    TypeKind getType();
+    int getalign()const;
+    int getsize()const ;
 private:
      int size_; //sizeo()value
 
@@ -38,39 +45,23 @@ private:
      TypeKind kind_ ;
      bool isIncomplete_;
 };
-#define BASIC(xx,size,align,kind)\
-class xx :public Type{ \
-public:\
-    static xx* create(){ return new xx();}\
-private:\
-    xx():Type(size,align,kind){}\
-\
-};
-BASIC(IntType,4,4,T_INT)
-BASIC(VoidType,1,1,T_VOID)
-BASIC(BoolType,1,1,T_BOOL)
-BASIC(CharType,1,1,T_CHAR)
-BASIC(ShortType,2,2,T_SHORT)
-BASIC(LongType,8,8,T_LONG)
-#undef BASIC        
-
 
 class PtrType:public Type
 {
 public:
-    static PtrType* create(Type* base){ return new PtrType(base);}
+    static PtrType* create(Type* base);
 private:
-PtrType(Type* base):Type(8,8,T_PTR),baseType_(base){}
+    PtrType(Type* base);
 
-Type* baseType_;
+    Type* baseType_;
 };
 
 class ArrayType:public Type
 {
 public:
-    static ArrayType* create(Type*base, int len){ return new ArrayType(base,len);}
+    static ArrayType* create(Type*base, int len);
 private:
-    ArrayType(Type*base, int len):Type(base->getsize()*len,base->getalign(),T_ARRAY),baseType_(base),len_(len){}
+    ArrayType(Type*base, int len);
     Type* baseType_;
     int len_;
 
@@ -78,11 +69,11 @@ private:
 class FuncType: public Type
 {
 public:
-    void addParam(Identifier* param){paramList_.push_back(param);}
-    std::vector<Identifier*>&getParam(){return paramList_;}
-    static FuncType* create(Type* returnType){ return new FuncType(returnType); }
+    void addParam(Identifier* param);
+    std::vector<Identifier*>&getParam();
+    static FuncType* create(Type* returnType);
 private:
-    FuncType(Type* returnType):Type(4,4,T_FUNC), returnType_(returnType){}
+    FuncType(Type* returnType);
     Type* returnType_;
     std::vector<Identifier*>paramList_;
 };
@@ -95,10 +86,10 @@ public:
         std::string name_;
         int offset;
     };
-static StructType* create(){return new StructType();}
-void addMember(const Member& memb){members_.push_back(memb);}
+static StructType* create();
+void addMember(const Member& memb);
 private:
-    StructType():Type(0,14,T_STRUCT,true){}
+    StructType();
     std::vector<Member> members_;
 };
 
@@ -107,6 +98,16 @@ enum class storageClass
     EXTERN,
     STATIC
 };
+
+
+BASIC(IntType,4,4,T_INT)
+BASIC(VoidType,1,1,T_VOID)
+BASIC(BoolType,1,1,T_BOOL)
+BASIC(CharType,1,1,T_CHAR)
+BASIC(ShortType,2,2,T_SHORT)
+BASIC(LongType,8,8,T_LONG)
+#undef BASIC        
+
 
 }
 #endif

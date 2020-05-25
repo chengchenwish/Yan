@@ -1,6 +1,5 @@
 build/*
 .vscode
-third_party/*
 test/*·out
 test/*.s
 test/YAN

@@ -7,7 +7,7 @@ TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 def run_make():
     if os.path.exists(BUILD_DIR+"/YAN"):
         os.remove(BUILD_DIR+"/YAN")
-    CMD = "cd "+BUILD_DIR +" && cmake . && make"
+    CMD = "cd "+BUILD_DIR +" && cmake .. && make"
 
     make = os.popen(CMD)
     out = make.read()

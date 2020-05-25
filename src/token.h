@@ -103,6 +103,7 @@ struct location
     std::string fileName;
     int line;
     int colum;
+    location():fileName(""),line(0),colum(0){}
     location(const std::string& file, int line, int colum)
     {
         this->fileName = file;
@@ -111,15 +112,23 @@ struct location
     }
     
 };
- struct Token 
+ class Token 
 {   
-    // store identifier name or num litri
-    std::variant<int,std::string> text;
+
+public:
+    Token() = default;
+    Token(const location& l):loc(l){}
     TokenType type;
-    //location loc;
+       // store identifier name or num litri
+    std::variant<int,std::string> text;
     std::string  tostring();
     std::string getText(){return std::get<std::string>(text);}
     int getValue(){return std::get<int>(text);}
+    const location& getLocation(){ return loc;}
+private:
+     
+    location loc;
+
 };
 }
 

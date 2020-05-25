@@ -26,7 +26,7 @@ TEST(lexerTest, test_scan_program)
   using namespace Yan;
   lexer l(yy);
   Token t;
-  l.scan(&t);
+  t = l.getToken();
   std::vector<Token> tlist;
   std::vector<std::string> expect_token{
 " int"  , 
@@ -47,8 +47,9 @@ TEST(lexerTest, test_scan_program)
  
   while(t.type !=TokenType::T_EOF)
   {
-    tlist.push_back(t);    
-    l.scan(&t);
+    tlist.push_back(t); 
+  //  std::cout<<t.getLocation().fileName<<":"<<t.getLocation().line<<",  " <<std::endl;  
+    t = l.getToken();
   }
 
   ASSERT_TRUE(tlist.size()== expect_token.size());

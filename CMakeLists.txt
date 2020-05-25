@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS "-std=c++17 ")
 add_library(compiler "")
 target_sources(compiler
     PRIVATE
+    src/type.cpp
     src/lexer.cpp
     src/parser.cpp
     src/token.cpp
