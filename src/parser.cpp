@@ -1,8 +1,5 @@
 #include "parser.h"
 namespace Yan{
-// #define TOKEN_2_OP(xx) \
-//     xx(TokenType::T_EOF,OpType::UNKOWN, 0,) \
-//     xx(TokenType::T_EQ,OpType::OP_EQ, 70)
 
 
 parser::parser(lexer& s):scan(s)
@@ -178,19 +175,81 @@ Expr* parser::assign()
         return BinaryOp::create(OpType::OP_ASSMOD,node,assign());
     }
 
-     if (match(TokenType::T_ASSIGN))
-    {
-        return BinaryOp::create(OpType::OP_ASSIGN,node,assign());
-    }
+    //  if (match(TokenType::T_ASSIGN))
+    // {
+    //     return BinaryOp::create(OpType::OP_ASSIGN,node,assign());
+    // }
     //TODO <<= >>= &= ^= |=
     return node;
     
 }
+// conditional = logor ("?" expr ":" conditional)?
 Expr* parser::conditional()
 {
-    return sum();
+    Expr* node = logicOr();
+    if(match(TokenType::T_QUSTION))
+    {
+        auto true_expr = expr();
+        expect(TokenType::T_COLON,":");
+        auto false_expr = conditional();
+        return ConditionExpr::create(node, true_expr, false_expr);
+    }
+    return node;
+}
+// logor = logand ("||" logand)*
+Expr* parser::logicOr()
+{
+    Expr* node = logicAnd();
+    while(match(TokenType::T_LOGOR))
+    {
+         node = BinaryOp(OpType::LOGICOR, node, logicAnd());
+    }
+    return node;
+
+
+}
+// logand = bitor ("&&" bitor)*
+Expr* parser::logicAnd()
+{
+    EXpr* node = bitor();
+    while(match(TokenType::T_LOGAND))
+    {
+        node = BinaryOp(OpType::LOGICAND, node, bitor());
+    }
+    return node;
 }
 
+// bitor = bitand ("|" bitand)*
+Expr* parser::bitOr()
+{
+    Expr* node = bitXor();
+    while(match(TokenType::T_BITOR))
+    {
+         node = BinaryOp(OpType::BITOR, node, bitXor());
+    }
+    return node;
+
+}
+Expr* parser::bitXor()
+{
+
+}
+Expr* parser::bitAnd()
+{
+
+}
+Expr* parser::equality()
+{
+
+}
+Expr* parser::relational()
+{
+
+}
+Expr* parser::shift()
+{
+    
+}
 //sum -> mul (('+' mul)|('-' mul))*
 Expr* parser::sum()
 {
@@ -514,52 +573,5 @@ Declaration* parser::parserDeclaration(Identifier* identi)
  }
  
 
-OpType parser::TokenType2ASTop(TokenType type)
-{ 
-    Info(__func__);
-    OpType op;
-
- switch (type)
-{
-    case TokenType::T_ADD:
-        op = OpType::OP_ADD;
-        break;
-    case TokenType::T_STAR:
-        op =  OpType::OP_MULTIPLY;
-        break;
-    case TokenType::T_MINUS:
-
-        op = OpType::OP_SUBTRACT;
-        break;
-    case TokenType::T_SLASH:
-        op =  OpType::OP_DIVIDE;
-        break;
-    case TokenType::T_EQ:
-        op =  OpType::OP_EQ;
-        break;
-    case TokenType::T_NE:
-        op =  OpType::OP_NE;
-        break;
-    case TokenType::T_LT:
-        op =  OpType::OP_LT;
-        break;
-    case TokenType::T_GT:
-        op =  OpType::OP_GT;
-        break;
-    case TokenType::T_LE:
-        op =  OpType::OP_LE;
-        break;
-    case TokenType::T_GE:
-        op =  OpType::OP_GE;
-        break;
-    default:
-        op= OpType::OP_UNKOWN;
-
-    
-}
-
-return op;
-    
-}
 
 }

@@ -5,8 +5,6 @@ namespace Yan
 
 std::string Token::tostring()
 {
-
-
     #define xx(T,Text)\
         case TokenType::T: return Text;
     switch(type)
@@ -34,6 +32,20 @@ std::string Token::tostring()
     }
     #undef xx
 
+}
+
+std::string Token::getText()
+{
+    return std::get<std::string>(text);
+}
+int Token::getValue()
+{
+    return std::get<int>(text);
+}
+
+const location& Token::getLocation()
+{ 
+    return loc;
 }
 
 

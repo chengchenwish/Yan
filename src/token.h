@@ -8,72 +8,73 @@ namespace Yan{
 
 constexpr int MAX_STR_LEN = 100;
 
-#define KEYWORD(xx) \
-    xx(T_VOID ,"void") \
-     xx(T_CHAR, "char") \
-     xx(T_INT, "int" ) \
-     xx(T_LONG, "long") \
-     xx(T_SHORT, "short")\
-     xx(T_ENUM, "enum")\
-     xx(T_STRUCT, "struct")\
-     xx(T_BOOL,"bool")\
-     xx(T_EXTERN,"extern")\
-     xx(T_STATIC,"static")\
-     xx(T_TYPDEF,"typedef")\
-     xx(T_SIGNED, "signed")\
-     xx(T_IF,"if")\
-     xx(T_ELSE,"else")\
-     xx(T_RETURN,"return")\
-     xx(T_SWITCH,"switch")\
-     xx(T_CASE,"case")\
-     xx(T_BREAK,"break")\
-     xx(T_CONTINUE,"continue")\
-     xx(T_DEFALT, "default")
+#define KEYWORD(xx)         \
+     xx(T_VOID ,    "void") \
+     xx(T_CHAR,     "char") \
+     xx(T_INT,      "int" ) \
+     xx(T_LONG,     "long") \
+     xx(T_SHORT,    "short")\
+     xx(T_ENUM,     "enum") \
+     xx(T_STRUCT,   "struct")\
+     xx(T_BOOL,     "bool")\
+     xx(T_EXTERN,   "extern")\
+     xx(T_STATIC,   "static")\
+     xx(T_TYPDEF,   "typedef")\
+     xx(T_SIGNED,   "signed")\
+     xx(T_IF,       "if")\
+     xx(T_ELSE,     "else")\
+     xx(T_RETURN,   "return")\
+     xx(T_SWITCH,   "switch")\
+     xx(T_CASE,     "case")\
+     xx(T_BREAK,    "break")\
+     xx(T_CONTINUE, "continue")\
+     xx(T_DEFALT,   "default")
     
 
-#define RESERVED(xx) \
-    xx(T_ASSIGN, "=") \
-    xx(T_ASPLUS, "+=") \
-    xx(T_ASMINUS,"-=")\
-    xx(T_ASSTAR,"*=")\
-    xx(T_ASSLASH,"/=")\
-    xx(T_ASMOD, "%=")\
-    xx(T_ANDASSIGN, "&=")\
-    xx(T_ORASSIGN, "|=" )\
-    xx(T_XORASSIGN ,"^=")\
-    xx(T_LSHIFASSIGN, "<<=")\
-    xx(T_RSHIFTASSIGN, ">>=")\
-    xx(T_QUSTION, "?")\
-    xx(T_ADD,   "+")\
-    xx(T_MINUS ,"-")\
-    xx(T_STAR ,"*")\
-    xx(T_SLASH , "/")\
-    xx(T_PERCENT, "%")\
-    xx(T_INC, "++")\
-    xx(T_DEC, "--")\
-    xx(T_EQ, "==")\
-    xx(T_GT, ">")\
-    xx(T_LT, "<")\
-    xx(T_LE, "<=")\
-    xx(T_GE, ">=")\
-    xx(T_NE, "!=")\
-    xx(T_BITOR, "|")\
-    xx(T_AMPER,"&")\
-    xx(T_BITXOR,"^")\
-    xx(T_INVERT,"~")\
-    xx(T_ARROW, "->")\
-    xx(T_DOT, ".")\
-    xx(T_LOGAND,"&&")\
-    xx(T_LOGOR,"||")\
-    xx(T_LOGNOT,"!")\
-    xx(T_LBRACE,"{")\
-    xx(T_RBRACE,"}")\
-    xx(T_LPAREN, "(")\
-    xx(T_RPAREN,")")\
-    xx(T_LBRACKET,"[")\
-    xx(T_RBRACKET,"]")\
-    xx(T_COMMA, ",")\
-    xx(T_SEMI, ";")
+#define RESERVED(xx)        \
+    xx(T_ASSIGN,        "=") \
+    xx(T_ASPLUS,        "+=") \
+    xx(T_ASMINUS,       "-=")\
+    xx(T_ASSTAR,        "*=")\
+    xx(T_ASSLASH,       "/=")\
+    xx(T_ASMOD,         "%=")\
+    xx(T_ANDASSIGN,      "&=")\
+    xx(T_ORASSIGN,       "|=" )\
+    xx(T_XORASSIGN,     "^=")\
+    xx(T_LSHIFASSIGN,    "<<=")\
+    xx(T_RSHIFTASSIGN,  ">>=")\
+    xx(T_QUSTION,       "?")\
+    xx(T_ADD,            "+")\
+    xx(T_MINUS,         "-")\
+    xx(T_STAR,          "*")\
+    xx(T_SLASH,          "/")\
+    xx(T_PERCENT,        "%")\
+    xx(T_INC,           "++")\
+    xx(T_DEC,           "--")\
+    xx(T_EQ,            "==")\
+    xx(T_GT,            ">")\
+    xx(T_LT,            "<")\
+    xx(T_LE,            "<=")\
+    xx(T_GE,            ">=")\
+    xx(T_NE,            "!=")\
+    xx(T_BITOR,         "|")\
+    xx(T_AMPER,         "&")\
+    xx(T_BITXOR,        "^")\
+    xx(T_INVERT,        "~")\
+    xx(T_ARROW,         "->")\
+    xx(T_DOT,           ".")\
+    xx(T_LOGAND,        "&&")\
+    xx(T_LOGOR,         "||")\
+    xx(T_LOGNOT,        "!")\
+    xx(T_LBRACE,        "{")\
+    xx(T_RBRACE,        "}")\
+    xx(T_LPAREN,        "(")\
+    xx(T_RPAREN,        ")")\
+    xx(T_LBRACKET,      "[")\
+    xx(T_RBRACKET,      "]")\
+    xx(T_COMMA,         ",")\
+    xx(T_SEMI,          ";")\
+    xx(T_COLON,         ":")
 
 
 
@@ -122,9 +123,9 @@ public:
        // store identifier name or num litri
     std::variant<int,std::string> text;
     std::string  tostring();
-    std::string getText(){return std::get<std::string>(text);}
-    int getValue(){return std::get<int>(text);}
-    const location& getLocation(){ return loc;}
+    std::string getText();
+    int getValue();
+    const location& getLocation();
 private:
      
     location loc;

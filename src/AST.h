@@ -23,6 +23,7 @@ struct FunctionCall;
 struct JumpStmt;
 struct ReturnStmt;
 struct UnaryOp;
+struct ConditionExpr
 
 
 class Ivisitor 
@@ -41,6 +42,7 @@ public:
    virtual void visit(JumpStmt* node)=0;
    virtual void visit(ReturnStmt* node) = 0;
    virtual void visit(UnaryOp*node)=0;
+   virtual void visit(ConditionExpr* node) = 0;
 
 };
 
@@ -60,12 +62,13 @@ struct Stmt : public Node
 using StmtList = std::list<Stmt*>;
 struct CompousedStmt:public Stmt
 {
-    CompousedStmt(){};
-    static CompousedStmt* create(){return new CompousedStmt();}
-    void addStmt(Stmt* stmt){stmtlist_.push_back(stmt);}
-    virtual void accept(Ivisitor*v) override{ v->visit(this);}
-  
-    virtual ~CompousedStmt(){};
+    CompousedStmt();
+    virtual ~CompousedStmt();
+
+    static CompousedStmt* create();
+    void addStmt(Stmt* stmt);
+    virtual void accept(Ivisitor*v) override;  
+
     StmtList stmtlist_;
 };
 
@@ -145,14 +148,14 @@ struct  BinaryOp: public Expr
 
     //svirtual void accept(Ivisitor*v);
     BinaryOp(OpType op, Expr*left, Expr* right);
-    virtual ~BinaryOp(){};  
-    virtual void accept(Ivisitor*v) override{ v->visit(this);} 
-    static BinaryOp* create(OpType op, Expr*left, Expr* right){ return new BinaryOp(op, left,right);}
+    virtual ~BinaryOp();  
+    virtual void accept(Ivisitor*v) override;
+    static BinaryOp* create(OpType op, Expr*left, Expr* right);
 
-    OpType    op;
+    OpType   op;
     Expr*  left;
     Expr*  right;
-   // int intValue;
+
 };
 /*
 // unary = ("+" | "-" | "*" | "&" | "!" | "~")? cast
@@ -169,6 +172,17 @@ struct UnaryOp: public Expr
     OpType op_;
     Expr* operand_;
     Type* type_;
+
+};
+struct ConditionExpr: public expr
+{  
+    IfStmt(Expr* cond, Expr* then, Expr* els )
+      : cond_(cond), trueExpr__(then),  falseExpr_(els) {}
+    virtual void accept(Ivisitor*v) override{ v->visit(this);}
+    static ConditionExpr* create(Expr* cond, Expr* then, Expr* els);
+    Expr* cond_;
+    Expr* trueExpr_;
+    Expr* falseExpr_;
 
 };
 

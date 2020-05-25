@@ -175,6 +175,8 @@ namespace Yan
             t->type = TokenType::T_SEMI; return;
         case ',':
                 t->type = TokenType::T_COMMA; return;
+        case ':':
+            t->type = TokenType::T_COLON; return;
         case '\'':
                 t->text = scanchar();
                 t->type = TokenType::T_INTLIT;
@@ -468,7 +470,7 @@ namespace Yan
    {
        if(c=='+'||c == '-'||c=='*'||c=='/'||c=='<'||c=='>'||c == '!'||c == '='||
           c == ','|| c == ';' ||c == '('||c== ')'||c=='['||c==']'||c=='{'||c =='}'||
-          c=='%'||c==':'||c == '?'||c == '\''||c == '"'||c == '.'||c=='^')
+          c=='%'||c==':'||c == '?'||c == '\''||c == '"'||c == '.'||c=='^'|| c ==':')
        {
            return true;
        }

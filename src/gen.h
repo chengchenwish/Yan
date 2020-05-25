@@ -25,6 +25,7 @@ public:
     virtual void visit(JumpStmt* node)override {}
    virtual void visit(ReturnStmt* node)override {}
    virtual void visit(UnaryOp* node)override{}
+   virtual void visit(ConditionExpr* node){};
 
     void genProgram(Program* node);
     void genLvalue(Identifier*node);

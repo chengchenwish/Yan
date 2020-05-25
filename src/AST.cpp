@@ -6,6 +6,27 @@ namespace Yan
 // {
 //     v->visit(this);
 // }
+ CompousedStmt::CompousedStmt()
+ {
+
+ }
+CompousedStmt* CompousedStmt::create()
+{
+    return new CompousedStmt();
+}
+void CompousedStmt::addStmt(Stmt* stmt)
+{
+    stmtlist_.push_back(stmt);
+}
+void CompousedStmt::accept(Ivisitor*v)
+{ 
+    v->visit(this);
+}
+  
+CompousedStmt:: ~CompousedStmt()
+{
+
+}
 
 BinaryOp::BinaryOp(OpType op, Expr*left, Expr* right)
 {
@@ -13,4 +34,22 @@ BinaryOp::BinaryOp(OpType op, Expr*left, Expr* right)
     this->left = left;
     this->right = right;
 }
+ BinaryOp:: ~BinaryOp()
+ {
+
+ }  
+ void BinaryOp:: accept(Ivisitor*v)
+{ 
+     v->visit(this);
+} 
+ BinaryOp* BinaryOp::create(OpType op, Expr*left, Expr* right)
+{ 
+     return new BinaryOp(op, left,right);
+}
+
+ConditionExpr* ConditionExpr::create(Expr* cond, Expr* then, Expr* els);
+{
+    return new ConditionExpr(cond, then, els);
+}
+
 }

@@ -12,9 +12,6 @@ namespace Yan {
 class parser 
 {
     public:
-        using precedenceMap = std::map<TokenType,int>;
-       // static precedenceMap initPrecedenceMap();
-    public:
         parser(lexer& s);
         ~parser();
         Expr*primary();
@@ -30,16 +27,23 @@ class parser
         Expr* expr();
         Expr* assign();
         Expr* conditional();
+        Expr* logOr();
+        Expr* logicAnd();
+        Expr* bitOr();
+        Expr* bitXor();
+        Expr* bitAnd();
+        Expr* equality();
+        Expr* relational();
+        Expr* shift();
         Expr* sum();
         Expr* mul();
         Expr* cast();
         Expr* unary();
         Expr* postfix();
+        
         // Expr* term();
         // Expr* group();        
 
-
-        OpType TokenType2ASTop(TokenType type);
        
     private:
         bool isTypeName();
