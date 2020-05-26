@@ -6,6 +6,39 @@
 class lexerTest :public testing::Test {
 
 };
+TEST(lexerTest, test_token_cache)
+{
+  std::ofstream f(inputfile);
+  f<<"int main; long a; a += 1; a /=2; -=,*= b->x";
+  f.flush();
+  f.close();
+  using namespace Yan;
+  lexer l(inputfile);
+  Token t;
+  auto t1 = l.getToken();
+  ASSERT_TRUE(t1.tostring() == "int");
+  l.putBack(t1);
+  auto t2 = l.getToken();
+  ASSERT_TRUE(t2.tostring() == "int");
+  auto t3 = l.getToken();
+  ASSERT_TRUE(t3.tostring() == "Identi: main");
+  l.putBack(t3);
+  ASSERT_TRUE(l.getToken().tostring() == "Identi: main");
+  auto t11 = l.getToken();
+  auto t12 = l.getToken();
+  auto t13 = l.getToken();
+
+  l.putBack(t13);
+  l.putBack(t12);
+  l.putBack(t11);
+  ASSERT_TRUE(l.getToken().tostring() == ";");
+   ASSERT_TRUE(l.getToken().tostring() == "long");
+    ASSERT_TRUE(l.getToken().tostring() == "Identi: a");
+
+
+
+
+}
 TEST(lexerTest, test_scan_program)
 {
   std::string yy = "yy.c";

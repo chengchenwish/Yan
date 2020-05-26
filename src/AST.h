@@ -23,7 +23,7 @@ struct FunctionCall;
 struct JumpStmt;
 struct ReturnStmt;
 struct UnaryOp;
-struct ConditionExpr
+struct ConditionExpr;
 
 
 class Ivisitor 
@@ -129,6 +129,9 @@ enum class OpType
     OP_ANDASSIGN,
     OP_ORASSIGN,
     OP_XORASSIGN,
+    OP_LSHIFT,//<<
+    OP_RSHIFT,//>>
+
     OP_COMMA,// ,
 
     OP_EQ,
@@ -137,6 +140,12 @@ enum class OpType
     OP_LT,
     OP_GE,
     OP_LE,
+
+    OP_LOGICAND,
+    OP_LOGICOR,
+    OP_BITOR,
+    OP_BITXOR,
+    OP_BITAND,
 
     //UnaryOP
     OP_CAST,
@@ -174,10 +183,10 @@ struct UnaryOp: public Expr
     Type* type_;
 
 };
-struct ConditionExpr: public expr
+struct ConditionExpr: public Expr
 {  
-    IfStmt(Expr* cond, Expr* then, Expr* els )
-      : cond_(cond), trueExpr__(then),  falseExpr_(els) {}
+    ConditionExpr(Expr* cond, Expr* then, Expr* els )
+      : cond_(cond), trueExpr_(then),  falseExpr_(els) {}
     virtual void accept(Ivisitor*v) override{ v->visit(this);}
     static ConditionExpr* create(Expr* cond, Expr* then, Expr* els);
     Expr* cond_;

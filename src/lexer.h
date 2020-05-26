@@ -3,7 +3,7 @@
 #include <fstream> 
 #include <iostream>
 #include <string>
-#include <queue>
+#include <stack>
 #include "error.h"
 namespace Yan{
 
@@ -36,7 +36,7 @@ private:
    std::string scanstr();
 
 private:
-   std::queue<Token> tokenCache_;
+   std::stack<Token> tokenCache_;
    location loc;
    std::ifstream infile;
 };

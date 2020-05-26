@@ -14,7 +14,7 @@ class parser
     public:
         parser(lexer& s);
         ~parser();
-        Expr*primary();
+        
         Program* parserProgram();
         FunctionDef* parserFuncDef(Identifier* identi);
         Declaration* parserDeclaration(Identifier* identi);
@@ -27,7 +27,7 @@ class parser
         Expr* expr();
         Expr* assign();
         Expr* conditional();
-        Expr* logOr();
+        Expr* logicOr();
         Expr* logicAnd();
         Expr* bitOr();
         Expr* bitXor();
@@ -40,6 +40,7 @@ class parser
         Expr* cast();
         Expr* unary();
         Expr* postfix();
+        Expr* primary();
         
         // Expr* term();
         // Expr* group();        

@@ -13,6 +13,9 @@ Expr* parser::primary()
 {
     Expr* node =nullptr;
     Info(__func__);
+    auto tt =scan.getToken();
+     Info(tt.tostring().c_str());
+     scan.putBack(tt);
 
         if(test(TokenType::T_INTLIT))
         {
@@ -24,6 +27,7 @@ Expr* parser::primary()
         else if(test(TokenType::T_IDENT))
         {    Identifier* identi;
              auto t =consume();
+             Info(t.tostring().c_str());
              auto exist =currentScop_->getIdentiInAllScope(t.getText(),&identi);
              if(!exist)
             {
@@ -34,7 +38,7 @@ Expr* parser::primary()
         }
         else if(match(TokenType::T_LPAREN))
         {
-            auto expr = sum();
+            Expr* expr = assign();
             expect(TokenType::T_RPAREN,")");
             return expr;
 
@@ -101,7 +105,7 @@ Token  parser::consume()
 
 PrintStmt* parser::parserPrintStmt()
 {
-    auto expr = sum();
+    Expr* expr = assign();
     expect(TokenType::T_SEMI,";");
     return PrintStmt::create(expr);
 }
@@ -202,7 +206,7 @@ Expr* parser::logicOr()
     Expr* node = logicAnd();
     while(match(TokenType::T_LOGOR))
     {
-         node = BinaryOp(OpType::LOGICOR, node, logicAnd());
+         node = BinaryOp::create(OpType::OP_LOGICOR, node, logicAnd());
     }
     return node;
 
@@ -211,10 +215,10 @@ Expr* parser::logicOr()
 // logand = bitor ("&&" bitor)*
 Expr* parser::logicAnd()
 {
-    EXpr* node = bitor();
+    Expr* node = bitOr();
     while(match(TokenType::T_LOGAND))
     {
-        node = BinaryOp(OpType::LOGICAND, node, bitor());
+        node = BinaryOp::create(OpType::OP_LOGICAND, node, bitOr());
     }
     return node;
 }
@@ -225,30 +229,90 @@ Expr* parser::bitOr()
     Expr* node = bitXor();
     while(match(TokenType::T_BITOR))
     {
-         node = BinaryOp(OpType::BITOR, node, bitXor());
+         node = BinaryOp::create(OpType::OP_BITOR, node, bitXor());
     }
     return node;
 
 }
 Expr* parser::bitXor()
 {
-
+    Expr* node = bitAnd();
+    while(match(TokenType::T_BITXOR))
+    {
+         node = BinaryOp::create(OpType::OP_BITXOR, node, bitAnd());
+    }
+    return node;
 }
 Expr* parser::bitAnd()
 {
-
+    Expr* node = equality();
+    while(match(TokenType::T_AMPER))
+    {
+         node = BinaryOp::create(OpType::OP_BITAND, node,equality());
+    }
+    return node;
 }
+// equality = relational ("==" relational | "!=" relational)*
 Expr* parser::equality()
 {
-
+    Expr* node =relational();
+    while(1)
+    {
+        if(match(TokenType::T_EQ))
+         {
+             node = BinaryOp::create(OpType::OP_EQ, node, relational());
+         }
+         else if(match(TokenType::T_NE))
+         {
+             node = BinaryOp::create(OpType::OP_NE, node, relational());
+         }
+         else return node;
+    }
+    return node;
 }
+// relational = shift ("<" shift | "<=" shift | ">" shift | ">=" shift)*
 Expr* parser::relational()
 {
-
+    Expr* node =shift();
+    while(1)
+    {
+        if(match(TokenType::T_LT))
+         {
+             node = BinaryOp::create(OpType::OP_LT, node, shift());
+         }
+         else if(match(TokenType::T_LE))
+         {
+             node = BinaryOp::create(OpType::OP_LE, node, shift());
+         }
+         else if(match(TokenType::T_GT))
+         {
+             node = BinaryOp::create(OpType::OP_GT, node, shift());
+         }
+         else if(match(TokenType::T_GE))
+         {
+             node = BinaryOp::create(OpType::OP_GE, node, shift());
+         }
+         else return node;
+    }
+    return node;
 }
+// shift = sum ("<<" sum | ">>" sum)*
 Expr* parser::shift()
 {
-    
+    Expr* node =sum();
+    while(1)
+    {
+        if(match(TokenType::T_LSHIFT))
+         {
+             node = BinaryOp::create(OpType::OP_LSHIFT, node, sum());
+         }
+         else if(match(TokenType::T_RSHIFT))
+         {
+             node = BinaryOp::create(OpType::OP_RSHIFT, node, sum());
+         }
+         else return node;
+    }
+    return node;   
 }
 //sum -> mul (('+' mul)|('-' mul))*
 Expr* parser::sum()
@@ -391,14 +455,18 @@ Expr* parser::mul()
         }
         else if(test(TokenType::T_IDENT))
         {
-             auto varToken = consume();
+             Token varToken = consume();
+             Info("vartoken:%s",varToken.tostring().c_str());
              if(match(TokenType::T_LPAREN))
              {
                  compoused->addStmt(parserFuncCall(varToken));
              }
              else
-             {
-                 compoused->addStmt(parserAssignExpr(varToken)); 
+             {   Info("vartoken:%s",varToken.tostring().c_str());
+                 scan.putBack(varToken);
+                 auto exp = expr();
+                 compoused->addStmt(exp);
+                 expect(TokenType::T_SEMI,";"); 
              }  
         }
         else
@@ -430,7 +498,7 @@ Expr* parser::mul()
     }
       auto funcCall = FunctionCall::create(identi);
 
-      auto expr = sum();
+      Expr* expr = assign();
       Info("add args");
       funcCall->addArg(expr);
       expect(TokenType::T_RPAREN,")");

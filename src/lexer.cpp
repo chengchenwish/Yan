@@ -249,6 +249,11 @@ namespace Yan
                 {   consume('=');
                     t->type = TokenType::T_GE;
                 }
+                else if(peek() == '>')
+                {
+                    consume('>');
+                    t->type = TokenType::T_RSHIFT;
+                }
                 else
                 {
                     t->type = TokenType::T_GT;
@@ -260,6 +265,11 @@ namespace Yan
                 if(peek() =='=')
                 {   consume('=');
                     t->type = TokenType::T_LE;
+                }
+                else if(peek() == '<')
+                {
+                    consume('<');
+                    t->type = TokenType::T_LSHIFT;
                 }
                 else
                 {
@@ -519,7 +529,7 @@ namespace Yan
        }
        else
        {
-           auto t = tokenCache_.front();
+           auto t = tokenCache_.top();
            tokenCache_.pop();
            return t;
        }
@@ -539,7 +549,7 @@ namespace Yan
        }
        else
        {
-          return  tokenCache_.front();
+          return  tokenCache_.top();
        }
    }
    lexer::~lexer()

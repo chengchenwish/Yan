@@ -47,7 +47,7 @@ BinaryOp::BinaryOp(OpType op, Expr*left, Expr* right)
      return new BinaryOp(op, left,right);
 }
 
-ConditionExpr* ConditionExpr::create(Expr* cond, Expr* then, Expr* els);
+ConditionExpr* ConditionExpr::create(Expr* cond, Expr* then, Expr* els)
 {
     return new ConditionExpr(cond, then, els);
 }

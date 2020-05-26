@@ -57,6 +57,8 @@ constexpr int MAX_STR_LEN = 100;
     xx(T_LE,            "<=")\
     xx(T_GE,            ">=")\
     xx(T_NE,            "!=")\
+    xx(T_LSHIFT,         "<<")\
+    xx(T_RSHIFT,         ">>")\
     xx(T_BITOR,         "|")\
     xx(T_AMPER,         "&")\
     xx(T_BITXOR,        "^")\
