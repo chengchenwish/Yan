@@ -32,12 +32,8 @@ TEST(lexerTest, test_token_cache)
   l.putBack(t12);
   l.putBack(t11);
   ASSERT_TRUE(l.getToken().tostring() == ";");
-   ASSERT_TRUE(l.getToken().tostring() == "long");
-    ASSERT_TRUE(l.getToken().tostring() == "Identi: a");
-
-
-
-
+  ASSERT_TRUE(l.getToken().tostring() == "long");
+  ASSERT_TRUE(l.getToken().tostring() == "Identi: a");
 }
 TEST(lexerTest, test_scan_program)
 {

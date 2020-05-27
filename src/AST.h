@@ -108,8 +108,10 @@ struct JumpStmt:public Stmt
 
 struct Expr : public Stmt
 {
-    Expr(){};
+    Expr(Type* ty): type_(ty){}
+    Expr(): type_(nullptr){}
     virtual ~Expr(){};
+    Type* type_;
 };
 enum class OpType
 { 
@@ -156,10 +158,10 @@ struct  BinaryOp: public Expr
 {
 
     //svirtual void accept(Ivisitor*v);
-    BinaryOp(OpType op, Expr*left, Expr* right);
+    BinaryOp(OpType op, Expr*left, Expr* right, Type* ty);
     virtual ~BinaryOp();  
     virtual void accept(Ivisitor*v) override;
-    static BinaryOp* create(OpType op, Expr*left, Expr* right);
+    static BinaryOp* create(OpType op, Expr*left, Expr* right, Type* ty = nullptr);
 
     OpType   op;
     Expr*  left;
@@ -175,12 +177,11 @@ struct  BinaryOp: public Expr
 */
 struct UnaryOp: public Expr
 {
-    UnaryOp(OpType op, Expr*operand,Type* ty):op_(op),operand_(operand),type_(ty){}
+    UnaryOp(OpType op, Expr*operand,Type* ty):Expr(ty),op_(op),operand_(operand){}
     static UnaryOp*create(OpType op, Expr*operand,Type*ty){ return new UnaryOp(op,operand,ty);}
     virtual void accept(Ivisitor*v){v->visit(this);}
     OpType op_;
     Expr* operand_;
-    Type* type_;
 
 };
 struct ConditionExpr: public Expr
@@ -206,7 +207,7 @@ struct ConstantValue: public Expr
     };
     virtual void accept(Ivisitor*v) override{ v->visit(this);}
 };
-struct FunctionCall:public Expr
+struct FunctionCall:public Stmt
 {
     FunctionCall(Identifier* designator):designator_(designator){}
     static FunctionCall* create(Identifier* designator){ return new FunctionCall(designator);}
@@ -219,14 +220,14 @@ struct FunctionCall:public Expr
 //represent a varaible 
 struct Identifier :public Expr
 {
-    Type* type_;
+    
     std::string name_;
     bool isLocal_;
     //only for local varibale
     int offset_ = 0;
     virtual void accept(Ivisitor*v) override{v->visit(this);}
     void setoffset(int offset){ offset_ = offset;}
-    Identifier(const std::string& name, Type* type, bool islocal):type_(type),name_(name), isLocal_(islocal){}
+    Identifier(const std::string& name, Type* type, bool islocal):Expr(type),name_(name), isLocal_(islocal){}
     static Identifier* create(const std::string& name, Type* type, bool islocal){ return new Identifier(name,type,islocal);}
 };
 //using ExtDecl = Node;

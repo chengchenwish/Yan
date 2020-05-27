@@ -105,35 +105,13 @@ Token  parser::consume()
 
 PrintStmt* parser::parserPrintStmt()
 {
-    Expr* expr = assign();
+    Expr* exp = expr();
     expect(TokenType::T_SEMI,";");
-    return PrintStmt::create(expr);
+    return PrintStmt::create(exp);
 }
 
 
-BinaryOp* parser::parserAssignExpr(Token var)
-{
-    //int id = currentScop_->findGlob(cacheToken.token_.getText());
-    Identifier* identi;
-    auto exist =currentScop_->getIdentiInAllScope(var.getText(),&identi);
-    if(!exist)
-    {
-        ExitWithError("undefined variable :%s",var.getText().c_str());
-    }
-     Expr *left, *right;
-     BinaryOp* tree;
-     
 
-     left = identi;
-     expect(TokenType::T_ASSIGN,"=");
-     right = sum();
-     tree = new BinaryOp(OpType::OP_ASSIGN, left, right);
-     expect(TokenType::T_SEMI,";");
-     Info(__func__);
-     return tree;
-     
-
-}
 // expr = assign(","assign")*
 Expr* parser::expr()
 {
@@ -155,28 +133,28 @@ Expr* parser::assign()
     auto node = conditional();
     if (match(TokenType::T_ASSIGN))//=
     {
-        return BinaryOp::create(OpType::OP_ASSIGN,node,assign());
+        return BinaryOp::create(OpType::OP_ASSIGN,node,assign(), node->type_);
     }
     if (match(TokenType::T_ASSLASH))// /=
     {
-        return BinaryOp::create(OpType::OP_ASSMOD,node,assign());
+        return BinaryOp::create(OpType::OP_ASSMOD,node,assign(), node->type_);
     }
      if (match(TokenType::T_ASSTAR))//*=
     {
-        return BinaryOp::create(OpType::OP_ASSMUL,node,assign());
+        return BinaryOp::create(OpType::OP_ASSMUL,node,assign(), node->type_);
     }
      if (match(TokenType::T_ASPLUS))// +=
     {
-        return BinaryOp::create(OpType::OP_ASSPLUS,node,assign());
+        return BinaryOp::create(OpType::OP_ASSPLUS,node,assign(), node->type_);
     }
      if (match(TokenType::T_ASMINUS)) // -=
     {
-        return BinaryOp::create(OpType::OP_ASSSUB,node,assign());
+        return BinaryOp::create(OpType::OP_ASSSUB,node,assign(), node->type_);
     }
 
      if (match(TokenType::T_ASMOD)) // %=
     {
-        return BinaryOp::create(OpType::OP_ASSMOD,node,assign());
+        return BinaryOp::create(OpType::OP_ASSMOD,node,assign(), node->type_);
     }
 
     //  if (match(TokenType::T_ASSIGN))
@@ -404,14 +382,7 @@ Expr* parser::mul()
      return primary();
  }
 
-// Expr* parser::term()
-// {
 
-// }
-// Expr* parser::group()
-// {
-
-// }
  CompousedStmt* parser::parserCompoundStmt()
  {
       Info(__func__);
@@ -498,9 +469,9 @@ Expr* parser::mul()
     }
       auto funcCall = FunctionCall::create(identi);
 
-      Expr* expr = assign();
+      Expr* exp = expr();
       Info("add args");
-      funcCall->addArg(expr);
+      funcCall->addArg(exp);
       expect(TokenType::T_RPAREN,")");
       expect(TokenType::T_SEMI,";");
       return funcCall;
@@ -593,8 +564,6 @@ Declaration* parser::parserDeclaration(Identifier* identi)
          }
 
      }
-     Info("hello");
-     Info(__func__);
      return program;
  }
 
@@ -636,6 +605,7 @@ Declaration* parser::parserDeclaration(Identifier* identi)
      {
          ExitWithError("unkown type name ");
      }
+     return nullptr;
      
 
  }

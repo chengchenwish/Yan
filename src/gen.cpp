@@ -73,11 +73,16 @@ namespace Yan
           // node->left->accept(this);
           genLvalue(static_cast<Identifier*>(node->left));
            node->right->accept(this);
-                  
+           
            emit("popq %rax");
            emit("popq %rbx");
+             if(node->type_->getsize() == 4)
+            {
+                emit("movl %eax, (%rbx)");
+            }
+            else    
            emit("movq %rax, (%rbx)");
-           emit("pushq %rax");
+           //emit("pushq %rax");
 
        }
        else if(node->op ==OpType::OP_ADD)
@@ -103,6 +108,24 @@ namespace Yan
             node->left->accept(this);
             node->right->accept(this);
             genDiv();    
+       }
+       else if (node->op == OpType::OP_GT)
+       {
+            node->left->accept(this);
+            node->right->accept(this);
+            genGT();
+       }
+        else if (node->op == OpType::OP_LT)
+       {
+            node->left->accept(this);
+            node->right->accept(this);
+            genLT();
+       }
+        else if (node->op == OpType::OP_EQ)
+       {
+            node->left->accept(this);
+            node->right->accept(this);
+            genEQ();
        }
  
     }
@@ -167,10 +190,13 @@ namespace Yan
     }
     void  gen::genCmp(const std::string& how)
     {
-        emit("cmp", "rax", "rdx");
-        std::string inst = how+" al";
+        emit("popq %rdx");
+        emit("popq %rax");
+        emit("cmp", "%rdx", "%rax");
+        std::string inst = how+" %al";
         emit(inst);
-        emit("movezb","rax","al");
+        emit("movzbq","%al", "%rax");
+        emit("pushq %rax");
 
     }
 

@@ -20,7 +20,6 @@ class parser
         Declaration* parserDeclaration(Identifier* identi);
         CompousedStmt*parserCompoundStmt();
         PrintStmt* parserPrintStmt();
-        BinaryOp* parserAssignExpr(Token var);
         FunctionCall* parserFuncCall(Token var);
        
         //EXPR

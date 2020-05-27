@@ -28,11 +28,12 @@ CompousedStmt:: ~CompousedStmt()
 
 }
 
-BinaryOp::BinaryOp(OpType op, Expr*left, Expr* right)
+BinaryOp::BinaryOp(OpType op, Expr*left, Expr* right, Type* ty):Expr(ty)
 {
     this->op = op;
     this->left = left;
     this->right = right;
+    
 }
  BinaryOp:: ~BinaryOp()
  {
@@ -42,9 +43,9 @@ BinaryOp::BinaryOp(OpType op, Expr*left, Expr* right)
 { 
      v->visit(this);
 } 
- BinaryOp* BinaryOp::create(OpType op, Expr*left, Expr* right)
+ BinaryOp* BinaryOp::create(OpType op, Expr*left, Expr* right, Type* ty)
 { 
-     return new BinaryOp(op, left,right);
+     return new BinaryOp(op, left,right,ty);
 }
 
 ConditionExpr* ConditionExpr::create(Expr* cond, Expr* then, Expr* els)
