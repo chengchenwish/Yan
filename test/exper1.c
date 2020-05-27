@@ -12,10 +12,18 @@ comments block
 */
 print(c);
 print(3);
+print(11>2);
+print(22<23);
+print(56!=2);
+print(88 == 88);
 }
 /*
 Expected output:
 -6
 9
 3
+1
+1
+1
+1
 */

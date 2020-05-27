@@ -20,6 +20,25 @@ int Type:: getsize()const
 {
     return size_;
 }
+std::string Type::tostring()
+{
+    switch(kind_)
+    {
+        case T_VOID: return "void";
+
+        case T_BOOL: return "bool";
+        case T_CHAR: return "char";
+        case T_SHORT:return "short";
+        case T_INT: return "int";
+        case T_LONG: return "long";
+
+        case T_ENUM: return "enum";
+        case T_PTR: return "ptr";
+        case T_ARRAY:return "array";
+        case T_STRUCT:return "struct";
+        case T_FUNC: return "function";
+    }
+}
 
 
 PtrType* PtrType::create(Type* base)

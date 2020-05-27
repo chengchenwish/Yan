@@ -19,7 +19,6 @@ private:                                     \
 class Type
 {
 public:
-
     enum TypeKind
     {
         T_VOID,
@@ -38,6 +37,7 @@ public:
     TypeKind getType();
     int getalign()const;
     int getsize()const ;
+    std::string tostring();
 private:
      int size_; //sizeo()value
 

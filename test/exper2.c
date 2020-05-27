@@ -7,14 +7,16 @@ int main()
     b = 10;
    // x = 99;
     print(a);
-    print(a<b+70);
-  
+    print(b);
+    print(45<10+70);
+    
     print(888<(21-2)*6);
 
 }
 /*
 Expected output:
 45
+10
 1
 0
 */

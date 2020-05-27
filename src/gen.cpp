@@ -60,7 +60,61 @@ namespace Yan
         outfstream<<"\t"<<inst<<"\n";
     }
 
-    //void gen::genLvalue(node* node);
+std::string getLoadInst(Type *ty) 
+{
+    switch (ty->getsize())
+    {
+    case 1: return "movb";
+    case 2: return "mov";
+    case 4: return "movl";
+    case 8: return "movq";
+    default:
+        ExitWithError("Unknown data size: %s: %d", ty->tostring().c_str(), ty->getsize());
+    }
+}
+//store value from register to statck
+void gen::storeLValue(Type *ty)
+{
+    emit("popq %rax");
+    emit("popq %rbx");
+    std::stringstream fm;
+
+    if(ty->getsize() == 2)
+    {
+        emit("mov %eax, (%rbx)");
+    }
+    else if(ty->getsize() == 4)
+    {
+        emit("movl %eax, (%rbx)");
+    }
+    else if (ty->getsize() == 8)            
+    {
+         emit("movq %rax, (%rbx)");
+    }
+}
+//load value from stack to register
+
+void gen::loadLValue(Identifier *node)
+{
+
+    std::stringstream fm;
+
+    if(node->type_->getsize() == 2)
+    {
+        fm<<"mov  -"<<node->offset_<<"(%rbp) , "<<"%eax";
+    }
+    else if(node->type_->getsize() == 4)
+    {
+        fm<<"movl  -"<<node->offset_<<"(%rbp) , "<<"%eax";
+    }
+    else if (node->type_->getsize() == 8)            
+    {
+        fm<<"movq  -"<<node->offset_<<"(%rbp) , "<<"%rax";
+    }
+
+    emit(fm.str());
+    emit("pushq %rax");
+}
     
     void gen::visit(BinaryOp* node)
     {
@@ -73,15 +127,8 @@ namespace Yan
           // node->left->accept(this);
           genLvalue(static_cast<Identifier*>(node->left));
            node->right->accept(this);
-           
-           emit("popq %rax");
-           emit("popq %rbx");
-             if(node->type_->getsize() == 4)
-            {
-                emit("movl %eax, (%rbx)");
-            }
-            else    
-           emit("movq %rax, (%rbx)");
+            storeLValue(node->type_);
+
            //emit("pushq %rax");
 
        }
@@ -109,6 +156,10 @@ namespace Yan
             node->right->accept(this);
             genDiv();    
        }
+       else if(node->op == OpType::OP_MOD)
+       {
+
+       }
        else if (node->op == OpType::OP_GT)
        {
             node->left->accept(this);
@@ -127,6 +178,25 @@ namespace Yan
             node->right->accept(this);
             genEQ();
        }
+         else if (node->op == OpType::OP_NE)
+       {
+            node->left->accept(this);
+            node->right->accept(this);
+            genNE();
+       }
+         else if (node->op == OpType::OP_GE)
+       {
+            node->left->accept(this);
+            node->right->accept(this);
+            genGE();
+       }
+        else if (node->op == OpType::OP_LE)
+       {
+            node->left->accept(this);
+            node->right->accept(this);
+            genLE();
+       }
+
  
     }
     
@@ -310,10 +380,7 @@ void gen::genProgram(Program* node)
     std::stringstream fm;
      if(node->isLocal_)
      {
-         Info("LLLLLL:%d",node->offset_);
-         fm<<"movq  -"<<node->offset_<<"(%rbp) , "<<"%rax";
-         emit(fm.str());
-         emit("pushq %rax");
+        loadLValue(node);
      }
      else
      {
@@ -335,8 +402,7 @@ void gen::genProgram(Program* node)
          emit("pushq %rax");
      }
      else
-     {
-         
+     {       
      
      
      fm<<"leaq "<<node->name_<<"(%rip), %rax";

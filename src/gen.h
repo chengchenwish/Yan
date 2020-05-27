@@ -29,10 +29,12 @@ public:
 
     void genProgram(Program* node);
     void genLvalue(Identifier*node);
-   // void genLvalue(node* node);
    void loardArgs(Identifier* node, int index);
 
-
+private:
+    void storeLValue(Type *ty);
+    void loadLValue(Identifier *node);
+    std::string getLoadInst(Type *ty);
     //operator
     void genAdd();
     void genSub();

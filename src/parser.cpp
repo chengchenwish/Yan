@@ -314,7 +314,7 @@ Expr* parser::sum()
     }
  
 }
-//sum -> primary (('+' primary)|('-' primary))*
+
 Expr* parser::mul()
 {
     Expr* node = cast();
@@ -327,6 +327,10 @@ Expr* parser::mul()
          else if(match(TokenType::T_SLASH))
          {
              node = BinaryOp::create(OpType::OP_DIVIDE, node, cast());
+         }
+         else if(match(TokenType::T_PERCENT))
+         {
+              node = BinaryOp::create(OpType::OP_MOD, node, cast());
          }
          else
          {
