@@ -1,8 +1,9 @@
 int dump(int x)
 {
+    print(x);
     int p;
     p = x+12;
-    print(x);
+    print(p);
 }
 
 int main()
@@ -13,5 +14,6 @@ int main()
 }
 /*
 Expected output:
+12
 24
 */

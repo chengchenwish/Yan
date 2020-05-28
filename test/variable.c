@@ -3,15 +3,43 @@ int main()
 {
     int a;
     int b;
+    int ad;
+    int bb;
+    int cc;
+    int dd;
+    int p;
     a = 80;
     b = 20;
+    ad  = 77;
+   p = 888;
+    bb = 22;
+    
+    cc = 33;
+    dd = 66;
+ 
 
-    print(a/b);
+  //  b = \
+ //   4;
+
+    print(a);
+    print(b);
+    print(ad);
+    print(bb);
+    print(cc);
+    print(dd);
+    print(p);
+    //print(aa);
 
 
 
 }
 /*
 Expected output:
-4
+80
+20
+77
+22
+33
+66
+888
 */

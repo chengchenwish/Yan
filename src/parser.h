@@ -46,6 +46,10 @@ class parser
 
        
     private:
+        //Begin a block scope;
+        symbolTable* enterScope(Scope kind);
+        void leaveScope();
+
         bool isTypeName();
          bool findtypedef(const std::string& name );
         Type*baseType(storageClass* sclass);

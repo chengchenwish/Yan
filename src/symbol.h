@@ -43,7 +43,7 @@ public:
    int caculateOffset(const std::string& name)
    {
        int off = 0;
-       for (const auto&kv:map_)
+       for (const auto&kv:list_)
        {    off += kv.second->type_->getsize();
 
            if (kv.first == name)
@@ -53,10 +53,26 @@ public:
        }
        return off;
    }
+   int getTyepSize()
+   {
+       int size = 0;
+       for(const auto& kv: list_)
+       {
+           size += kv.second->type_->getsize();
+       }
+       return size;
+   }
+   void printSymbol()
+   {
+       for(const auto& kv: list_)
+       {
+           std::cout<<kv.first<<": "<<kv.second->type_->getsize()<<std::endl;
+       }
+   }
 
 private:
     Scope scope_;
-    std::map<std::string, Identifier*> map_;
+    std::vector<std::pair<std::string,Identifier*>>list_;
     symbolTable* parent_;
 
 

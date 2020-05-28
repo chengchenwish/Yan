@@ -5,8 +5,10 @@
 #include<vector>
 #include"lexer.h"
 #include "type.h"
+//#include "symbol.h"
 
 namespace Yan{
+class symbolTable;
 
 struct Expr;
 struct BinaryOp;
@@ -70,6 +72,7 @@ struct CompousedStmt:public Stmt
     virtual void accept(Ivisitor*v) override;  
 
     StmtList stmtlist_;
+    symbolTable* scope_;
 };
 
 struct  PrintStmt: public Stmt
@@ -239,6 +242,7 @@ struct FunctionDef:Node
     virtual void accept(Ivisitor*v) override{ v->visit(this);}
     static FunctionDef* create(Identifier* identi){ return new FunctionDef(identi);}
     void setBody(CompousedStmt* body){body_ = body;}
+    int getStackSize();
     Identifier* identi_;
     //LabelStmt* returnLebl_;
     CompousedStmt* body_;

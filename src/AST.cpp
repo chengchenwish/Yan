@@ -1,4 +1,5 @@
 #include "AST.h"
+#include "symbol.h"
 namespace Yan
 {
 
@@ -51,6 +52,16 @@ BinaryOp::BinaryOp(OpType op, Expr*left, Expr* right, Type* ty):Expr(ty)
 ConditionExpr* ConditionExpr::create(Expr* cond, Expr* then, Expr* els)
 {
     return new ConditionExpr(cond, then, els);
+}
+int FunctionDef::getStackSize()
+{
+    auto sc = this->body_->scope_;
+    if(sc)
+    {
+        return sc->getTyepSize();
+    }
+    return 0;
+
 }
 
 }

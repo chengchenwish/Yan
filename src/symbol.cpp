@@ -14,22 +14,22 @@ namespace Yan
     }
     void symbolTable:: addSymoble(const std::string& name, Identifier* indenti)
     {
-         map_.insert({name, indenti});
+         list_.push_back({name, indenti});
 
     }
     bool symbolTable::getIdentiInCurrentScope(const std::string& name,  Identifier** indenti)
 
     {
-        auto it = map_.find(name);
-        if(it != map_.end())
+        for(const auto& v: list_)
         {
-            *indenti = it->second;
-            return true;
+            if(v.first == name)
+            {
+                *indenti = v.second;
+                return true;
+            }
         }
-        else
-        {
-            return false;
-        }
+        return false;
+       
         
 
     }

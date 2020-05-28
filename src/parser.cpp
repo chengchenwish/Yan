@@ -4,10 +4,24 @@ namespace Yan{
 
 parser::parser(lexer& s):scan(s)
 {
+    currentScop_ = nullptr;
 }
 parser::~parser()
 {
  
+}
+symbolTable* parser::enterScope(Scope kind)
+{
+    auto sc = new symbolTable;
+    sc->setParent(this->currentScop_);
+    sc->setScope(kind);
+   
+    return sc;
+}
+void parser::leaveScope()
+{
+    currentScop_ = currentScop_->getParentScop();
+    Info(__func__);
 }
 Expr* parser::primary()
 {
@@ -413,6 +427,10 @@ Expr* parser::mul()
                 currentScop_->addSymoble(identi->name_,identi);
                  compoused->addStmt(parserDeclaration(identi));
                  identi->setoffset(currentScop_->caculateOffset(t.getText()));
+                 Info("ppppppppppppppp");
+                 currentScop_->printSymbol();
+                 Info("111111111111111111111111111111");
+
             }
             else
             {
@@ -485,6 +503,7 @@ Expr* parser::mul()
  {
      auto func = FunctionDef::create(identi);
      auto body = parserCompoundStmt();
+     body->scope_ = currentScop_;
      func->setBody(body);
      Info(__func__);
      return func;
@@ -498,17 +517,11 @@ Declaration* parser::parserDeclaration(Identifier* identi)
  Program* parser::parserProgram()
  {  
     auto program = Program::create();
-    currentScop_ = new symbolTable();
-    currentScop_->setScope(Scope::GLOBAL);
-     symbolTable*funcScop = nullptr;
-     
+     currentScop_ = enterScope(Scope::GLOBAL);
+     symbolTable*funcscop = nullptr;     
      while(!match(TokenType::T_EOF))
      {
-        if(match(TokenType::T_COMMENTS))
-        {
-            Info("comments");
-             continue;
-        }
+    
         storageClass sclass;     
         auto type = baseType(&sclass);
         Identifier* identi =nullptr;
@@ -524,8 +537,8 @@ Declaration* parser::parserDeclaration(Identifier* identi)
         if(match(TokenType::T_LPAREN))
         {
             identi->type_ = FuncType::create(type);
-            funcScop = new symbolTable();
-            funcScop->setScope(Scope::FUNC);
+            funcscop = enterScope(Scope::FUNC);
+            Info("enter func");
             if(match(TokenType::T_INT))
             {
                 while(!match(TokenType::T_RPAREN))
@@ -533,9 +546,8 @@ Declaration* parser::parserDeclaration(Identifier* identi)
                     auto t = consume();
                     auto text = t.getText();
                     auto param = Identifier::create(text, IntType::create(),true);
-                    funcScop->addSymoble(text,param);
-                    funcScop->caculateOffset(text);
-                    param->offset_ = funcScop->caculateOffset(text);
+                    funcscop->addSymoble(text,param);
+                    param->offset_ = funcscop->caculateOffset(text);
                     static_cast<FuncType*>(identi->type_)->addParam(param);
                     if(!test(TokenType::T_RPAREN))
                     {
@@ -546,21 +558,25 @@ Declaration* parser::parserDeclaration(Identifier* identi)
             }
             else
             {
+                Info("lll");
                 expect(TokenType::T_RPAREN,")");
                // ExitWithError("function paser expect int");
             }
             
            // expect(TokenType::T_RPAREN,")");
         }
-        
+        if(currentScop_ == 0)
+        {
+            Info("ooop");
+        }
         currentScop_->addSymoble(identi->name_,identi);
 
          if(identi->type_->getType() == Type::T_FUNC)
          {
-            funcScop->setParent(currentScop_);
-            currentScop_ = funcScop;
+             Info("kkkk");
+             currentScop_ = funcscop;
             program->add(parserFuncDef(identi));
-            currentScop_= currentScop_-> getParentScop();
+            leaveScope();
          }
          else
          {
@@ -568,7 +584,9 @@ Declaration* parser::parserDeclaration(Identifier* identi)
          }
 
      }
+     Info(__func__);
      return program;
+     
  }
 
  bool parser::isTypeName()

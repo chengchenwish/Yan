@@ -60,18 +60,7 @@ namespace Yan
         outfstream<<"\t"<<inst<<"\n";
     }
 
-std::string getLoadInst(Type *ty) 
-{
-    switch (ty->getsize())
-    {
-    case 1: return "movb";
-    case 2: return "mov";
-    case 4: return "movl";
-    case 8: return "movq";
-    default:
-        ExitWithError("Unknown data size: %s: %d", ty->tostring().c_str(), ty->getsize());
-    }
-}
+
 //store value from register to statck
 void gen::storeLValue(Type *ty)
 {
@@ -311,7 +300,10 @@ void gen::genProgram(Program* node)
            emit(node->identi_->name_+":");
            emit("pushq %rbp");
            emit("movq %rsp, %rbp");
-           emit("subq $24, %rsp");
+           std::stringstream fm;
+           fm<<"subq $"<<node->getStackSize()<<", %rsp";
+           emit(fm.str());
+        //   emit("subq $24, %rsp");
            int index =0;
            for(auto & arg: static_cast<FuncType*>(node->identi_->type_)->getParam())
            {
@@ -397,6 +389,7 @@ void gen::genProgram(Program* node)
      std::stringstream fm;
      if(node->isLocal_)
      {
+         Info("name:%s offset :%d",node->name_.c_str(),node->offset_);
          fm<<"leaq  -"<<node->offset_<<"(%rbp) , "<<"%rax";
          emit(fm.str());
          emit("pushq %rax");

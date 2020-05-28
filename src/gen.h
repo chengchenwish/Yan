@@ -34,7 +34,6 @@ public:
 private:
     void storeLValue(Type *ty);
     void loadLValue(Identifier *node);
-    std::string getLoadInst(Type *ty);
     //operator
     void genAdd();
     void genSub();
