@@ -95,7 +95,7 @@ bool parser::match(TokenType t)
     }
 
 }
-bool  parser::test(TokenType t)
+bool  parser::test(TokenType t)const
 {
      auto token = scan.getToken();
     if(token.type == t)
@@ -614,21 +614,138 @@ Declaration* parser::parserDeclaration(Identifier* identi)
      {
          ExitWithError("Type name expected");
      }
+     enum
+     {
+         kkindnone,
+         kvoid=1,
+         kbool,
+         kchar,
+         kint
+        // kfloat,
+         //kdouble  
+     }kind=kkindnone;
+     enum
+     {
+         ksizenone,kshort=1, klong, kllong
+     }size = ksizenone;
+    
+     enum{ksignnone, ksigned=1, kunsigned}sign = ksignnone;        
      
-     if(match(TokenType::T_INT))
+     storageClass storage_class = storageClass::UNKNOW;
+     while(isTypeName())
      {
-         return IntType::create();
+         if(isOneOf(TokenType::T_STATIC, TokenType::T_EXTERN ,TokenType::T_TYPDEF))
+         { 
+             //handle storage class
+            if(storage_class != storageClass::UNKNOW)
+            {
+                //storage alreadly have a value;
+                ExitWithError("Type mismatch");
+            }
+            if(match(TokenType::T_STATIC))
+            {
+                storage_class = storageClass::STATIC;
+            }
+            else if(match((TokenType::T_EXTERN)))
+            {
+                storage_class = storageClass::EXTERN;
+            }
+            else if(match(TokenType::T_TYPDEF))
+            {
+                storage_class = storageClass::TYPE_DEF;
+            }
+
+         }
+         //handle user defined type
+
+
+
+         //Handle build-in type
+
+        else if(isOneOf(TokenType::T_SHORT,TokenType::T_LONG))
+         {
+             //handle size;
+             if(size != ksizenone && size != klong)
+             {
+                 ExitWithError("Type mismatch"); 
+             }
+             if(match(TokenType::T_SHORT))
+             {
+                 size = kshort;
+             }
+             else if(match(TokenType::T_LONG))
+             {
+                 size = size ? kllong : klong;
+             }
+         }
+         //build-in type
+         else if(isOneOf(TokenType::T_INT,TokenType::T_CHAR,TokenType::T_VOID,TokenType::T_BOOL))
+         {
+             if(kind != kkindnone)
+             {
+                 ExitWithError("Type mismatch");
+             }
+             if(match(TokenType::T_INT))
+             {
+                 kind = kint;
+             }
+             else if(match(TokenType::T_CHAR))
+             {
+                 kind = kvoid;
+             }
+             else if(match(TokenType::T_VOID))
+             {
+                 kind = kvoid;
+             }
+             else if(match(TokenType::T_BOOL))
+             {
+                 kind = kbool;
+             }
+         }
+
+         //sign
+
+         else if(isOneOf(TokenType::T_UNSIGNED,TokenType::T_SIGNED))
+         {
+             if(sign != ksignnone)
+             {
+                 ExitWithError("mismatch type");
+             }
+             if(match(TokenType::T_UNSIGNED))
+             {
+                 sign = kunsigned;
+             }
+             else if(match(TokenType::T_SIGNED))
+             {
+                 sign = ksigned;
+             }
+         }     
+
+
      }
-     else if(match(TokenType::T_CHAR))
+     if(sclass)
      {
-         return CharType::create();
+         *sclass = storage_class;
      }
-     else
+     Type* ty = nullptr;
+     switch (kind)
      {
-         ExitWithError("unkown type name ");
+         case kvoid: ty = VoidType::create();break;
+         case kchar: ty = CharType::create();break;
+         case kbool: ty = BoolType::create();break;
+         default: break;
      }
-     return nullptr;
-     
+     if(ty == nullptr)
+    {  
+        switch(size)
+        {
+            case kshort: ty = ShortType::create();break;
+            case klong: ty = LongType::create();break;
+            case kllong: break;//todo
+            default: ty = IntType::create();break;
+         }
+    }
+    return ty;
 
  }
  

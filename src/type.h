@@ -15,6 +15,16 @@ private:                                     \
     xx():Type(size,align,kind){}             \
                                              \
 };
+enum class storageClass 
+{
+    TYPE_DEF,
+    EXTERN,
+    STATIC,
+    AUTO,
+    REGISTER,
+
+    UNKNOW = 255
+};
 
 class Type
 {
@@ -44,6 +54,8 @@ private:
      int align_ ;
      TypeKind kind_ ;
      bool isIncomplete_;
+     bool isunsigned;
+     storageClass class_;
 };
 
 class PtrType:public Type
@@ -93,11 +105,7 @@ private:
     std::vector<Member> members_;
 };
 
-enum class storageClass 
-{
-    EXTERN,
-    STATIC
-};
+
 
 
 BASIC(IntType,4,4,T_INT)

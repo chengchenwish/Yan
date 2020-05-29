@@ -60,6 +60,9 @@ private:
     //8 byte
     static const std::vector<std::string> argReg8;
     
+    //used to avoid generating duplicated label
+    static int labelseq;
+    
     std::string outfileName; 
     std::fstream outfstream;
 

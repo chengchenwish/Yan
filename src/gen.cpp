@@ -6,7 +6,8 @@ namespace Yan
     const std::vector<std::string> gen::argReg2 ={"%di", "%si", "%dx", "%cx", "%r8w", "%r9w"};
     const std::vector<std::string> gen::argReg4 ={"%edi", "%esi", "%edx", "%ecx", "%r8d", "%r9d"};
     const std::vector<std::string> gen::argReg8 ={"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
-   
+    
+    int gen::labelseq = 1;
     gen::gen (const std::string& fileName):outfileName(fileName)
     {
         outfstream.open(fileName.c_str(), std::ios::out);
@@ -413,13 +414,32 @@ void gen::genProgram(Program* node)
   }
   void gen::visit(FunctionCall* node)
 {
+    static int seq = 0;
     Info("functionCall");
-    emit("subq $16,%rsp");
+
+
     auto arg = node->argList_.front();
     arg->accept(this);
     emit("popq %rax");
     emit("movq %rax, %rdi");
+    // align RSP to a 16 byte boundary before
+    // calling a function because it is an ABI requirement.  
+    emit("movq %rsp, %rax");
+    emit("andq $15, %rax");
+    std::stringstream labe,labe1;
+    labe <<".L.call."<<seq++;
+    labe1 <<".L.end."<<seq;
+     emit("jnz "+labe.str());
+    emit("mov $0,%rax");
     emit("call "+node->designator_->name_);
+    emit("jmp "+labe1.str());
+    emit(labe.str()+":");
+    emit("subq $8,%rsp");
+     emit("movq $0,%rax");
+     emit("   call "+node->designator_->name_);
+     emit(" addq $8,%rsp");
+     emit(labe1.str()+":");
+
 }
 void  gen::visit(CompousedStmt* node)
 {

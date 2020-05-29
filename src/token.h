@@ -21,6 +21,7 @@ constexpr int MAX_STR_LEN = 100;
      xx(T_STATIC,   "static")\
      xx(T_TYPDEF,   "typedef")\
      xx(T_SIGNED,   "signed")\
+     xx(T_UNSIGNED,  "unsigned")\
      xx(T_IF,       "if")\
      xx(T_ELSE,     "else")\
      xx(T_RETURN,   "return")\

@@ -57,7 +57,17 @@ class parser
 
         //Token ralated function
         bool match(TokenType t);
-        bool test(TokenType t);
+        bool test(TokenType t) const;   
+
+        
+        bool isOneOf(TokenType K1,TokenType K2)const
+        {
+            return test(K1)||test(K2);
+        }
+        template <typename... Ts>
+        bool isOneOf(TokenType K1, TokenType K2, Ts... Ks) const {
+        return test(K1) || isOneOf(K2, Ks...);
+        }
         Token consume();
         void putBack(const Token& t){ scan.putBack(t);}
         Token peek(){ return scan.peektoken();}
