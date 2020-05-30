@@ -29,6 +29,7 @@ enum class storageClass
 class Type
 {
 public:
+
     enum TypeKind
     {
         T_VOID,
@@ -44,6 +45,7 @@ public:
         T_FUNC,
     };
     Type(int size, int align, TypeKind kind, bool incomplete = false);
+    Type() = default;
     TypeKind getType();
     int getalign()const;
     int getsize()const ;
@@ -57,28 +59,63 @@ private:
      bool isunsigned;
      storageClass class_;
 };
+// void clone(Type*src, type*dest)
+// {
+//     int size = 0;
+//     switch(source->getType())
+//     {
+//         case Type::T_VOID:
+//         case Type::T_BOOL:
+//         case Type::T_CHAR:
+//         case Type::T_SHORT:
+//         case Type::T_INT:
+//         case Type::T_LONG:
+//             size = sizeof(Type);break;
+//         case Type::T_PTR:
+//             size = sizeof(PtrType);break;
+//         case Type::T_FUNC:
+//             size = sizeof(FuncType);break;
+//         case Type::T_ARRAY:
+//             size = sizeof(ArrayType);break;
+//         case Type::T_STRUCT:
+//             size = sizeof(StructType);break;
 
-class PtrType:public Type
+
+
+//     }
+//     memcpy(dest,src,size);
+// }
+class DerivedType :public Type
 {
 public:
-    static PtrType* create(Type* base);
-private:
-    PtrType(Type* base);
+Type* getBaseType(){ return baseType_;}
+void setBase(Type* ty){baseType_ = ty;}
+DerivedType(int size, int align, TypeKind kind, Type*base): Type(size, align, kind),baseType_(base){}
 
+private:
     Type* baseType_;
 };
 
-class ArrayType:public Type
+
+class PtrType:public DerivedType
+{
+public:
+    static PtrType* create(Type* base);
+    
+private:
+    PtrType(Type* base);
+};
+
+class ArrayType:public DerivedType
 {
 public:
     static ArrayType* create(Type*base, int len);
 private:
     ArrayType(Type*base, int len);
-    Type* baseType_;
     int len_;
 
 };
-class FuncType: public Type
+class FuncType: public DerivedType
 {
 public:
     void addParam(Identifier* param);
@@ -86,10 +123,9 @@ public:
     static FuncType* create(Type* returnType);
 private:
     FuncType(Type* returnType);
-    Type* returnType_;
     std::vector<Identifier*>paramList_;
 };
-class StructType:public Type
+class StructType:public Type 
 {
 public:
     struct Member

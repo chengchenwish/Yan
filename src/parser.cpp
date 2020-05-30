@@ -416,26 +416,32 @@ Expr* parser::mul()
         {
            compoused->addStmt(parserPrintStmt());
         }
-        else if(match(TokenType::T_INT))
+        else if(isTypeName())
         {
-            auto ty = IntType::create();
-            if(test(TokenType::T_IDENT))
-            {
-                auto t = consume();
+            auto type = baseType(nullptr);
+            auto pair = declarator(type);
+            
+            auto identi = Identifier::create(pair.second,pair.first, true);
+            currentScop_->addSymoble(pair.second,identi);
+            compoused->addStmt(parserDeclaration(identi));
+            identi->setoffset(currentScop_->caculateOffset(pair.second));
+            // if(test(TokenType::T_IDENT))
+            // {
+            //     auto t = consume();
 
-                auto identi = Identifier::create(t.getText(),ty, true);
-                currentScop_->addSymoble(identi->name_,identi);
-                 compoused->addStmt(parserDeclaration(identi));
-                 identi->setoffset(currentScop_->caculateOffset(t.getText()));
-                 Info("ppppppppppppppp");
-                 currentScop_->printSymbol();
-                 Info("111111111111111111111111111111");
+            //     auto identi = Identifier::create(t.getText(),ty, true);
+            //     currentScop_->addSymoble(identi->name_,identi);
+                 
+            //      identi->setoffset(currentScop_->caculateOffset(t.getText()));
+            //      Info("ppppppppppppppp");
+            //      currentScop_->printSymbol();
+            //      Info("111111111111111111111111111111");
 
-            }
-            else
-            {
-                ExitWithError("wrong declaration");
-            }
+            // }
+            // else
+            // {
+            //     ExitWithError("wrong declaration");
+            // }
             
         }
         else if(match(TokenType::T_IF))
@@ -524,6 +530,7 @@ Declaration* parser::parserDeclaration(Identifier* identi)
     
         storageClass sclass;     
         auto type = baseType(&sclass);
+        //auto pair = declarator(type);
         Identifier* identi =nullptr;
         if(test(TokenType::T_IDENT))
         {
@@ -591,12 +598,21 @@ Declaration* parser::parserDeclaration(Identifier* identi)
 
  bool parser::isTypeName()
  {
-     //current only support int/char
-     return (test(TokenType::T_INT) ||test(TokenType::T_CHAR)|| test(TokenType::T_BOOL)
-             || test(TokenType::T_ENUM) || test(TokenType::T_SHORT)|| test(TokenType::T_SIGNED)||
-             test(TokenType::T_STATIC)|| test(TokenType::T_STRUCT)|| test(TokenType::T_VOID)||
-             test(TokenType::T_TYPDEF) || test(TokenType::T_EXTERN) || test(TokenType::T_LONG) 
-             ||(test(TokenType::T_IDENT) && findtypedef(peek().getText())));
+     //current only support int/char     
+        return isOneOf(TokenType::T_INT, 
+        TokenType::T_CHAR, 
+        TokenType::T_BOOL, 
+        TokenType::T_ENUM,
+        TokenType::T_SHORT,
+        TokenType::T_SIGNED, 
+        TokenType::T_UNSIGNED,
+        TokenType::T_STATIC,
+        TokenType::T_STRUCT, 
+        TokenType::T_VOID, 
+        TokenType::T_TYPDEF,
+        TokenType::T_EXTERN, 
+        TokenType::T_LONG)
+        ||(test(TokenType::T_IDENT) && findtypedef(peek().getText()));
  }
  bool parser::findtypedef(const std::string& name )
  {
@@ -748,7 +764,113 @@ Declaration* parser::parserDeclaration(Identifier* identi)
     return ty;
 
  }
+Type* parser::modifyBase(Type* type, Type* base,Type*new_base)
+{
+    if(type == base)
+    {
+        return new_base;
+    }
+    auto ty = static_cast<DerivedType*>(base);
+    ty->setBase(modifyBase(type,ty->getBaseType(), new_base));
+    return ty;
+
+}
+ // declarator = "*"* ("(" declarator ")" | ident) type-suffix
+//int *p();
+ TokenPair parser::declarator(Type*type)
+ {
+     Type* ty = type;
+     while(match(TokenType::T_STAR))
+     {
+        ty = PtrType::create(ty);   
+     }
+
+     if(match(TokenType::T_LPAREN))
+     {
+
+          auto pair = declarator(ty);
+          Type* base = pair.first;
+          expect(TokenType::T_RPAREN,")");          
+
+          auto new_base = type_suffix(ty);
+          auto return_type = modifyBase(ty,base,new_base);
+     
+         return std::make_pair(return_type, pair.second);
+
+     }
+     else if(test(TokenType::T_IDENT))
+     {
+         auto name = consume().getText();
+         ty = type_suffix(ty);
+         return std::make_pair(ty, name);
+     }
+     else
+     {
+         ty =  type_suffix(ty);
+         //abstract declarator int*();
+         return std::make_pair(ty, "") ;  
+     }
+     
+ }
+ Type* parser::type_suffix(Type* type)
+ {
+     if(test(TokenType::T_LBRACKET))
+     {
+         return declarator_array(type);
+     }
+     if(test(TokenType::T_LPAREN))
+     {
+         return declarator_func(type);
+     }
+     return type;
+
+ }
+
+ Type* parser::declarator_array(Type* type)
+ {
+
+return type;
+ }
  
+  Type* parser::declarator_func(Type* type)
+ {
+     if(type->getType() == Type::T_ARRAY || 
+        type->getType() == Type::T_FUNC)
+    {
+         ExitWithError("function return type can't be:%s",type->tostring().c_str());
+
+    }
+    return type;
+
+
+
+ }
+
+ TokenPair parser::parser_func_param(bool optional)
+ {
+     Type* ty;
+     if(isTypeName())
+     {
+         ty = baseType(nullptr);
+     }
+     else
+     {
+         ExitWithError("Expect type");
+     }
+
+     auto pair = declarator(ty);
+     ty = pair.first;
+     if(ty->getType() == Type::T_ARRAY)
+     {
+         ty = PtrType::create(static_cast<ArrayType*>(ty)->getBaseType());
+     }
+     else if(ty->getType() == Type::T_FUNC)
+     {
+         ty = PtrType::create(ty);
+     }
+     return std::make_pair(ty, pair.second);
+
+ }
 
 
 }

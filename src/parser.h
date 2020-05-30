@@ -8,9 +8,12 @@
 namespace Yan {
 
 // + - * / intlitr EOF
+ using TokenPair = std::pair<Type*,std::string>;
 
 class parser 
 {
+    public:
+   
     public:
         parser(lexer& s);
         ~parser();
@@ -42,7 +45,16 @@ class parser
         Expr* primary();
         
         // Expr* term();
-        // Expr* group();        
+        // Expr* group();
+        //declaration
+        Type*baseType(storageClass* sclass);
+        TokenPair declarator(Type*type);
+        Type* declarator_array(Type* type);
+        Type* declarator_func(Type* type);
+        Type* type_suffix(Type* type);
+        Type* modifyBase(Type* type, Type* base,Type*new_base);
+
+        TokenPair parser_func_param(bool optional);        
 
        
     private:
@@ -52,8 +64,7 @@ class parser
 
         bool isTypeName();
          bool findtypedef(const std::string& name );
-        Type*baseType(storageClass* sclass);
-        Type*Declarator(Type*type);
+
 
         //Token ralated function
         bool match(TokenType t);
@@ -75,6 +86,7 @@ class parser
 
     private:
         lexer& scan;
+        //Token currenttoken_;//used for error output
         
         symbolTable* currentScop_;     
 

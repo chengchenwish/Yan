@@ -46,7 +46,7 @@ PtrType* PtrType::create(Type* base)
     return new PtrType(base);
 }
 
-PtrType::PtrType(Type* base):Type(8,8,T_PTR),baseType_(base)
+PtrType::PtrType(Type* base):DerivedType(8,8,T_PTR,base)
 {
 
 }
@@ -56,8 +56,7 @@ ArrayType* ArrayType::create(Type*base, int len)
     return new ArrayType(base,len);
 }
 
- ArrayType::ArrayType(Type*base, int len):Type(base->getsize()*len,base->getalign(),T_ARRAY),
- baseType_(base),len_(len)
+ ArrayType::ArrayType(Type*base, int len):DerivedType(base->getsize()*len,base->getalign(),T_ARRAY, base),len_(len)
  {
 
  }
@@ -75,7 +74,7 @@ FuncType* FuncType::create(Type* returnType)
     return new FuncType(returnType); 
 }
 
-FuncType::FuncType(Type* returnType):Type(4,4,T_FUNC), returnType_(returnType)
+FuncType::FuncType(Type* returnType):DerivedType(4,4,T_FUNC, returnType) 
 {
 
 }
