@@ -434,7 +434,7 @@ Expr* parser::mul()
                  
             //      identi->setoffset(currentScop_->caculateOffset(t.getText()));
             //      Info("ppppppppppppppp");
-            //      currentScop_->printSymbol();
+            //      currentScop_->dumpSymbol();
             //      Info("111111111111111111111111111111");
 
             // }
@@ -560,7 +560,7 @@ Declaration* parser::parserDeclaration(Identifier* identi)
                  param->offset_ = currentScop_->caculateOffset(param->name_);
 
              }
-              currentScop_ ->printSymbol();
+            //  currentScop_ ->dumpSymbol();
              program->add(parserFuncDef(funcIden));
             leaveScope();
                    

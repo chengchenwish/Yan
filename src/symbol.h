@@ -2,6 +2,7 @@
 #define _SYMBOL_H_
 #include <array>
 #include<algorithm>
+#include<iomanip>
 #include "token.h"
 #include "AST.h"
 #include "type.h"
@@ -54,15 +55,7 @@ public:
        }
        return size;
    }
-   void printSymbol()
-   {
-       std::cout<<" Current scope:"<<scopeToString(scope_);
-       for(const auto& kv: list_)
-       {
-           std::cout<<kv.first<<": Type = "<<kv.second->type_->tostring()<<" size:"<< kv.second->type_->getsize()<<std::endl;
-       }
-   }
-
+   void dumpSymbol( std::ostream& os);
 private:
     Scope scope_;
     std::vector<std::pair<std::string,Identifier*>>list_;

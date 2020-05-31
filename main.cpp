@@ -25,9 +25,13 @@ static void compile(std::vector<std::string>&files)
     Yan::gen gencode(out_asmeble_file);
     Yan::parser pars(pp);
     auto pp1= pars.parserProgram();
+    
     if(DEBUG)
     {
-        pars.getSymbolTable()->printSymbol();
+        std::ofstream f(files.front()+".symobol");
+
+        pars.getSymbolTable()->dumpSymbol(f);
+        f.close();
     }
     gencode.genProgram(pp1);
         

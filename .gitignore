@@ -3,3 +3,4 @@ build/*
 test/*·out
 test/*.s
 test/YAN
+test/*.symobol

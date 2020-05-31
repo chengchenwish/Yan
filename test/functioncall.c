@@ -5,7 +5,7 @@ int dump(int x)
     p = x+12;
     print(p);
 }
-int dump2(int x, int y)
+int dump2(int x, int y,int z)
 {
     int xx;
     int yy;
@@ -14,6 +14,7 @@ int dump2(int x, int y)
     print(x);
     print(y);
     print(xx+yy);
+    print(z);
 }
 
 
@@ -24,7 +25,7 @@ int main()
     int y;
     y =66;
     dump(x);
-    dump2(33,44);
+    dump2(33,44,88);
 }
 /*
 Expected output:
@@ -33,4 +34,5 @@ Expected output:
 33
 44
 154
+88
 */

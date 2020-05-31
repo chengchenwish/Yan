@@ -57,8 +57,24 @@ namespace Yan
         return false;
      }
 
-
-extern std::string  scopeToString(Scope s)
+  void symbolTable::dumpSymbol( std::ostream& os)
+{
+       os<<" Current scope:"<<scopeToString(scope_)<<std::endl;
+       os<<std::endl;
+       os<<std::endl;
+      
+       os<<"name"<<std::setw(20)<<"Type"<<std::setw(20)<<"size"<<std::setw(20)<<"scope"<<std::endl;
+       
+       for(const auto& kv: list_)
+       {
+            
+           os<<kv.first<<std::setw(20)<<kv.second->type_->tostring()<<std::setw(20)<< kv.second->type_->getsize();
+           os<<std::setw(20)<<scopeToString(scope_)<<std::endl;
+           
+       }
+    //    os<<std::setiosflags(std::ios::left)<<std::endl;
+}
+ std::string  scopeToString(Scope s)
 {
     switch(s)
     {

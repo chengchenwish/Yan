@@ -42,7 +42,7 @@ std::string Type::tostring()
         case T_PTR: return "ptr";
         case T_ARRAY:return "array";
         case T_STRUCT:return "struct";
-        case T_FUNC: return "function";
+        case T_FUNC: return "func";
     }
 }
 
