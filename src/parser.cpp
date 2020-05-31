@@ -485,8 +485,8 @@ Expr* parser::mul()
     {
         if(var.getText() == "print")
         {
-            auto functype = FuncType::create(VoidType::create());
-            auto param = Identifier::create("x",IntType::create(),true);
+            auto functype = FuncType::create(void_type);
+            auto param = Identifier::create("x",int_type,true);
             functype->addParam(param);
             identi = Identifier::create(var.getText(),functype,false);
 
@@ -495,7 +495,7 @@ Expr* parser::mul()
 
             ExitWithError("undefined variable :%s",var.getText().c_str());
     }
-    else if(identi->type_->getType()!=Type::T_FUNC)
+    else if(!identi->type_->isKindOf(Type::T_FUNC))
     {
         ExitWithError("Expect function type");
     }
@@ -547,7 +547,7 @@ Declaration* parser::parserDeclaration(Identifier* identi)
         auto pair = declarator(type);
         auto name = pair.second;
         auto new_ty = pair.first;
-        if(new_ty->getType() == Type::T_FUNC && test(TokenType::T_LBRACE))
+        if(new_ty->isKindOf(Type::T_FUNC) && test(TokenType::T_LBRACE))
         {
             // expect(TokenType::T_LBRACE,"{");
             //if(currentScop_->
@@ -728,19 +728,19 @@ Declaration* parser::parserDeclaration(Identifier* identi)
      Type* ty = nullptr;
      switch (kind)
      {
-         case kvoid: ty = VoidType::create();break;
-         case kchar: ty = CharType::create();break;
-         case kbool: ty = BoolType::create();break;
+         case kvoid: ty = void_type;break;
+         case kchar: ty = char_type;break;
+         case kbool: ty = bool_type;break;
          default: break;
      }
      if(ty == nullptr)
     {  
         switch(size)
         {
-            case kshort: ty = ShortType::create();break;
-            case klong: ty = LongType::create();break;
+            case kshort: ty = short_type;break;
+            case klong: ty = long_type;break;
             case kllong: break;//todo
-            default: ty = IntType::create();break;
+            default: ty = int_type;break;
          }
     }
     return ty;
@@ -816,8 +816,8 @@ return type;
  
   Type* parser::declarator_func(Type* type)
  {
-     if(type->getType() == Type::T_ARRAY || 
-        type->getType() == Type::T_FUNC)
+     if(type->isKindOf(Type::T_ARRAY) || 
+        type->isKindOf(Type::T_FUNC))
     {
          ExitWithError("function return type can't be:%s",type->tostring().c_str());
 
@@ -864,11 +864,11 @@ return type;
 
      auto pair = declarator(ty);
      ty = pair.first;
-     if(ty->getType() == Type::T_ARRAY)
+     if(ty->isKindOf(Type::T_ARRAY))
      {
          ty = PtrType::create(static_cast<ArrayType*>(ty)->getBaseType());
      }
-     else if(ty->getType() == Type::T_FUNC)
+     else if(ty->isKindOf(Type::T_FUNC))
      {
          ty = PtrType::create(ty);
      }

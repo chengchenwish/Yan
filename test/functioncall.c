@@ -7,9 +7,15 @@ int dump(int x)
 }
 int dump2(int x, int y)
 {
+    int xx;
+    int yy;
+    xx =x+x;
+    yy = y+y;
     print(x);
     print(y);
+    print(xx+yy);
 }
+
 
 int main()
 {
@@ -26,4 +32,5 @@ Expected output:
 24
 33
 44
+154
 */

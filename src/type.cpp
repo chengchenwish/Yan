@@ -2,13 +2,19 @@
 namespace Yan
 {
   
+ IntType*     int_type = IntType::create();
+ VoidType*    void_type = VoidType::create();
+ BoolType*    bool_type = BoolType::create();
+ CharType*    char_type = CharType::create();
+ ShortType*   short_type = ShortType::create();
+ LongType*    long_type = LongType::create();
 Type::Type(int size, int align, TypeKind kind, bool incomplete):size_(size),
 align_(align), kind_(kind),isIncomplete_(incomplete)
 {
 
 }
 
-Type::TypeKind Type::getType()
+Type::TypeKind Type::getKind()
 {
     return kind_;
 }

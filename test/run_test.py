@@ -11,16 +11,18 @@ def run_make():
 
     make = os.popen(CMD)
     out = make.read()
-    if re.search( r'[ 100%]', out, re.M|re.I) is not None:
+    matched = re.search( r'\[100%\]', out, re.M)
+    if matched is not None:    
         print("-----make build successfully-----")
     else:
         print(out)
-        exit()
+        exit(1)
 
     if os.path.exists(BUILD_DIR+"/YAN"):
         os.popen("cp "+BUILD_DIR+"/YAN  "+ TEST_DIR+"/.")
-    else:
+    else:        
         print("make build fail")
+        exit(1);
 
 def compile(file):
     out = ''
@@ -34,7 +36,7 @@ def compile(file):
     else:
        # print(out)
        print(out)
-       exit()
+       exit(1)
        pass
     excute(file, "a.out")
 def excute(file, out):

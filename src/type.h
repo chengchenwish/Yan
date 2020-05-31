@@ -7,7 +7,7 @@ namespace Yan
 
 struct Identifier;
 
-#define BASIC(xx,size,align,kind)            \
+#define BUILD_IN_TYPE(xx,size,align,kind)            \
 class xx :public Type{                       \
 public:                                      \
     static xx* create(){ return new xx();}   \
@@ -46,10 +46,11 @@ public:
     };
     Type(int size, int align, TypeKind kind, bool incomplete = false);
     Type() = default;
-    TypeKind getType();
+    TypeKind getKind();
     int getalign()const;
     int getsize()const ;
     std::string tostring();
+    bool isKindOf(TypeKind kind)const {return kind_ == kind;}
 private:
      int size_; //sizeo()value
 
@@ -59,32 +60,7 @@ private:
      bool isunsigned;
      storageClass class_;
 };
-// void clone(Type*src, type*dest)
-// {
-//     int size = 0;
-//     switch(source->getType())
-//     {
-//         case Type::T_VOID:
-//         case Type::T_BOOL:
-//         case Type::T_CHAR:
-//         case Type::T_SHORT:
-//         case Type::T_INT:
-//         case Type::T_LONG:
-//             size = sizeof(Type);break;
-//         case Type::T_PTR:
-//             size = sizeof(PtrType);break;
-//         case Type::T_FUNC:
-//             size = sizeof(FuncType);break;
-//         case Type::T_ARRAY:
-//             size = sizeof(ArrayType);break;
-//         case Type::T_STRUCT:
-//             size = sizeof(StructType);break;
 
-
-
-//     }
-//     memcpy(dest,src,size);
-// }
 class DerivedType :public Type
 {
 public:
@@ -142,16 +118,19 @@ private:
 };
 
 
-
-
-BASIC(IntType,4,4,T_INT)
-BASIC(VoidType,1,1,T_VOID)
-BASIC(BoolType,1,1,T_BOOL)
-BASIC(CharType,1,1,T_CHAR)
-BASIC(ShortType,2,2,T_SHORT)
-BASIC(LongType,8,8,T_LONG)
-#undef BASIC        
-
+BUILD_IN_TYPE(IntType,4,4,T_INT)
+BUILD_IN_TYPE(VoidType,1,1,T_VOID)
+BUILD_IN_TYPE(BoolType,1,1,T_BOOL)
+BUILD_IN_TYPE(CharType,1,1,T_CHAR)
+BUILD_IN_TYPE(ShortType,2,2,T_SHORT)
+BUILD_IN_TYPE(LongType,8,8,T_LONG)
+#undef BUILD_IN_TYPE        
+extern IntType*     int_type;
+extern VoidType*    void_type;
+extern BoolType*    bool_type;
+extern CharType*    char_type;
+extern ShortType*   short_type;
+extern LongType*    long_type;
 
 }
 #endif
