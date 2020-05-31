@@ -1,25 +1,15 @@
 #ifndef _SYMBOL_H_
 #define _SYMBOL_H_
 #include <array>
-#include<map>
+#include<algorithm>
 #include "token.h"
 #include "AST.h"
+#include "type.h"
 
 namespace Yan
 {
 
 //class Idetifier;
-
-struct symbol
-{
-    symbol(std::string&s)
-    {
-        this->name = s;
-    }
-    symbol()=default;
-
-    std::string name;//name of symbol
-};
  
  enum class Scope
  {
@@ -27,10 +17,11 @@ struct symbol
      FUNC,
      BLOCK
  };
-
+extern std::string scopeToString(Scope s);
 class symbolTable
 {
 public:
+   using Symbol =  std::pair<std::string,Identifier*>;
     symbolTable();
     ~symbolTable();   
     //new 
@@ -39,10 +30,7 @@ public:
     bool  getIdentiInAllScope(const std::string& name,  Identifier** indenti);
    void setParent(symbolTable* parent){ parent_ = parent;}
    void setScope(const Scope s){ scope_ = s;}
-//    bool existInCurrentScope(const std::string& name)
-//    {
-//        for(auto kv)
-//    }
+   bool existInCurrentScope(const std::string& name);
    symbolTable* getParentScop(){ return parent_;}
    int caculateOffset(const std::string& name)
    {
@@ -68,9 +56,10 @@ public:
    }
    void printSymbol()
    {
+       std::cout<<" Current scope:"<<scopeToString(scope_);
        for(const auto& kv: list_)
        {
-           std::cout<<kv.first<<": "<<kv.second->type_->getsize()<<std::endl;
+           std::cout<<kv.first<<": Type = "<<kv.second->type_->tostring()<<" size:"<< kv.second->type_->getsize()<<std::endl;
        }
    }
 

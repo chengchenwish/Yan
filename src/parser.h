@@ -17,6 +17,7 @@ class parser
     public:
         parser(lexer& s);
         ~parser();
+        symbolTable* getSymbolTable(){ return currentScop_;}
         
         Program* parserProgram();
         FunctionDef* parserFuncDef(Identifier* identi);
