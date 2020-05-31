@@ -7,6 +7,12 @@ namespace Yan
 
 struct Identifier;
 
+class PtrType;
+class ArrayType;
+class StructType;
+class FuncType;
+class DerivedType;
+
 #define BUILD_IN_TYPE(xx,size,align,kind)            \
 class xx :public Type{                       \
 public:                                      \
@@ -51,6 +57,15 @@ public:
     int getsize()const ;
     std::string tostring();
     bool isKindOf(TypeKind kind)const {return kind_ == kind;}
+
+    //cast
+    virtual DerivedType* castToDeried(){return nullptr;}
+    virtual PtrType* castToPtr(){ return nullptr;}
+    virtual ArrayType* castToArray(){return nullptr;}
+    virtual FuncType* castToFunc(){return nullptr;}
+    virtual StructType* castToStruct(){return nullptr;}
+
+
 private:
      int size_; //sizeo()value
 
@@ -68,6 +83,8 @@ Type* getBaseType(){ return baseType_;}
 void setBase(Type* ty){baseType_ = ty;}
 DerivedType(int size, int align, TypeKind kind, Type*base): Type(size, align, kind),baseType_(base){}
 
+virtual DerivedType* castToDeried(){return this;}
+
 private:
     Type* baseType_;
 };
@@ -77,6 +94,8 @@ class PtrType:public DerivedType
 {
 public:
     static PtrType* create(Type* base);
+    virtual PtrType* castToPtr(){ return this;}
+ 
     
 private:
     PtrType(Type* base);
@@ -86,6 +105,7 @@ class ArrayType:public DerivedType
 {
 public:
     static ArrayType* create(Type*base, int len);
+    virtual ArrayType* castToArray(){ return this;}
 private:
     ArrayType(Type*base, int len);
     int len_;
@@ -97,6 +117,8 @@ public:
     void addParam(Identifier* param);
     std::vector<Identifier*>&getParam();
     static FuncType* create(Type* returnType);
+
+    virtual FuncType* castToFunc(){return this;}
 private:
     FuncType(Type* returnType);
     std::vector<Identifier*>paramList_;
@@ -112,6 +134,7 @@ public:
     };
 static StructType* create();
 void addMember(const Member& memb);
+virtual StructType* castToStruct(){return this;}
 private:
     StructType();
     std::vector<Member> members_;

@@ -23,6 +23,7 @@ class symbolTable
 {
 public:
    using Symbol =  std::pair<std::string,Identifier*>;
+   using SymbolList = std::vector<Symbol>;
     symbolTable();
     ~symbolTable();   
     //new 
@@ -33,6 +34,8 @@ public:
    void setScope(const Scope s){ scope_ = s;}
    bool existInCurrentScope(const std::string& name);
    symbolTable* getParentScop(){ return parent_;}
+   SymbolList::iterator begin(){return list_.begin(); }
+   SymbolList::iterator end() {return list_.end();}
    int caculateOffset(const std::string& name)
    {
        int off = 0;
@@ -55,10 +58,10 @@ public:
        }
        return size;
    }
-   void dumpSymbol( std::ostream& os);
+   void dumpSymbol(std::ostream& os);
 private:
     Scope scope_;
-    std::vector<std::pair<std::string,Identifier*>>list_;
+    SymbolList list_;
     symbolTable* parent_;
 
 

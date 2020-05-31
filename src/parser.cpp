@@ -501,7 +501,7 @@ Expr* parser::mul()
     }
       auto funcCall = FunctionCall::create(identi);
 
-     auto argsNum = static_cast<FuncType*>(identi->type_)->getParam().size();
+     auto argsNum = identi->type_->castToFunc()->getParam().size();
      Info("num    %d",argsNum);
      for(int i=0;i<argsNum;i++)
      {
@@ -614,7 +614,7 @@ Declaration* parser::parserDeclaration(Identifier* identi)
      }
      enum
      {
-         kkindnone,
+         kkindnone=0,
          kvoid=1,
          kbool,
          kchar,
@@ -624,10 +624,10 @@ Declaration* parser::parserDeclaration(Identifier* identi)
      }kind=kkindnone;
      enum
      {
-         ksizenone,kshort=1, klong, kllong
+         ksizenone=0,kshort=1, klong, kllong
      }size = ksizenone;
     
-     enum{ksignnone, ksigned=1, kunsigned}sign = ksignnone;        
+     enum{ksignnone=0, ksigned=1, kunsigned}sign = ksignnone;        
      
      storageClass storage_class = storageClass::UNKNOW;
      while(isTypeName())
@@ -739,7 +739,7 @@ Declaration* parser::parserDeclaration(Identifier* identi)
         {
             case kshort: ty = short_type;break;
             case klong: ty = long_type;break;
-            case kllong: break;//todo
+            case kllong: ty = long_type;break;//todo
             default: ty = int_type;break;
          }
     }
@@ -752,7 +752,7 @@ Type* parser::modifyBase(Type* type, Type* base,Type*new_base)
     {
         return new_base;
     }
-    auto ty = static_cast<DerivedType*>(base);
+    auto ty = base->castToDeried();
     ty->setBase(modifyBase(type,ty->getBaseType(), new_base));
     return ty;
 
@@ -762,6 +762,7 @@ Type* parser::modifyBase(Type* type, Type* base,Type*new_base)
  Declarator parser::declarator(Type*type)
  {
      Type* ty = type;
+     Info("ttttttt:%s",ty->tostring().c_str());
      while(match(TokenType::T_STAR))
      {
         ty = PtrType::create(ty);   
@@ -866,7 +867,7 @@ return type;
      ty = pair.first;
      if(ty->isKindOf(Type::T_ARRAY))
      {
-         ty = PtrType::create(static_cast<ArrayType*>(ty)->getBaseType());
+         ty = PtrType::create(ty->castToArray()->getBaseType());
      }
      else if(ty->isKindOf(Type::T_FUNC))
      {
