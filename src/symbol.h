@@ -39,6 +39,10 @@ public:
     bool  getIdentiInAllScope(const std::string& name,  Identifier** indenti);
    void setParent(symbolTable* parent){ parent_ = parent;}
    void setScope(const Scope s){ scope_ = s;}
+//    bool existInCurrentScope(const std::string& name)
+//    {
+//        for(auto kv)
+//    }
    symbolTable* getParentScop(){ return parent_;}
    int caculateOffset(const std::string& name)
    {

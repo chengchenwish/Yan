@@ -418,10 +418,13 @@ void gen::genProgram(Program* node)
     Info("functionCall");
 
 
-    auto arg = node->argList_.front();
-    arg->accept(this);
-    emit("popq %rax");
-    emit("movq %rax, %rdi");
+    auto& args = node->argList_;
+    for(int i =0;i<args.size();i++)
+    {
+        args[i]->accept(this);
+        emit("popq %rax");
+        emit("movq %rax, "+argReg8[i]);
+    }
     // align RSP to a 16 byte boundary before
     // calling a function because it is an ABI requirement.  
     emit("movq %rsp, %rax");

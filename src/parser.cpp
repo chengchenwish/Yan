@@ -485,7 +485,11 @@ Expr* parser::mul()
     {
         if(var.getText() == "print")
         {
-            identi = Identifier::create(var.getText(),FuncType::create(VoidType::create()),false);
+            auto functype = FuncType::create(VoidType::create());
+            auto param = Identifier::create("x",IntType::create(),true);
+            functype->addParam(param);
+            identi = Identifier::create(var.getText(),functype,false);
+
         }
         else
 
@@ -497,9 +501,19 @@ Expr* parser::mul()
     }
       auto funcCall = FunctionCall::create(identi);
 
-      Expr* exp = expr();
+     auto argsNum = static_cast<FuncType*>(identi->type_)->getParam().size();
+     Info("num    %d",argsNum);
+     for(int i=0;i<argsNum;i++)
+     {
+      Expr* exp = assign();
       Info("add args");
       funcCall->addArg(exp);
+      if(i<argsNum-1)
+      {
+          Info("i=%d:",i);
+          expect(TokenType::T_COMMA,",");
+      }
+     }
       expect(TokenType::T_RPAREN,")");
       expect(TokenType::T_SEMI,";");
       return funcCall;
@@ -530,68 +544,36 @@ Declaration* parser::parserDeclaration(Identifier* identi)
     
         storageClass sclass;     
         auto type = baseType(&sclass);
-        //auto pair = declarator(type);
-        Identifier* identi =nullptr;
-        if(test(TokenType::T_IDENT))
+        auto pair = declarator(type);
+        auto name = pair.second;
+        auto new_ty = pair.first;
+        if(new_ty->getType() == Type::T_FUNC && test(TokenType::T_LBRACE))
         {
-            auto t = consume();
-            identi = Identifier::create(t.getText(),type,false);
+            // expect(TokenType::T_LBRACE,"{");
+            //if(currentScop_->
+            auto funcIden = Identifier::create(name,new_ty,false);
+            currentScop_->addSymoble(name,funcIden);
+             currentScop_ = enterScope(Scope::FUNC);
+             for(auto param : static_cast<FuncType*>(new_ty)->getParam())
+             {
+                 currentScop_->addSymoble(param->name_, param);
+                 param->offset_ = currentScop_->caculateOffset(param->name_);
+
+             }
+              currentScop_ ->printSymbol();
+             program->add(parserFuncDef(funcIden));
+            leaveScope();
+                   
+
         }
         else
         {
-            ExitWithError(__func__);
+            auto varabile = Identifier::create(name,new_ty,false);
+            currentScop_->addSymoble(name, varabile);
+            program->add(parserDeclaration(varabile));
         }
-        if(match(TokenType::T_LPAREN))
-        {
-            identi->type_ = FuncType::create(type);
-            funcscop = enterScope(Scope::FUNC);
-            Info("enter func");
-            if(match(TokenType::T_INT))
-            {
-                while(!match(TokenType::T_RPAREN))
-                {
-                    auto t = consume();
-                    auto text = t.getText();
-                    auto param = Identifier::create(text, IntType::create(),true);
-                    funcscop->addSymoble(text,param);
-                    param->offset_ = funcscop->caculateOffset(text);
-                    static_cast<FuncType*>(identi->type_)->addParam(param);
-                    if(!test(TokenType::T_RPAREN))
-                    {
-                        match(TokenType::T_COMMA);
-                    }
-                }
-              
-            }
-            else
-            {
-                Info("lll");
-                expect(TokenType::T_RPAREN,")");
-               // ExitWithError("function paser expect int");
-            }
-            
-           // expect(TokenType::T_RPAREN,")");
-        }
-        if(currentScop_ == 0)
-        {
-            Info("ooop");
-        }
-        currentScop_->addSymoble(identi->name_,identi);
-
-         if(identi->type_->getType() == Type::T_FUNC)
-         {
-             Info("kkkk");
-             currentScop_ = funcscop;
-            program->add(parserFuncDef(identi));
-            leaveScope();
-         }
-         else
-         {
-             program->add(parserDeclaration(identi));
-         }
-
      }
-     Info(__func__);
+
      return program;
      
  }
@@ -777,7 +759,7 @@ Type* parser::modifyBase(Type* type, Type* base,Type*new_base)
 }
  // declarator = "*"* ("(" declarator ")" | ident) type-suffix
 //int *p();
- TokenPair parser::declarator(Type*type)
+ Declarator parser::declarator(Type*type)
  {
      Type* ty = type;
      while(match(TokenType::T_STAR))
@@ -840,13 +822,35 @@ return type;
          ExitWithError("function return type can't be:%s",type->tostring().c_str());
 
     }
-    return type;
+    auto functionType = FuncType::create(type);
+    expect(TokenType::T_LPAREN,"(");
+    while(1)
+    {
+      if(isOneOf(TokenType::T_EOF,TokenType::T_RPAREN))
+      {
+          break;
+      }
+      auto pair = parser_func_param();
+      auto param = Identifier::create(pair.second,pair.first,true);
+      functionType->addParam(param);
+       if(isOneOf(TokenType::T_EOF,TokenType::T_RPAREN))
+      {
+          break;
+      }
+     
+      expect(TokenType::T_COMMA,",");
+
+    }
+    expect(TokenType::T_RPAREN,")");
+
+
+    return functionType;
 
 
 
  }
 
- TokenPair parser::parser_func_param(bool optional)
+ Declarator parser::parser_func_param()
  {
      Type* ty;
      if(isTypeName())

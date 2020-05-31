@@ -8,7 +8,7 @@
 namespace Yan {
 
 // + - * / intlitr EOF
- using TokenPair = std::pair<Type*,std::string>;
+ using Declarator = std::pair<Type*,std::string>;
 
 class parser 
 {
@@ -20,7 +20,7 @@ class parser
         
         Program* parserProgram();
         FunctionDef* parserFuncDef(Identifier* identi);
-        Declaration* parserDeclaration(Identifier* identi);
+        
         CompousedStmt*parserCompoundStmt();
         PrintStmt* parserPrintStmt();
         FunctionCall* parserFuncCall(Token var);
@@ -46,15 +46,17 @@ class parser
         
         // Expr* term();
         // Expr* group();
+        
         //declaration
+        Declaration* parserDeclaration(Identifier* identi);
         Type*baseType(storageClass* sclass);
-        TokenPair declarator(Type*type);
+        Declarator declarator(Type*type);
         Type* declarator_array(Type* type);
         Type* declarator_func(Type* type);
         Type* type_suffix(Type* type);
         Type* modifyBase(Type* type, Type* base,Type*new_base);
 
-        TokenPair parser_func_param(bool optional);        
+        Declarator parser_func_param();        
 
        
     private:
