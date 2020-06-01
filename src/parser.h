@@ -5,6 +5,7 @@
 #include "AST.h"
 #include "error.h"
 #include "symbol.h"
+#include "evaluator.h"
 namespace Yan {
 
 // + - * / intlitr EOF
@@ -17,6 +18,9 @@ class parser
     public:
         parser(lexer& s);
         ~parser();
+        //Begin a block scope;
+        void enterScope(Scope kind);
+        void leaveScope();
         symbolTable* getSymbolTable(){ return currentScop_;}
         
         Program* parserProgram();
@@ -57,13 +61,12 @@ class parser
         Type* type_suffix(Type* type);
         Type* modifyBase(Type* type, Type* base,Type*new_base);
 
-        Declarator parser_func_param();        
+        Declarator parser_func_param();
+        int constExpr();        
 
        
     private:
-        //Begin a block scope;
-        symbolTable* enterScope(Scope kind);
-        void leaveScope();
+
 
         bool isTypeName();
          bool findtypedef(const std::string& name );
@@ -97,6 +100,25 @@ class parser
         parser(const parser&) = delete;
         parser& operator = (const parser&) = delete;
 };
+//RAII scope
+class selfScope
+{
+public:
+    selfScope( parser& p, Scope kind): self(p)
+    {        
+        self.enterScope(kind);
+    }
+    ~selfScope()
+    {
+        self.leaveScope();
+    }
+private:
+
+     parser& self;
+
+
+};
+
 
 }
 #endif

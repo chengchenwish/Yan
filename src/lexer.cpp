@@ -162,7 +162,10 @@ namespace Yan
                 t->type = TokenType::T_PERCENT;
             }
             break;
-            
+        case '[':
+            t->type = TokenType::T_LBRACKET; return;            
+        case ']': 
+            t->type = TokenType::T_RBRACKET; return;        
         case '{':
             t->type = TokenType::T_LBRACE; return;            
         case '}':

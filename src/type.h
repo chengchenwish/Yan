@@ -55,8 +55,10 @@ public:
     TypeKind getKind();
     int getalign()const;
     int getsize()const ;
+    void setIncomplete(bool incomplete){isIncomplete_ = incomplete; }
     std::string tostring();
     bool isKindOf(TypeKind kind)const {return kind_ == kind;}
+    bool isIncomplete(){return isIncomplete_;}
 
     //cast
     virtual DerivedType* castToDeried(){return nullptr;}

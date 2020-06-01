@@ -4,19 +4,19 @@ namespace Yan{
 
 parser::parser(lexer& s):scan(s)
 {
-    currentScop_ = nullptr;
+    currentScop_ = new symbolTable;
+    currentScop_->setScope(Scope::GLOBAL);
 }
 parser::~parser()
 {
  
 }
-symbolTable* parser::enterScope(Scope kind)
+void  parser::enterScope(Scope kind)
 {
     auto sc = new symbolTable;
     sc->setParent(this->currentScop_);
     sc->setScope(kind);
-   
-    return sc;
+    currentScop_ = sc;
 }
 void parser::leaveScope()
 {
@@ -37,6 +37,7 @@ Expr* parser::primary()
             
             Info(std::to_string(t.getValue()).c_str());
             node =  ConstantValue::create(t.getValue());
+            node->type_ = int_type;
         }
         else if(test(TokenType::T_IDENT))
         {    Identifier* identi;
@@ -537,11 +538,9 @@ Declaration* parser::parserDeclaration(Identifier* identi)
  Program* parser::parserProgram()
  {  
     auto program = Program::create();
-     currentScop_ = enterScope(Scope::GLOBAL);
      symbolTable*funcscop = nullptr;     
      while(!match(TokenType::T_EOF))
-     {
-    
+     {    
         storageClass sclass;     
         auto type = baseType(&sclass);
         auto pair = declarator(type);
@@ -549,20 +548,18 @@ Declaration* parser::parserDeclaration(Identifier* identi)
         auto new_ty = pair.first;
         if(new_ty->isKindOf(Type::T_FUNC) && test(TokenType::T_LBRACE))
         {
-            // expect(TokenType::T_LBRACE,"{");
-            //if(currentScop_->
             auto funcIden = Identifier::create(name,new_ty,false);
-            currentScop_->addSymoble(name,funcIden);
-             currentScop_ = enterScope(Scope::FUNC);
-             for(auto param : static_cast<FuncType*>(new_ty)->getParam())
-             {
-                 currentScop_->addSymoble(param->name_, param);
-                 param->offset_ = currentScop_->caculateOffset(param->name_);
+            currentScop_->addSymoble(name,funcIden);            
+            {
+                selfScope self (*this, Scope::FUNC);
+                for(auto param : new_ty->castToFunc()->getParam())
+                {
+                    currentScop_->addSymoble(param->name_, param);
+                    param->offset_ = currentScop_->caculateOffset(param->name_);
 
-             }
-            //  currentScop_ ->dumpSymbol();
-             program->add(parserFuncDef(funcIden));
-            leaveScope();
+                 }
+                program->add(parserFuncDef(funcIden));
+            }
                    
 
         }
@@ -811,8 +808,33 @@ Type* parser::modifyBase(Type* type, Type* base,Type*new_base)
 
  Type* parser::declarator_array(Type* type)
  {
+     expect(TokenType::T_LBRACKET,"[");
+     bool incomplete = true;
+     int len = -1;
+     if(!test(TokenType::T_RBRACKET))
+     {
+         len = constExpr();
+         expect(TokenType::T_RBRACKET,"]");
+         incomplete = false;
+     }
+     
+     if(test(TokenType::T_LBRACKET))
+     {
+        type = declarator_array(type);
+        if(type->isIncomplete())
+        {
+            ExitWithError("Array type incompleye");
+        }
+     }
+     Type* array = ArrayType::create(type,len);
+     array->setIncomplete(incomplete);
 
-return type;
+    return array;
+ }
+ int parser::constExpr()
+ {
+     evaluator<int> eval;
+     return eval.eval(assign());
  }
  
   Type* parser::declarator_func(Type* type)
