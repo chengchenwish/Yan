@@ -288,10 +288,10 @@ void gen::genProgram(Program* node)
     }
 }
                 
-   void gen::visit(ConstantValue* node)
+   void gen::visit(IntegerLiteral* node)
    {
-       emit("movq $" +std::to_string(node->ivalue_)+", %rax");
-       Info(std::to_string(node->ivalue_).c_str());
+       emit("movq $" +std::to_string(node->value_)+", %rax");
+       Info(std::to_string(node->value_).c_str());
        emit("pushq %rax");
    }
    void gen::visit(FunctionDef* node)

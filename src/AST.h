@@ -13,7 +13,8 @@ class symbolTable;
 struct Expr;
 struct BinaryOp;
 struct Identifier;
-struct ConstantValue;
+struct IntegerLiteral;
+struct StringLiteral;
 struct FunctionDef;
 struct Declaration;
 struct Program;
@@ -33,7 +34,8 @@ class Ivisitor
 public:
    virtual void visit(BinaryOp* node) = 0;
    virtual void visit(Identifier* node) = 0;
-   virtual void visit(ConstantValue* node) = 0;
+   virtual void visit(IntegerLiteral* node) = 0;
+   virtual void visit(StringLiteral* node) = 0;
    virtual void visit(FunctionDef* node) = 0;
    virtual void visit(Declaration* node) = 0;
    virtual void visit(Program* node) = 0;
@@ -87,6 +89,10 @@ struct IfStmt: public Stmt
 {  
     IfStmt(Expr* cond, Stmt* then, Stmt* els = nullptr)
       : cond_(cond), then_(then), else_(els) {}
+    static IfStmt* create(Expr* cond, Stmt* then, Stmt* els = nullptr)
+    {
+        return new IfStmt(cond,then,els);
+    }
     virtual void accept(Ivisitor*v) override{ v->visit(this);}
     Expr* cond_;
     Stmt* then_;
@@ -199,18 +205,26 @@ struct ConditionExpr: public Expr
     Expr* falseExpr_;
 
 };
-
-struct ConstantValue: public Expr 
+//type longlong int short 
+struct IntegerLiteral: public Expr
 {
-    ConstantValue(int value):ivalue_(value){}
-    static  ConstantValue*create(int value){ return new ConstantValue(value);}
-    union 
-    {    
-        int ivalue_;
-        std::string* svalue_;
-    };
+    IntegerLiteral(int value):value_(value){}
+    static  IntegerLiteral*create(int value){ return new IntegerLiteral(value);} 
     virtual void accept(Ivisitor*v) override{ v->visit(this);}
+    int value_;
 };
+struct StringLiteral: public Expr
+{
+
+    StringLiteral(const char* data, int len):strData_(data),byteLen_(len){}
+    static StringLiteral* create(const char* data, int len){ return new StringLiteral(data,len);}
+    virtual void accept(Ivisitor* v){ v->visit(this);}
+    const char* strData_;
+    int byteLen_;
+
+};
+
+
 struct FunctionCall:public Stmt
 {
     FunctionCall(Identifier* designator):designator_(designator){}

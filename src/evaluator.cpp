@@ -12,17 +12,19 @@ template<typename T>
         case OpType::OP_SUBTRACT: result  = Left - Right; break;
         case OpType::OP_MULTIPLY: result  = Left * Right; break;
         case OpType::OP_DIVIDE: result  = Left / Right; break;
+        case OpType::OP_MOD: result = Left % Right;break;
+        case  OpType::OP_EQ: result = Left == Right; break;
         default: break;
     }
 }
 template<typename T>
-void evaluator<T>:: visit(ConstantValue* node)
+void evaluator<T>:: visit(IntegerLiteral* node)
 {
     
     if(node->type_->isKindOf(Type::T_INT))
     {
 
-        result = static_cast<int>(node->ivalue_);
+        result = static_cast<int>(node->value_);
     }
     else
     {

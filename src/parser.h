@@ -13,7 +13,6 @@ namespace Yan {
 
 class parser 
 {
-    public:
    
     public:
         parser(lexer& s);
@@ -29,6 +28,8 @@ class parser
         CompousedStmt*parserCompoundStmt();
         PrintStmt* parserPrintStmt();
         FunctionCall* parserFuncCall(Token var);
+        IfStmt* parserIfStmt();
+        Stmt* parserSingleStmt();
        
         //EXPR
         Expr* expr();
@@ -62,7 +63,14 @@ class parser
         Type* modifyBase(Type* type, Type* base,Type*new_base);
 
         Declarator parser_func_param();
-        int constExpr();        
+
+
+        template<typename T>
+        T constExpr()
+        {
+            evaluator<T> eval;
+            return eval.eval(assign());
+        }  
 
        
     private:

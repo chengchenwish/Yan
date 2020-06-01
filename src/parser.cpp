@@ -36,7 +36,7 @@ Expr* parser::primary()
             auto t = consume();
             
             Info(std::to_string(t.getValue()).c_str());
-            node =  ConstantValue::create(t.getValue());
+            node =  IntegerLiteral::create(t.getValue());
             node->type_ = int_type;
         }
         else if(test(TokenType::T_IDENT))
@@ -387,7 +387,7 @@ Expr* parser::mul()
      }
      if(match(TokenType::T_MINUS))
      {
-         return BinaryOp::create(OpType::OP_SUBTRACT,ConstantValue::create(0),cast());
+         return BinaryOp::create(OpType::OP_SUBTRACT,IntegerLiteral::create(0),cast());
      }
      if(match(TokenType::T_STAR))
      {
@@ -401,7 +401,50 @@ Expr* parser::mul()
      return primary();
  }
 
+IfStmt* parser::parserIfStmt()
+{
+     expect(TokenType::T_LPAREN,"(");
+     auto condition = expr();
+     expect(TokenType::T_RPAREN,")");
+     Stmt* then = nullptr;
+     Stmt* els = nullptr;
+     if(!test(TokenType::T_LBRACE))
+     {
+        then = parserSingleStmt();
+    }
+    else
+    {
+        then = parserCompoundStmt();
+    }
+    if(test(TokenType::T_ELSE))
+    {
+        consume();
 
+        if(!test(TokenType::T_LBRACE))
+        {
+           els = parserSingleStmt();   
+        }
+        else
+        {
+            els = parserCompoundStmt();
+        }
+        
+    }
+
+    return IfStmt::create(condition, then, els);
+}
+ Stmt* parser::parserSingleStmt()
+ {
+    if (match(TokenType::T_PRINT))
+    {
+        return parserPrintStmt();
+    }
+    if(match(TokenType::T_IF))
+    {
+        return parserIfStmt();           
+    }
+    ExitWithError("unknow statment");
+ }
  CompousedStmt* parser::parserCompoundStmt()
  {
       Info(__func__);
@@ -409,15 +452,12 @@ Expr* parser::mul()
      auto compoused = CompousedStmt::create();
      while(!match(TokenType::T_RBRACE))
      {
-     if(match(TokenType::T_EOF))
+        if(match(TokenType::T_EOF))
         {
             ExitWithError(__func__);
         }
-        if (match(TokenType::T_PRINT))
-        {
-           compoused->addStmt(parserPrintStmt());
-        }
-        else if(isTypeName())
+       
+        if(isTypeName())
         {
             auto type = baseType(nullptr);
             auto pair = declarator(type);
@@ -426,29 +466,9 @@ Expr* parser::mul()
             currentScop_->addSymoble(pair.second,identi);
             compoused->addStmt(parserDeclaration(identi));
             identi->setoffset(currentScop_->caculateOffset(pair.second));
-            // if(test(TokenType::T_IDENT))
-            // {
-            //     auto t = consume();
-
-            //     auto identi = Identifier::create(t.getText(),ty, true);
-            //     currentScop_->addSymoble(identi->name_,identi);
-                 
-            //      identi->setoffset(currentScop_->caculateOffset(t.getText()));
-            //      Info("ppppppppppppppp");
-            //      currentScop_->dumpSymbol();
-            //      Info("111111111111111111111111111111");
-
-            // }
-            // else
-            // {
-            //     ExitWithError("wrong declaration");
-            // }
             
-        }
-        else if(match(TokenType::T_IF))
-        {
-            //ifStatement();
-        }
+        }        
+        
         else if(match(TokenType::T_LBRACE))
         {
 
@@ -471,8 +491,8 @@ Expr* parser::mul()
         }
         else
         {
-     
-           ExitWithError("unkown token :%s",scan.getToken().tostring().c_str());   
+           compoused->addStmt(parserSingleStmt());
+       
         } 
      }
      return compoused;
@@ -813,7 +833,7 @@ Type* parser::modifyBase(Type* type, Type* base,Type*new_base)
      int len = -1;
      if(!test(TokenType::T_RBRACKET))
      {
-         len = constExpr();
+         len = constExpr<int>();
          expect(TokenType::T_RBRACKET,"]");
          incomplete = false;
      }
@@ -826,16 +846,13 @@ Type* parser::modifyBase(Type* type, Type* base,Type*new_base)
             ExitWithError("Array type incompleye");
         }
      }
+     assert(len>0);
      Type* array = ArrayType::create(type,len);
      array->setIncomplete(incomplete);
 
     return array;
  }
- int parser::constExpr()
- {
-     evaluator<int> eval;
-     return eval.eval(assign());
- }
+ 
  
   Type* parser::declarator_func(Type* type)
  {

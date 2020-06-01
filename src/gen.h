@@ -14,7 +14,7 @@ public:
     //impliment Ivistor
     virtual void visit(BinaryOp* node)override;
     virtual void visit(Identifier* node) override;
-    virtual void visit(ConstantValue* node)override;
+    virtual void visit(IntegerLiteral* node)override;
     virtual void visit(FunctionDef* node)override;
     virtual void visit(Declaration* node)override;
     virtual void visit(Program* node)override{};
@@ -25,7 +25,8 @@ public:
     virtual void visit(JumpStmt* node)override {}
    virtual void visit(ReturnStmt* node)override {}
    virtual void visit(UnaryOp* node)override{}
-   virtual void visit(ConditionExpr* node)override{};
+   virtual void visit(ConditionExpr* node)override{}
+   virtual void visit(StringLiteral* node)override{}
 
     void genProgram(Program* node);
     void genLvalue(Identifier*node);
