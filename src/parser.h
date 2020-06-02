@@ -33,6 +33,8 @@ class parser
         IfStmt* parserIfStmt();
         LoopStmt* parseWhileStmt();
         LoopStmt* parseForStmt();
+        LoopStmt* parseDoWhileStmt();
+
     
         
        

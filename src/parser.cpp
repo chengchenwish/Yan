@@ -447,7 +447,7 @@ LoopStmt* parser::parseWhileStmt()
 }
 LoopStmt* parser::parseForStmt()
 {
-    //this function should only called by singleStmt
+    //this function should only be called by singleStmt
     expect(TokenType::T_SEMI,";");
     auto cond = expr();
     expect(TokenType::T_SEMI,";");
@@ -470,6 +470,19 @@ LoopStmt* parser::parseForStmt()
     return LoopStmt::create(cond, then);
 
 }
+LoopStmt* parser::parseDoWhileStmt()
+{
+    auto then = parserCompoundStmt();
+    Info(__func__);
+    expect(TokenType::T_WHILE,"while");
+    expect(TokenType::T_LPAREN,"(");
+    auto cond = expr();
+    expect(TokenType::T_RPAREN,")");
+    expect(TokenType::T_SEMI,";");
+    return LoopStmt::create(cond, then, true);
+
+
+}
  Stmt* parser::parserSingleStmt()
  {
      Info(peek().tostring().c_str());
@@ -480,6 +493,10 @@ LoopStmt* parser::parseForStmt()
     if(match(TokenType::T_WHILE))
     {
         return parseWhileStmt();
+    }
+    if(match(TokenType::T_DO))
+    {
+        return parseDoWhileStmt();
     }
     if(match(TokenType::T_FOR))
     {

@@ -31,7 +31,8 @@ constexpr int MAX_STR_LEN = 100;
      xx(T_CONTINUE, "continue")\
      xx(T_DEFALT,   "default")\
      xx(T_WHILE,    "while")\
-     xx(T_FOR,      "for")
+     xx(T_FOR,      "for")\
+     xx(T_DO,       "do")
     
 
 #define RESERVED(xx)        \

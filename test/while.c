@@ -5,6 +5,13 @@ void main(){
     print(i);
     i= i + 1;
   }
+  
+  do 
+  {
+      print(i);
+      i = i-2;
+      
+  }while(i >= 3);
 }
 /*
 Expected output:
@@ -18,4 +25,9 @@ Expected output:
 8
 9
 10
+11
+9
+7
+5
+3
 */

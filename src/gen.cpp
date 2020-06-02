@@ -388,7 +388,7 @@ void gen::genProgram(Program* node)
   {
       node->cond_->accept(this);
       emit("popq %rax");
-     emit("orq $0, %rax");
+     emit("cmp $0, %rax");
      // static int seq = 0;
     auto elsLabel = genLabe();
     auto elsEndLabel = genLabe();
@@ -408,7 +408,14 @@ void gen::genProgram(Program* node)
 
      auto thenLabel = genLabe();
      auto thenEndLabel = genLabe();
-     checkCondition(node->cond_,thenLabel,thenEndLabel);
+     if(node->postcheck_)
+     {
+         emit("jmp " + thenLabel);
+     }
+     else
+     {
+        checkCondition(node->cond_,thenLabel,thenEndLabel);
+     }
      emit(thenLabel+":");
      node->then_->accept(this);
      checkCondition(node->cond_,thenLabel,thenEndLabel);
@@ -420,7 +427,7 @@ void gen::genProgram(Program* node)
   {
      node->accept(this);
      emit("popq %rax");
-     emit("orq $0, %rax");
+     emit("cmp $0, %rax");
      emit("jz " + falsedLabel);
      emit("jmp "+ trueLabel);
   }
