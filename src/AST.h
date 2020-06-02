@@ -18,7 +18,7 @@ struct StringLiteral;
 struct FunctionDef;
 struct Declaration;
 struct Program;
-
+struct LoopStmt;
 struct IfStmt;
 struct CompousedStmt;
 struct FunctionCall;
@@ -39,6 +39,7 @@ public:
    virtual void visit(Declaration* node) = 0;
    virtual void visit(Program* node) = 0;
    virtual void visit(IfStmt* node) = 0;
+   virtual void visit(LoopStmt* node) = 0;
    virtual void visit(CompousedStmt* node) = 0;
    virtual void visit(FunctionCall* node) = 0;
    virtual void visit(JumpStmt* node)=0;
@@ -87,6 +88,20 @@ struct IfStmt: public Stmt
     Expr* cond_;
     Stmt* then_;
     Stmt* else_;
+
+};
+// while and for Stmt
+struct LoopStmt: public Stmt
+{  
+    LoopStmt(Expr* cond, Stmt* then)
+      : cond_(cond), then_(then) {}
+    static LoopStmt* create(Expr* cond, Stmt* then)
+    {
+        return new LoopStmt(cond,then);
+    }
+    virtual void accept(Ivisitor*v) override{ v->visit(this);}
+    Expr* cond_;
+    Stmt* then_;
 
 };
 struct ReturnStmt:public Stmt

@@ -20,6 +20,7 @@ public:
    virtual void visit(StringLiteral* node)override{assert(0);}
    virtual void visit(UnaryOp*node)override;
    virtual void visit(ConditionExpr* node)override;
+   virtual void visit(LoopStmt* node)override{assert(0);};
    T eval(Expr* node)
    {
        node->accept(this);

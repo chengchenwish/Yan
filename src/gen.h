@@ -20,6 +20,7 @@ public:
     virtual void visit(Declaration* node)override;
     virtual void visit(Program* node)override{};
    virtual void visit(IfStmt* node)override;
+   virtual void visit(LoopStmt* node)override;
    virtual void visit(CompousedStmt* node)override;
    virtual void visit(FunctionCall* node)override;
     virtual void visit(JumpStmt* node)override {}
@@ -31,6 +32,7 @@ public:
     void genProgram(Program* node);
     void genLvalue(Identifier*node);
    void loardArgs(Identifier* node, int index);
+   void checkCondition(Expr* node, std::string trueLabel,std::string falsedLabel);
 
 private:
     void storeLValue(Type *ty);
@@ -43,9 +45,8 @@ private:
     void  genCmp(const std::string& how);
 
 private:
-    void emit(std::string inst, std::string dest, std::string source);
     void emit(std::string inst);
-    void emit(std::stringstream& out);
+    void emit(std::stringstream& inst);
 
     //1 byte
     static const std::vector<std::string> argReg1;

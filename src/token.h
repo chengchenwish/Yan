@@ -29,7 +29,9 @@ constexpr int MAX_STR_LEN = 100;
      xx(T_CASE,     "case")\
      xx(T_BREAK,    "break")\
      xx(T_CONTINUE, "continue")\
-     xx(T_DEFALT,   "default")
+     xx(T_DEFALT,   "default")\
+     xx(T_WHILE,    "while")\
+     xx(T_FOR,      "for")
     
 
 #define RESERVED(xx)        \

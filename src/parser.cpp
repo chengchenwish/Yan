@@ -426,12 +426,87 @@ IfStmt* parser::parserIfStmt()
 
     return IfStmt::create(condition, then, els);
 }
+LoopStmt* parser::parseWhileStmt()
+{
+    expect(TokenType::T_LPAREN,"(");
+    auto cond = expr();
+    expect(TokenType::T_RPAREN,")");
+    Stmt* then = nullptr;
+    if(!test(TokenType::T_LBRACE))
+     {
+        then = parserSingleStmt();
+    }
+    else
+    {
+        then = parserCompoundStmt();
+    }
+
+    return LoopStmt::create(cond, then);
+
+
+}
+LoopStmt* parser::parseForStmt()
+{
+    //this function should only called by singleStmt
+    expect(TokenType::T_SEMI,";");
+    auto cond = expr();
+    expect(TokenType::T_SEMI,";");
+    auto post = expr();
+    expect(TokenType::T_RPAREN,")");
+    Stmt* then = nullptr;
+    if(!test(TokenType::T_LBRACE))
+     {
+        then = parserSingleStmt();
+        auto stmt = CompousedStmt::create();
+        stmt->addStmt(then);
+        stmt->addStmt(post);
+    }
+    else
+    {
+        then = parserCompoundStmt();
+        static_cast<CompousedStmt*>(then)->addStmt(post);
+    }
+
+    return LoopStmt::create(cond, then);
+
+}
  Stmt* parser::parserSingleStmt()
  {
      Info(peek().tostring().c_str());
     if(match(TokenType::T_IF))
     {
         return parserIfStmt();           
+    }
+    if(match(TokenType::T_WHILE))
+    {
+        return parseWhileStmt();
+    }
+    if(match(TokenType::T_FOR))
+    {
+        CompousedStmt* stmt = nullptr;
+        //split for into two part
+          //before: for (int i = 0; i<10;i++)
+          //after:  int i = 0; 
+          //            ;i<10;i++)
+
+        expect(TokenType::T_LPAREN,"(");
+        //TODO variabale
+        //auto cond = expr();
+        if(!test(TokenType::T_SEMI))
+        {
+            stmt =  CompousedStmt::create();
+            auto init = expr();
+            stmt->addStmt(init);
+        }
+        auto forstmt = parseForStmt();
+         if(stmt)
+         {
+             stmt->addStmt(forstmt);
+             return stmt;
+         }
+         return forstmt;
+
+   
     }
     if(test(TokenType::T_IDENT))
     {
@@ -480,9 +555,11 @@ IfStmt* parser::parserIfStmt()
         {
 
         }
+
         
         else
         {
+
            compoused->addStmt(parserSingleStmt());
        
         } 

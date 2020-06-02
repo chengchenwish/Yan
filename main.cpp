@@ -28,7 +28,7 @@ static void compile(std::vector<std::string>&files)
     
     if(DEBUG)
     {
-        std::ofstream f(files.front()+".symobol");
+        std::ofstream f(files.front()+".symbol");
 
         pars.getSymbolTable()->dumpSymbol(f);
         f.close();

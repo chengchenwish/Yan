@@ -23,12 +23,18 @@ class parser
         symbolTable* getSymbolTable(){ return currentScop_;}
         
         Program* parserProgram();
-        FunctionDef* parserFuncDef(Identifier* identi);
         
+
+        //Statments
+        Stmt* parserSingleStmt();
         CompousedStmt*parserCompoundStmt();
+        FunctionDef* parserFuncDef(Identifier* identi);       
         FunctionCall* parserFuncCall(Token var);
         IfStmt* parserIfStmt();
-        Stmt* parserSingleStmt();
+        LoopStmt* parseWhileStmt();
+        LoopStmt* parseForStmt();
+    
+        
        
         //EXPR
         Expr* expr();
@@ -49,8 +55,7 @@ class parser
         Expr* postfix();
         Expr* primary();
         
-        // Expr* term();
-        // Expr* group();
+
         
         //declaration
         Declaration* parserDeclaration(Identifier* identi);

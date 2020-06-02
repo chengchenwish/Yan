@@ -51,18 +51,14 @@ namespace Yan
     outfstream <<"\t"<< std::string(outputstr)<<std::endl;
 
    }*/
-   void gen::emit(std::string inst, std::string dest, std::string source)
-    {
-        outfstream<<"\t"<<inst<<"\t"<<dest<<", "<<source<<"\n";
-    }
 
     void gen::emit(std::string inst)
     {
         outfstream<<"\t"<<inst<<"\n";
     }
-    void gen::emit(std::stringstream& out)
+    void gen::emit(std::stringstream& inst)
     {
-        outfstream<<"\t"<<out.str()<<std::endl;
+        outfstream<<"\t"<<inst.str()<<std::endl;
     }
 std::string gen::genLabe()
 {
@@ -212,7 +208,7 @@ void gen::loadLValue(Identifier *node)
         
         emit("popq %rdx");
         emit("popq %rax");
-        emit("subq","%rdx","%rax");
+        emit("subq %rdx , %rax");
         emit("pushq %rax");
     }
     void gen::genMul()
@@ -220,7 +216,7 @@ void gen::loadLValue(Identifier *node)
         emit("popq %rdx");
         emit("popq %rax");
 
-        emit("imulq","%rdx","%rax");
+        emit("imulq %rdx , %rax");
         emit("pushq %rax");
     }
     void gen::genDiv()
@@ -236,10 +232,10 @@ void gen::loadLValue(Identifier *node)
     {
         emit("popq %rdx");
         emit("popq %rax");
-        emit("cmp", "%rdx", "%rax");
+        emit("cmp %rdx, %rax");
         std::string inst = how+" %al";
         emit(inst);
-        emit("movzbq","%al", "%rax");
+        emit("movzbq %al, %rax");
         emit("pushq %rax");
 
     }
@@ -376,7 +372,7 @@ void gen::genProgram(Program* node)
      {
          Info("name:%s offset :%d",node->name_.c_str(),node->offset_);
          fm<<"leaq  -"<<node->offset_<<"(%rbp) , "<<"%rax";
-         emit(fm.str());
+         emit(fm);
          emit("pushq %rax");
      }
      else
@@ -406,7 +402,27 @@ void gen::genProgram(Program* node)
     emit(elsEndLabel+":");
 
 
+  }
+  void gen::visit(LoopStmt* node)
+  {
 
+     auto thenLabel = genLabe();
+     auto thenEndLabel = genLabe();
+     checkCondition(node->cond_,thenLabel,thenEndLabel);
+     emit(thenLabel+":");
+     node->then_->accept(this);
+     checkCondition(node->cond_,thenLabel,thenEndLabel);
+     emit(thenEndLabel+":");
+
+
+  }
+  void gen::checkCondition(Expr* node, std::string trueLabel,std::string falsedLabel)
+  {
+     node->accept(this);
+     emit("popq %rax");
+     emit("orq $0, %rax");
+     emit("jz " + falsedLabel);
+     emit("jmp "+ trueLabel);
   }
   void gen::visit(FunctionCall* node)
 {
