@@ -20,19 +20,20 @@ public:
     virtual void visit(IntegerLiteral* node)override;
     virtual void visit(FunctionDef* node)override;
     virtual void visit(Declaration* node)override;
-    virtual void visit(Program* node)override{};
+    virtual void visit(Program* node)override;
    virtual void visit(IfStmt* node)override;
    virtual void visit(LoopStmt* node)override;
    virtual void visit(CompousedStmt* node)override;
    virtual void visit(FunctionCall* node)override;
-    virtual void visit(JumpStmt* node)override {}
+    virtual void visit(GotoStmt* node)override;
    virtual void visit(ReturnStmt* node)override {}
    virtual void visit(UnaryOp* node)override{}
    virtual void visit(ConditionExpr* node)override{}
    virtual void visit(StringLiteral* node)override{}
    virtual void visit(BreakContinueStmt* node)override;
+   virtual void visit(LabelStmt* node)override;
 
-    void genProgram(Program* node);
+
     void genLvalue(Identifier*node);
    void loardArgs(Identifier* node, int index);
    void checkCondition(Expr* node, std::string trueLabel,std::string falsedLabel);
@@ -64,6 +65,7 @@ private:
     static int labelseq;
     LabelStack breakLabels_;
     LabelStack continueLabels_;
+    std::string functionName_;
     
     std::string outfileName; 
     std::fstream outfstream;

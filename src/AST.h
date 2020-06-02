@@ -22,11 +22,12 @@ struct LoopStmt;
 struct IfStmt;
 struct CompousedStmt;
 struct FunctionCall;
-struct JumpStmt;
+struct GotoStmt;
 struct ReturnStmt;
 struct UnaryOp;
 struct ConditionExpr;
 struct BreakContinueStmt;
+struct LabelStmt;
 
 
 class Ivisitor 
@@ -43,11 +44,12 @@ public:
    virtual void visit(LoopStmt* node) = 0;
    virtual void visit(CompousedStmt* node) = 0;
    virtual void visit(FunctionCall* node) = 0;
-   virtual void visit(JumpStmt* node)=0;
+   virtual void visit(GotoStmt* node)=0;
    virtual void visit(ReturnStmt* node) = 0;
    virtual void visit(UnaryOp*node)=0;
    virtual void visit(ConditionExpr* node) = 0;
    virtual void visit(BreakContinueStmt* node) = 0;
+   virtual void visit(LabelStmt* node) = 0;
 
 };
 
@@ -129,14 +131,22 @@ struct ReturnStmt:public Stmt
     virtual void accept(Ivisitor* v)override{ v->visit(this);}
     Expr* expr_;
 };
-struct JumpStmt:public Stmt
+struct GotoStmt:public Stmt
 {
-    JumpStmt(std::string label):label_(label){}
-    static JumpStmt*create(std::string label){ return new JumpStmt(label);}
+    GotoStmt(std::string label):label_(label){}
+    static GotoStmt*create(std::string label){ return new GotoStmt(label);}
      virtual void accept(Ivisitor* v){ v->visit(this);}
 
     std::string label_;
 };
+struct LabelStmt: public Stmt
+{
+    LabelStmt(std::string label):label_(label){}
+    static LabelStmt* create(std::string label){return new LabelStmt(label);}
+    virtual void accept(Ivisitor* v)override{v->visit(this);}
+    std::string label_;
+};
+
 
 struct Expr : public Stmt
 {

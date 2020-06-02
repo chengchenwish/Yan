@@ -245,33 +245,7 @@ void gen::loadLValue(Identifier *node)
 
     }
 
-void gen::genProgram(Program* node)
-{  
-    //emit(".intel_syntax noprefix\n");
-    emit(".LC0:");
-    emit("\t.string \"%d\\n\"");
-    emit(".text");
-    emit(".global print");
-    emit("print:");
-    emit("pushq %rbp");
-    emit("movq %rsp, %rbp");
-    emit("subq $16, %rsp");
-    emit("movq %rdi, -8(%rbp)");
-    emit("movq -8(%rbp), %rax") ;
-    emit("movq %rax, %rsi");
-    emit("leaq .LC0(%rip), %rdi");
-    emit("movq $0,%rax");
-    emit("call printf@PLT");
-    emit("nop");
-    emit("leave");
-    emit("ret");         
 
-    for(auto& decl: node->decls_)
-    {
-        decl->accept(this);
-       // visit(decl);
-    }
-}
                 
    void gen::visit(IntegerLiteral* node)
    {
@@ -282,6 +256,7 @@ void gen::genProgram(Program* node)
    void gen::visit(FunctionDef* node)
    {
            Info("FunctionDef");
+           functionName_ = node->identi_->name_;
            emit(".global "+node->identi_->name_);
            emit(node->identi_->name_+":");
            emit("pushq %rbp");
@@ -459,6 +434,20 @@ void gen::genProgram(Program* node)
      emit("jz " + falsedLabel);
      emit("jmp "+ trueLabel);
   }
+
+  void gen::visit(GotoStmt* node)
+  {
+      std::stringstream s;
+      s<<"jmp .L."<<functionName_<<"."<<node->label_;
+      emit(s);
+  }
+
+  void gen::visit(LabelStmt* node)
+  {
+       std::stringstream s;
+      s<<".L."<<functionName_<<"."<<node->label_<<":";
+      emit(s);     
+  }
   void gen::visit(FunctionCall* node)
 {
     static int seq = 0;
@@ -498,5 +487,31 @@ void  gen::visit(CompousedStmt* node)
     }
     Info("compoused");
 }
+void gen::visit(Program* node)
+{
+//emit(".intel_syntax noprefix\n");
+    emit(".LC0:");
+    emit("\t.string \"%d\\n\"");
+    emit(".text");
+    emit(".global print");
+    emit("print:");
+    emit("pushq %rbp");
+    emit("movq %rsp, %rbp");
+    emit("subq $16, %rsp");
+    emit("movq %rdi, -8(%rbp)");
+    emit("movq -8(%rbp), %rax") ;
+    emit("movq %rax, %rsi");
+    emit("leaq .LC0(%rip), %rdi");
+    emit("movq $0,%rax");
+    emit("call printf@PLT");
+    emit("nop");
+    emit("leave");
+    emit("ret");         
 
+    for(auto& decl: node->decls_)
+    {
+        decl->accept(this);
+       // visit(decl);
+    }
+}
 }

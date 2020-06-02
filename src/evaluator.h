@@ -15,13 +15,15 @@ public:
    virtual void visit(IfStmt* node)override{ assert(0);}
    virtual void visit(CompousedStmt* node)override{ assert(0);}
    virtual void visit(FunctionCall* node)override{ assert(0);}
-   virtual void visit(JumpStmt* node)override { assert(0);}
+   virtual void visit(GotoStmt* node)override { assert(0);}
    virtual void visit(ReturnStmt* node)override{ assert(0);}
    virtual void visit(StringLiteral* node)override{assert(0);}
    virtual void visit(UnaryOp*node)override;
    virtual void visit(ConditionExpr* node)override;
    virtual void visit(LoopStmt* node)override{assert(0);}
    virtual void visit(BreakContinueStmt* node)override{assert(0);}
+   virtual void visit(LabelStmt* node)override{assert(0);}
+
    T eval(Expr* node)
    {
        node->accept(this);

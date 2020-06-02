@@ -512,6 +512,16 @@ LoopStmt* parser::parseDoWhileStmt()
     {
         return parseContinueBreakStmt(BreakContinueStmt::kcontinue);
     }
+    if(match(TokenType::T_GOTO))
+    {
+        auto token = consume();
+        if(token.type != TokenType::T_IDENT)
+        {
+            ExitWithError("expect identifier");
+        }
+        expect(TokenType::T_SEMI,";");
+        return GotoStmt::create(token.getText());
+    }
     if(match(TokenType::T_FOR))
     {
         CompousedStmt* stmt = nullptr;
@@ -550,13 +560,22 @@ LoopStmt* parser::parseDoWhileStmt()
         else
         {
             Info("vartoken:%s",varToken.tostring().c_str());
-            scan.putBack(varToken);
-            auto  assign = expr();                 
-            expect(TokenType::T_SEMI,";");
-            return assign; 
+            
+            if(match(TokenType::T_COLON))
+            {
+                
+                return LabelStmt::create(varToken.getText());
+            }
+            else
+            {
+                scan.putBack(varToken);
+                auto  assign = expr();                 
+                expect(TokenType::T_SEMI,";");
+                 return assign; 
+            }
         }  
      }
-    ExitWithError("unknow statment");
+    ExitWithError("Token: %s unknow statment", peek().tostring().c_str());
  }
  CompousedStmt* parser::parserCompoundStmt()
  {
