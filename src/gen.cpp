@@ -60,7 +60,16 @@ namespace Yan
     {
         outfstream<<"\t"<<inst<<"\n";
     }
-
+    void gen::emit(std::stringstream& out)
+    {
+        outfstream<<"\t"<<out.str()<<std::endl;
+    }
+std::string gen::genLabe()
+{
+    std::stringstream  l;
+    l<<".L"<<labelseq++;
+    return l.str();
+}
 
 //store value from register to statck
 void gen::storeLValue(Type *ty)
@@ -154,37 +163,37 @@ void gen::loadLValue(Identifier *node)
        {
             node->left->accept(this);
             node->right->accept(this);
-            genGT();
+           genCmp("setg");
        }
         else if (node->op == OpType::OP_LT)
        {
             node->left->accept(this);
             node->right->accept(this);
-            genLT();
+            genCmp("setle");
        }
         else if (node->op == OpType::OP_EQ)
        {
             node->left->accept(this);
             node->right->accept(this);
-            genEQ();
+            genCmp("sete");
        }
          else if (node->op == OpType::OP_NE)
        {
             node->left->accept(this);
             node->right->accept(this);
-            genNE();
+            genCmp("setne");
        }
          else if (node->op == OpType::OP_GE)
        {
             node->left->accept(this);
             node->right->accept(this);
-            genGE();
+            genCmp("setge");
        }
         else if (node->op == OpType::OP_LE)
        {
             node->left->accept(this);
             node->right->accept(this);
-            genLE();
+             genCmp("setle");;
        }
 
  
@@ -223,31 +232,6 @@ void gen::loadLValue(Identifier *node)
         emit("push %rax");
     }
    
-
-   void gen::genGE()
-    {
-        genCmp("setge");
-    }
-     void gen::genEQ()
-    {
-        genCmp("sete");
-    }
-     void gen::genNE()
-    {
-        genCmp("setne");
-    }
-     void gen::genGT()
-    {
-        genCmp("setg");
-    }
-     void gen::genLT()
-    {
-        genCmp("setl");
-    }
-     void gen::genLE()
-    {
-        genCmp("setle");
-    }
     void  gen::genCmp(const std::string& how)
     {
         emit("popq %rdx");
@@ -406,10 +390,22 @@ void gen::genProgram(Program* node)
  }
   void  gen::visit(IfStmt* node)
   {
+      node->cond_->accept(this);
+      emit("popq %rax");
+     emit("orq $0, %rax");
+     // static int seq = 0;
+    auto elsLabel = genLabe();
+    auto elsEndLabel = genLabe();
+    emit("jz " + elsLabel);
+    node->then_->accept(this);
+    emit("jmp "+ elsEndLabel);
+    emit(elsLabel +" :");
+    if(node->else_)
+    node->else_->accept(this);
 
-  }
-  void  gen::visit(PrintStmt* node)
-  {
+    emit(elsEndLabel+":");
+
+
 
   }
   void gen::visit(FunctionCall* node)
@@ -429,19 +425,18 @@ void gen::genProgram(Program* node)
     // calling a function because it is an ABI requirement.  
     emit("movq %rsp, %rax");
     emit("andq $15, %rax");
-    std::stringstream labe,labe1;
-    labe <<".L.call."<<seq++;
-    labe1 <<".L.end."<<seq;
-     emit("jnz "+labe.str());
+    auto labe = genLabe();
+    auto labe1 = genLabe();
+     emit("jnz "+labe);
     emit("mov $0,%rax");
     emit("call "+node->designator_->name_);
-    emit("jmp "+labe1.str());
-    emit(labe.str()+":");
+    emit("jmp "+labe1);
+    emit(labe +":");
     emit("subq $8,%rsp");
      emit("movq $0,%rax");
      emit("   call "+node->designator_->name_);
      emit(" addq $8,%rsp");
-     emit(labe1.str()+":");
+     emit(labe1 +":");
 
 }
 void  gen::visit(CompousedStmt* node)

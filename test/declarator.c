@@ -10,18 +10,19 @@ int main()
     int **(**a())();
     int x;
     x = 99;
-    if(x>90)
+  /*  if(x>90)
     {
         x = x+78;
     }
     else
     {
         x = x -80;
-    }
-    if(88>90)
-    x=90;
+    }*/
+    if(881>90)
+        print(90);
     
 }
 /*
 Expected output:
+90
 */

@@ -20,7 +20,6 @@ struct Declaration;
 struct Program;
 
 struct IfStmt;
-struct PrintStmt;
 struct CompousedStmt;
 struct FunctionCall;
 struct JumpStmt;
@@ -40,7 +39,6 @@ public:
    virtual void visit(Declaration* node) = 0;
    virtual void visit(Program* node) = 0;
    virtual void visit(IfStmt* node) = 0;
-   virtual void visit(PrintStmt* node) = 0;
    virtual void visit(CompousedStmt* node) = 0;
    virtual void visit(FunctionCall* node) = 0;
    virtual void visit(JumpStmt* node)=0;
@@ -77,14 +75,6 @@ struct CompousedStmt:public Stmt
     symbolTable* scope_;
 };
 
-struct  PrintStmt: public Stmt
-{
-    PrintStmt(Expr*expr):expr_(expr){}
-    virtual void accept(Ivisitor*v) override{ v->visit(this);}
-    static PrintStmt* create(Expr*expr){ return new PrintStmt(expr);}
-    Expr* expr_;
-    
-};
 struct IfStmt: public Stmt
 {  
     IfStmt(Expr* cond, Stmt* then, Stmt* els = nullptr)

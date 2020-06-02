@@ -13,7 +13,6 @@ public:
    virtual void visit(Declaration* node)override{ assert(0);}
    virtual void visit(Program* node)override{ assert(0);}
    virtual void visit(IfStmt* node)override{ assert(0);}
-   virtual void visit(PrintStmt* node)override{ assert(0);}
    virtual void visit(CompousedStmt* node)override{ assert(0);}
    virtual void visit(FunctionCall* node)override{ assert(0);}
    virtual void visit(JumpStmt* node)override { assert(0);}

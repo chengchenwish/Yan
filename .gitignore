@@ -4,3 +4,4 @@ test/*·out
 test/*.s
 test/YAN
 test/*.symobol
+test/*.core

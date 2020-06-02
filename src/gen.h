@@ -11,6 +11,7 @@ class gen:public Ivisitor
 public:
     explicit gen(const std::string& fileName = "a.s");
     ~gen();
+   std::string genLabe();
     //impliment Ivistor
     virtual void visit(BinaryOp* node)override;
     virtual void visit(Identifier* node) override;
@@ -19,7 +20,6 @@ public:
     virtual void visit(Declaration* node)override;
     virtual void visit(Program* node)override{};
    virtual void visit(IfStmt* node)override;
-   virtual void visit(PrintStmt* node)override;
    virtual void visit(CompousedStmt* node)override;
    virtual void visit(FunctionCall* node)override;
     virtual void visit(JumpStmt* node)override {}
@@ -40,17 +40,12 @@ private:
     void genSub();
     void genMul();
     void genDiv();
-    void  genGE();
-    void genEQ();
-    void  genNE();
-    void  genGT();
-    void  genLT();
-    void  genLE();
     void  genCmp(const std::string& how);
 
 private:
     void emit(std::string inst, std::string dest, std::string source);
     void emit(std::string inst);
+    void emit(std::stringstream& out);
 
     //1 byte
     static const std::vector<std::string> argReg1;

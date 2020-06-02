@@ -26,7 +26,6 @@ class parser
         FunctionDef* parserFuncDef(Identifier* identi);
         
         CompousedStmt*parserCompoundStmt();
-        PrintStmt* parserPrintStmt();
         FunctionCall* parserFuncCall(Token var);
         IfStmt* parserIfStmt();
         Stmt* parserSingleStmt();

@@ -118,13 +118,6 @@ Token  parser::consume()
 }
 
 
-PrintStmt* parser::parserPrintStmt()
-{
-    Expr* exp = expr();
-    expect(TokenType::T_SEMI,";");
-    return PrintStmt::create(exp);
-}
-
 
 
 // expr = assign(","assign")*
@@ -435,14 +428,28 @@ IfStmt* parser::parserIfStmt()
 }
  Stmt* parser::parserSingleStmt()
  {
-    if (match(TokenType::T_PRINT))
-    {
-        return parserPrintStmt();
-    }
+     Info(peek().tostring().c_str());
     if(match(TokenType::T_IF))
     {
         return parserIfStmt();           
     }
+    if(test(TokenType::T_IDENT))
+    {
+        Token varToken = consume();
+             Info("vartoken:%s",varToken.tostring().c_str());
+        if(match(TokenType::T_LPAREN))
+        {
+                 return parserFuncCall(varToken);
+        }
+        else
+        {
+            Info("vartoken:%s",varToken.tostring().c_str());
+            scan.putBack(varToken);
+            auto  assign = expr();                 
+            expect(TokenType::T_SEMI,";");
+            return assign; 
+        }  
+     }
     ExitWithError("unknow statment");
  }
  CompousedStmt* parser::parserCompoundStmt()
@@ -473,22 +480,7 @@ IfStmt* parser::parserIfStmt()
         {
 
         }
-        else if(test(TokenType::T_IDENT))
-        {
-             Token varToken = consume();
-             Info("vartoken:%s",varToken.tostring().c_str());
-             if(match(TokenType::T_LPAREN))
-             {
-                 compoused->addStmt(parserFuncCall(varToken));
-             }
-             else
-             {   Info("vartoken:%s",varToken.tostring().c_str());
-                 scan.putBack(varToken);
-                 auto exp = expr();
-                 compoused->addStmt(exp);
-                 expect(TokenType::T_SEMI,";"); 
-             }  
-        }
+        
         else
         {
            compoused->addStmt(parserSingleStmt());
