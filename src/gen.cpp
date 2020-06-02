@@ -159,6 +159,7 @@ void gen::loadLValue(Identifier *node)
        {
             node->left->accept(this);
             node->right->accept(this);
+            
            genCmp("setg");
        }
         else if (node->op == OpType::OP_LT)
@@ -232,7 +233,9 @@ void gen::loadLValue(Identifier *node)
     {
         emit("popq %rdx");
         emit("popq %rax");
-        emit("cmp %rdx, %rax");
+        //TODO if type = long longlong
+       // emit("cmp %rdx, %rax");
+       emit("cmp %edx, %eax");
         std::string inst = how+" %al";
         emit(inst);
         emit("movzbq %al, %rax");

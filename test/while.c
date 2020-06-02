@@ -11,7 +11,7 @@ void main(){
       print(i);
       i = i-2;
       
-  }while(i >= 3);
+  }while(i >= 0);
 }
 /*
 Expected output:
@@ -30,4 +30,5 @@ Expected output:
 7
 5
 3
+1
 */
