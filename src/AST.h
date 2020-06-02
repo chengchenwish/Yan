@@ -26,6 +26,7 @@ struct JumpStmt;
 struct ReturnStmt;
 struct UnaryOp;
 struct ConditionExpr;
+struct BreakContinueStmt;
 
 
 class Ivisitor 
@@ -46,6 +47,7 @@ public:
    virtual void visit(ReturnStmt* node) = 0;
    virtual void visit(UnaryOp*node)=0;
    virtual void visit(ConditionExpr* node) = 0;
+   virtual void visit(BreakContinueStmt* node) = 0;
 
 };
 
@@ -105,6 +107,20 @@ struct LoopStmt: public Stmt
     // true for do-while
     bool  postcheck_ ;
 
+};
+struct BreakContinueStmt:public Stmt
+{
+    enum kind
+    {
+        kBreak,
+        kcontinue
+    };
+    BreakContinueStmt(kind k):kind_(k){}
+    static BreakContinueStmt* create(kind k){return new BreakContinueStmt(k);}
+    virtual void accept(Ivisitor* v)override{ v->visit(this);}
+
+    kind kind_;
+    
 };
 struct ReturnStmt:public Stmt
 {

@@ -8,6 +8,8 @@ namespace Yan{
 
 class gen:public Ivisitor
 {
+    using LabelStack = std::stack<std::string>;
+
 public:
     explicit gen(const std::string& fileName = "a.s");
     ~gen();
@@ -28,6 +30,7 @@ public:
    virtual void visit(UnaryOp* node)override{}
    virtual void visit(ConditionExpr* node)override{}
    virtual void visit(StringLiteral* node)override{}
+   virtual void visit(BreakContinueStmt* node)override;
 
     void genProgram(Program* node);
     void genLvalue(Identifier*node);
@@ -42,7 +45,7 @@ private:
     void genSub();
     void genMul();
     void genDiv();
-    void  genCmp(const std::string& how);
+    void  genCmp(const std::string& how, bool longType = false);
 
 private:
     void emit(std::string inst);
@@ -59,6 +62,8 @@ private:
     
     //used to avoid generating duplicated label
     static int labelseq;
+    LabelStack breakLabels_;
+    LabelStack continueLabels_;
     
     std::string outfileName; 
     std::fstream outfstream;

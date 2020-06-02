@@ -159,7 +159,7 @@ void gen::loadLValue(Identifier *node)
        {
             node->left->accept(this);
             node->right->accept(this);
-            
+            //Todo Check node type if long/long 
            genCmp("setg");
        }
         else if (node->op == OpType::OP_LT)
@@ -229,12 +229,14 @@ void gen::loadLValue(Identifier *node)
         emit("push %rax");
     }
    
-    void  gen::genCmp(const std::string& how)
+    void  gen::genCmp(const std::string& how, bool longType)
     {
         emit("popq %rdx");
         emit("popq %rax");
-        //TODO if type = long longlong
-       // emit("cmp %rdx, %rax");
+        if(longType)
+         {
+             emit("cmp %rdx, %rax");
+         }
        emit("cmp %edx, %eax");
         std::string inst = how+" %al";
         emit(inst);
@@ -409,22 +411,45 @@ void gen::genProgram(Program* node)
   void gen::visit(LoopStmt* node)
   {
 
-     auto thenLabel = genLabe();
-     auto thenEndLabel = genLabe();
+     auto startLabel = genLabe();
+     auto endLabel = genLabe();
+     breakLabels_.push(endLabel);
+     continueLabels_.push(startLabel);
      if(node->postcheck_)
      {
-         emit("jmp " + thenLabel);
+         emit("jmp " + startLabel);
      }
      else
      {
-        checkCondition(node->cond_,thenLabel,thenEndLabel);
+        checkCondition(node->cond_,startLabel,endLabel);
      }
-     emit(thenLabel+":");
+     emit(startLabel+":");
      node->then_->accept(this);
-     checkCondition(node->cond_,thenLabel,thenEndLabel);
-     emit(thenEndLabel+":");
+     checkCondition(node->cond_,startLabel,endLabel);
+     emit(endLabel+":");
+     breakLabels_.pop();
+     continueLabels_.pop();
 
 
+  }
+  void gen::visit(BreakContinueStmt* node)
+  {
+      if(node->kind_ == BreakContinueStmt::kBreak)
+      {
+          if(breakLabels_.empty())
+          {
+              ExitWithError("break doesn't in a loop or switch statment");
+          }
+          emit("jmp "+breakLabels_.top());
+      }
+      else
+      {
+          if(continueLabels_.empty())
+          {
+              ExitWithError("contine doesn't in a loop or switch statment");
+          }
+          emit("jmp "+continueLabels_.top());
+      }
   }
   void gen::checkCondition(Expr* node, std::string trueLabel,std::string falsedLabel)
   {

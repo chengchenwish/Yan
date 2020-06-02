@@ -5,3 +5,4 @@ test/*.s
 test/YAN
 test/*.symbol
 test/*.core
+test/core

@@ -34,6 +34,7 @@ class parser
         LoopStmt* parseWhileStmt();
         LoopStmt* parseForStmt();
         LoopStmt* parseDoWhileStmt();
+        BreakContinueStmt* parseContinueBreakStmt(BreakContinueStmt::kind type);
 
     
         

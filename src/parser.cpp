@@ -483,6 +483,12 @@ LoopStmt* parser::parseDoWhileStmt()
 
 
 }
+ BreakContinueStmt* parser::parseContinueBreakStmt(BreakContinueStmt::kind type)
+ {
+     expect(TokenType::T_SEMI,";");
+     return BreakContinueStmt::create(type);
+
+ }
  Stmt* parser::parserSingleStmt()
  {
      Info(peek().tostring().c_str());
@@ -497,6 +503,14 @@ LoopStmt* parser::parseDoWhileStmt()
     if(match(TokenType::T_DO))
     {
         return parseDoWhileStmt();
+    }
+    if(match(TokenType::T_BREAK))
+    {
+        return parseContinueBreakStmt(BreakContinueStmt::kBreak);
+    }
+    if(match(TokenType::T_CONTINUE))
+    {
+        return parseContinueBreakStmt(BreakContinueStmt::kcontinue);
     }
     if(match(TokenType::T_FOR))
     {
