@@ -1,0 +1,37 @@
+TranslationUnitDecl 0x55e07ee26128 <<invalid sloc>> <invalid sloc>
+|-TypedefDecl 0x55e07ee266a0 <<invalid sloc>> <invalid sloc> implicit __int128_t '__int128'
+| `-BuiltinType 0x55e07ee263c0 '__int128'
+|-TypedefDecl 0x55e07ee26710 <<invalid sloc>> <invalid sloc> implicit __uint128_t 'unsigned __int128'
+| `-BuiltinType 0x55e07ee263e0 'unsigned __int128'
+|-TypedefDecl 0x55e07ee269e8 <<invalid sloc>> <invalid sloc> implicit __NSConstantString 'struct __NSConstantString_tag'
+| `-RecordType 0x55e07ee267f0 'struct __NSConstantString_tag'
+|   `-Record 0x55e07ee26768 '__NSConstantString_tag'
+|-TypedefDecl 0x55e07ee26a80 <<invalid sloc>> <invalid sloc> implicit __builtin_ms_va_list 'char *'
+| `-PointerType 0x55e07ee26a40 'char *'
+|   `-BuiltinType 0x55e07ee261c0 'char'
+|-TypedefDecl 0x55e07ee26d48 <<invalid sloc>> <invalid sloc> implicit __builtin_va_list 'struct __va_list_tag [1]'
+| `-ConstantArrayType 0x55e07ee26cf0 'struct __va_list_tag [1]' 1 
+|   `-RecordType 0x55e07ee26b60 'struct __va_list_tag'
+|     `-Record 0x55e07ee26ad8 '__va_list_tag'
+|-VarDecl 0x55e07ee26db8 <c.c:2:1, col:5> col:5 used a 'int'
+|-VarDecl 0x55e07ee7ed88 <line:3:1, col:5> col:5 used b 'int'
+|-FunctionDecl 0x55e07ee7ee38 <line:4:1, line:7:1> line:4:6 used dump 'void ()'
+| `-CompoundStmt 0x55e07ee7efd0 <line:5:1, line:7:1>
+|   `-BinaryOperator 0x55e07ee7efa8 <line:6:5, col:11> 'int' '='
+|     |-DeclRefExpr 0x55e07ee7eed8 <col:5> 'int' lvalue Var 0x55e07ee26db8 'a' 'int'
+|     `-BinaryOperator 0x55e07ee7ef80 <col:9, col:11> 'int' '+'
+|       |-ImplicitCastExpr 0x55e07ee7ef50 <col:9> 'int' <LValueToRValue>
+|       | `-DeclRefExpr 0x55e07ee7ef00 <col:9> 'int' lvalue Var 0x55e07ee26db8 'a' 'int'
+|       `-ImplicitCastExpr 0x55e07ee7ef68 <col:11> 'int' <LValueToRValue>
+|         `-DeclRefExpr 0x55e07ee7ef28 <col:11> 'int' lvalue Var 0x55e07ee7ed88 'b' 'int'
+`-FunctionDecl 0x55e07ee7f040 <line:8:1, line:13:1> line:8:5 main 'int ()'
+  `-CompoundStmt 0x55e07ee7f2d8 <line:9:1, line:13:1>
+    |-DeclStmt 0x55e07ee7f178 <line:10:5, col:12>
+    | `-VarDecl 0x55e07ee7f0f8 <col:5, col:11> col:9 x 'int' cinit
+    |   `-IntegerLiteral 0x55e07ee7f158 <col:11> 'int' 1
+    |-DeclStmt 0x55e07ee7f228 <line:11:5, col:13>
+    | `-VarDecl 0x55e07ee7f1a8 <col:5, col:12> col:9 y 'int' cinit
+    |   `-IntegerLiteral 0x55e07ee7f208 <col:12> 'int' 2
+    `-CallExpr 0x55e07ee7f2b0 <line:12:5, col:10> 'void'
+      `-ImplicitCastExpr 0x55e07ee7f298 <col:5> 'void (*)()' <FunctionToPointerDecay>
+        `-DeclRefExpr 0x55e07ee7f240 <col:5> 'void ()' Function 0x55e07ee7ee38 'dump' 'void ()'

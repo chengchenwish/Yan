@@ -262,6 +262,7 @@ namespace Yan
     {
 
         std::string name_;
+        storageClass class_ = storageClass::UNKNOW;
         bool isLocal_;
         //only for local varibale
         int offset_ = 0;

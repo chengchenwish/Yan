@@ -684,8 +684,18 @@ namespace Yan
             else
             {
                 //global variable
+                Info("varaibale111");
+                 
                 auto varabile = Identifier::create(name, new_ty, false);
-                currentScop_->addSymoble(name, varabile);
+                    currentScop_->addSymoble(name, varabile);
+                if(sclass == storageClass::TYPE_DEF)
+                {
+                    varabile->class_ = storageClass::TYPE_DEF;
+                    expect(TokenType::T_SEMI,";");
+                    continue;
+                }
+                    
+               
                 program->add(parserDeclaration(varabile));
             }
         }
@@ -696,6 +706,7 @@ namespace Yan
     bool parser::isTypeName()
     {
         //current only support int/char
+        Info("uuu:%s",peek().tostring().c_str());
         return isOneOf(TokenType::T_INT,
                        TokenType::T_CHAR,
                        TokenType::T_BOOL,
@@ -713,7 +724,13 @@ namespace Yan
     }
     bool parser::findtypedef(const std::string &name)
     {
-        //todo
+        Identifier* identi = nullptr;
+        currentScop_->getIdentiInAllScope(name,&identi);
+        Info("yyyy:%s",name.c_str());
+        if(identi && identi->class_ == storageClass::TYPE_DEF)
+        {
+            return true;
+        }
         return false;
     }
 
@@ -838,10 +855,23 @@ namespace Yan
                     sign = ksigned;
                 }
             }
+            //handle user defined type;
+            else if(peek().type == TokenType::T_IDENT)
+            {
+                Identifier* identi =nullptr;
+                if(currentScop_->getIdentiInAllScope(peek().getText(),&identi))
+                {
+                    consume();
+                    return identi->type_;
+                }
+            }
+
+            
         }
         if (sclass)
         {
             *sclass = storage_class;
+
         }
         Type *ty = nullptr;
         switch (kind)
@@ -894,6 +924,7 @@ namespace Yan
     {
         Type *ty = type;
         Info("ttttttt:%s", ty->tostring().c_str());
+        Info(peek().tostring().c_str());
         while (match(TokenType::T_STAR))
         {
             ty = PtrType::create(ty);
