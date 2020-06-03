@@ -3,51 +3,50 @@
 namespace Yan
 {
 
-std::string Token::tostring()
-{
-    #define xx(T,Text)\
-        case TokenType::T: return Text;
-    switch(type)
+    std::string Token::tostring()
     {
-        RESERVED(xx)
-        KEYWORD(xx)
-        case TokenType::T_EOF: return "EOF";
+#define xx(T, Text)    \
+    case TokenType::T: \
+        return Text;
+        switch (type)
+        {
+            RESERVED(xx)
+            KEYWORD(xx)
+        case TokenType::T_EOF:
+            return "EOF";
         case TokenType::T_IDENT:
         {
-             std::string str = "Identi: "+getText();
+            std::string str = "Identi: " + getText();
             return str;
         }
         case TokenType::T_STRLIT:
         {
-             std::string str = "strlit: "+getText();
+            std::string str = "strlit: " + getText();
             return str;
         }
         case TokenType::T_INTLIT:
         {
-            std::string str = "intlit: "+std::to_string(getValue());
-            return  str;
+            std::string str = "intlit: " + std::to_string(getValue());
+            return str;
         }
         default:
-        return "unkown";
+            return "unkown";
+        }
+#undef xx
     }
-    #undef xx
 
-}
+    std::string Token::getText()
+    {
+        return std::get<std::string>(text);
+    }
+    int Token::getValue()
+    {
+        return std::get<int>(text);
+    }
 
-std::string Token::getText()
-{
-    return std::get<std::string>(text);
-}
-int Token::getValue()
-{
-    return std::get<int>(text);
-}
+    const location &Token::getLocation()
+    {
+        return loc;
+    }
 
-const location& Token::getLocation()
-{ 
-    return loc;
-}
-
-
-
-}
+} // namespace Yan

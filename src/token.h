@@ -9,8 +9,8 @@ namespace Yan{
 constexpr int MAX_STR_LEN = 100;
 
 #define KEYWORD(xx)         \
-     xx(T_VOID ,    "void") \
-     xx(T_CHAR,     "char") \
+xx(T_VOID ,    "void") \
+xx(T_CHAR,     "char") \
      xx(T_INT,      "int" ) \
      xx(T_LONG,     "long") \
      xx(T_SHORT,    "short")\
@@ -89,10 +89,10 @@ constexpr int MAX_STR_LEN = 100;
 
 enum class TokenType 
 { 
-    #define xx(type, text) type,
+#define xx(type, text) type,
     KEYWORD(xx)
     RESERVED(xx)
-    #undef xx
+#undef xx
 
     T_EOF,
     T_INTLIT,
