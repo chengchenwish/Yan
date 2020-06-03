@@ -21,6 +21,8 @@ x= 9 > 7;   print (x);
 x= 9 >= 7;  print (x);
 x= 9 == 7;  print (x);
 x=  -1 >= 1;  print (x);
+x=7<7;print(x);
+x = 7>7;print(x);
 
 }
 /*
@@ -42,6 +44,8 @@ Expected output:
 1
 1
 1
+0
+0
 0
 0
 */

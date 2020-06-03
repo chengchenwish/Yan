@@ -164,7 +164,7 @@ namespace Yan
         {
             node->left->accept(this);
             node->right->accept(this);
-            genCmp("setle");
+            genCmp("setl");
         }
         else if (node->op == OpType::OP_EQ)
         {
@@ -189,7 +189,7 @@ namespace Yan
             node->left->accept(this);
             node->right->accept(this);
             genCmp("setle");
-            ;
+            
         }
     }
 

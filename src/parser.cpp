@@ -585,8 +585,13 @@ namespace Yan
                 identi->setoffset(currentScop_->caculateOffset(pair.second));
             }
 
-            else if (match(TokenType::T_LBRACE))
+            else if (test(TokenType::T_LBRACE))
             {
+                selfScope self(*this, Scope::BLOCK);
+                auto block = parserCompoundStmt();
+                block->scope_ = currentScop_;
+                compoused->addStmt(block);
+                
             }
 
             else
@@ -678,6 +683,7 @@ namespace Yan
             }
             else
             {
+                //global variable
                 auto varabile = Identifier::create(name, new_ty, false);
                 currentScop_->addSymoble(name, varabile);
                 program->add(parserDeclaration(varabile));
