@@ -388,7 +388,9 @@ namespace Yan
         }
         else
         {
+            selfScope self(*this, Scope::BLOCK);
             then = parserCompoundStmt();
+            static_cast<CompousedStmt*>(then)->scope_ = currentScop_;
         }
         if (test(TokenType::T_ELSE))
         {
@@ -400,7 +402,9 @@ namespace Yan
             }
             else
             {
+                selfScope self(*this, Scope::BLOCK);
                 els = parserCompoundStmt();
+                static_cast<CompousedStmt*>(els)->scope_ = currentScop_;
             }
         }
 
@@ -418,7 +422,9 @@ namespace Yan
         }
         else
         {
+            selfScope self(*this, Scope::BLOCK);
             then = parserCompoundStmt();
+            static_cast<CompousedStmt*>(then)->scope_ = currentScop_;
         }
 
         return LoopStmt::create(cond, then);
@@ -449,8 +455,12 @@ namespace Yan
     }
     LoopStmt *parser::parseDoWhileStmt()
     {
-        auto then = parserCompoundStmt();
-        Info(__func__);
+        Stmt* then = nullptr;
+        {
+             selfScope self(*this, Scope::BLOCK);
+            then = parserCompoundStmt();
+            static_cast<CompousedStmt*>(then)->scope_ = currentScop_;
+        }
         expect(TokenType::T_WHILE, "while");
         expect(TokenType::T_LPAREN, "(");
         auto cond = expr();
@@ -507,7 +517,9 @@ namespace Yan
             expect(TokenType::T_LPAREN, "(");
             //TODO variabale
             //auto cond = expr();
-            if (!test(TokenType::T_SEMI))
+            
+          
+                if (!test(TokenType::T_SEMI))
             {
                 stmt = CompousedStmt::create();
                 auto init = expr();
@@ -518,6 +530,7 @@ namespace Yan
             {
                 stmt->addStmt(forstmt);
                 return stmt;
+            
             }
             return forstmt;
         }

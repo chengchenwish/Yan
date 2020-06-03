@@ -468,10 +468,25 @@ namespace Yan
     }
     void gen::visit(CompousedStmt *node)
     {
+        int offset = 0;
+        if(node->scope_)
+        {
+            offset = node->scope_->getTyepSize();
+            std::stringstream f;
+            f<<"subq $"<<offset<<", %rsp";
+            emit(f);
+        }
         for (auto &stmt : node->stmtlist_)
         {
             stmt->accept(this);
         }
+        if(offset>0)
+        {
+            std::stringstream f;
+            f<<"addq $"<<offset<<", %rsp";
+            emit(f);
+        }
+
         Info("compoused");
     }
     void gen::visit(Program *node)

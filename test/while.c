@@ -2,8 +2,10 @@ void main(){
  int i;
   i=1;
   while (i <= 10) {
+    int a;
+    a = 1;
     print(i);
-    i= i + 1;
+    i= i + a;
   }
   
   do 
