@@ -482,6 +482,7 @@ namespace Yan
         }
         if(offset>0)
         {
+            //restore
             std::stringstream f;
             f<<"addq $"<<offset<<", %rsp";
             emit(f);

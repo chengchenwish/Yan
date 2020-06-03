@@ -32,30 +32,13 @@ namespace Yan
         bool getIdentiInAllScope(const std::string &name, Identifier **indenti);
         void setParent(symbolTable *parent) { parent_ = parent; }
         void setScope(const Scope s) { scope_ = s; }
-        Scope getScope(){return scope_;}
-        SymbolList& getlist(){ return list_;}
+        Scope getScope() { return scope_; }
+        SymbolList &getlist() { return list_; }
         bool existInCurrentScope(const std::string &name);
         symbolTable *getParentScop() { return parent_; }
         SymbolList::iterator begin() { return list_.begin(); }
         SymbolList::iterator end() { return list_.end(); }
-        int caculateParentScopeOffSet(symbolTable* sc)
-        {
-            int off = 0;
-            if(sc && (sc->getScope() == Scope::BLOCK || (sc->getScope() == Scope::FUNC)))
-            {
-                Info("iiiiii");
-                off += caculateParentScopeOffSet(sc->getParentScop());
-                for(const auto& kv: sc->getlist())
-                {
-                    off += kv.second->type_->getsize();
-                }
-            }
-            else
-            {
-                return 0;
-            }
-            return off;
-        }
+
         int caculateOffset(const std::string &name)
         {
             int off = caculateParentScopeOffSet(parent_);
@@ -82,6 +65,24 @@ namespace Yan
         void dumpSymbol(std::ostream &os);
 
     private:
+        int caculateParentScopeOffSet(symbolTable *sc)
+        {
+            int off = 0;
+            if (sc && (sc->getScope() == Scope::BLOCK || (sc->getScope() == Scope::FUNC)))
+            {
+                Info("iiiiii");
+                off += caculateParentScopeOffSet(sc->getParentScop());
+                for (const auto &kv : sc->getlist())
+                {
+                    off += kv.second->type_->getsize();
+                }
+            }
+            else
+            {
+                return 0;
+            }
+            return off;
+        }
         Scope scope_;
         SymbolList list_;
         symbolTable *parent_;

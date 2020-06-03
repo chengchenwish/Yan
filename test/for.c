@@ -1,12 +1,18 @@
 void main(){
   int i;
   for (i= 1; i <= 10; i= i + 1) {
-    print (i);
+    int a;
+    a = 0;
+    a = i+1;
+    print (a);
   }
+  int a;
+  a = 9;
+  print(a);
+
 }
 /*
 Expected output:
-1
 2
 3
 4
@@ -16,4 +22,6 @@ Expected output:
 8
 9
 10
+11
+9
 */
