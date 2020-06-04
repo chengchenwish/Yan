@@ -71,9 +71,14 @@ namespace Yan
         emit("popq %rbx");
         std::stringstream fm;
 
-        if (ty->getsize() == 2)
+        if(ty->getsize() == 1)
         {
-            emit("mov %eax, (%rbx)");
+            emit("movb %al, (%rbx)");
+        }
+
+        else if (ty->getsize() == 2)
+        {
+            emit("movw %ax, (%rbx)");
         }
         else if (ty->getsize() == 4)
         {
@@ -90,11 +95,15 @@ namespace Yan
     {
 
         std::stringstream fm;
-
+        if(node->type_->getsize() == 1)
+        {
+                fm << "movb  -" << node->offset_ << "(%rbp) , "
+               << "%al";
+        }
         if (node->type_->getsize() == 2)
         {
-            fm << "mov  -" << node->offset_ << "(%rbp) , "
-               << "%eax";
+            fm << "movw  -" << node->offset_ << "(%rbp) , "
+               << "%ax";
         }
         else if (node->type_->getsize() == 4)
         {
@@ -254,9 +263,9 @@ namespace Yan
         emit(node->identi_->name_ + ":");
         emit("pushq %rbp");
         emit("movq %rsp, %rbp");
-        std::stringstream fm;
-        fm << "subq $" << node->getStackSize() << ", %rsp";
-        emit(fm.str());
+        // std::stringstream fm;
+        // fm << "subq $" << node->getStackSize() << ", %rsp";
+      //  emit(fm.str());
         //   emit("subq $24, %rsp");
         int index = 0;
         for (auto &arg : static_cast<FuncType *>(node->identi_->type_)->getParam())
@@ -470,7 +479,7 @@ namespace Yan
     {
         int offset = 0;
         if(node->scope_)
-        {
+        {//extend stack size for block statments
             offset = node->scope_->getTyepSize();
             std::stringstream f;
             f<<"subq $"<<offset<<", %rsp";
