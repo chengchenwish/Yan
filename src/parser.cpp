@@ -576,11 +576,18 @@ namespace Yan
 
             if (isTypeName())
             {
-                auto type = baseType(nullptr);
+                storageClass sclass= storageClass::UNKNOW;
+                auto type = baseType(&sclass);
                 auto pair = declarator(type);
 
                 auto identi = Identifier::create(pair.second, pair.first, true);
                 currentScop_->addSymoble(pair.second, identi);
+                if(sclass == storageClass::TYPE_DEF)
+                {
+                    identi->class_ = storageClass::TYPE_DEF;
+                    expect(TokenType::T_SEMI,";");
+                    continue;
+                }
                 compoused->addStmt(parserDeclaration(identi));
                 identi->setoffset(currentScop_->caculateOffset(pair.second));
             }
