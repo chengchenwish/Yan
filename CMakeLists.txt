@@ -31,8 +31,8 @@ if(YAN_BUILD_TESTS)
                       APPEND PROPERTY COMPILE_OPTIONS -Wno-missing-field-initializers)
     set_property(TARGET gmock
                       APPEND PROPERTY COMPILE_OPTIONS -Wno-missing-field-initializers)
-    add_executable(UT UT/test_lexer.cpp
-                        UT/testAll.cpp)
+    add_executable(UT unittest/test_lexer.cpp
+                        unittest/testAll.cpp)
    
     target_link_libraries(UT gtest)
     target_link_libraries(UT compiler)
