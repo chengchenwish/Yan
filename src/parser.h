@@ -79,16 +79,16 @@ namespace Yan
 
         //Token ralated function
         bool match(TokenType t);
-        bool test(TokenType t) const;
+        bool is(TokenType t) const;
 
         bool isOneOf(TokenType K1, TokenType K2) const
         {
-            return test(K1) || test(K2);
+            return is(K1) || is(K2);
         }
         template <typename... Ts>
         bool isOneOf(TokenType K1, TokenType K2, Ts... Ks) const
         {
-            return test(K1) || isOneOf(K2, Ks...);
+            return is(K1) || isOneOf(K2, Ks...);
         }
         Token consume();
         void putBack(const Token &t) { scan.putBack(t); }

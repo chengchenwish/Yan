@@ -30,7 +30,7 @@ namespace Yan
         Info(tt.tostring().c_str());
         scan.putBack(tt);
 
-        if (test(TokenType::T_INTLIT))
+        if (is(TokenType::T_INTLIT))
         {
             auto t = consume();
 
@@ -38,7 +38,7 @@ namespace Yan
             node = IntegerLiteral::create(t.getValue());
             node->type_ = int_type;
         }
-        else if (test(TokenType::T_IDENT))
+        else if (is(TokenType::T_IDENT))
         {
             Identifier *identi;
             auto t = consume();
@@ -67,7 +67,7 @@ namespace Yan
     //if the front token doesn't match the specific token exit with error
     void parser::expect(TokenType t, const std::string &what)
     {
-        if (!test(t))
+        if (!is(t))
         {
             ExitWithError(scan.getLocation(), "matchTed %s,but current token is %s ", what.c_str(), scan.getToken().tostring().c_str());
         }
@@ -92,7 +92,7 @@ namespace Yan
             return false;
         }
     }
-    bool parser::test(TokenType t) const
+    bool parser::is(TokenType t) const
     {
         auto token = scan.getToken();
         if (token.type == t)
@@ -335,7 +335,7 @@ namespace Yan
     //cast = (type)cast|unary
     Expr *parser::cast()
     {
-        if (test(TokenType::T_RPAREN))
+        if (is(TokenType::T_RPAREN))
         {
             auto t = consume(); //consume '('
             if (isTypeName())
@@ -344,7 +344,7 @@ namespace Yan
                 auto ty = baseType(nullptr);
 
                 expect(TokenType::T_LPAREN, ")");
-                if (!test(TokenType::T_LBRACE))
+                if (!is(TokenType::T_LBRACE))
                 {
                     consume();
                     return UnaryOp::create(OpType::OP_CAST, cast(), ty);
@@ -382,7 +382,7 @@ namespace Yan
         expect(TokenType::T_RPAREN, ")");
         Stmt *then = nullptr;
         Stmt *els = nullptr;
-        if (!test(TokenType::T_LBRACE))
+        if (!is(TokenType::T_LBRACE))
         {
             then = parserSingleStmt();
         }
@@ -392,11 +392,11 @@ namespace Yan
             then = parserCompoundStmt();
             static_cast<CompousedStmt *>(then)->scope_ = currentScop_;
         }
-        if (test(TokenType::T_ELSE))
+        if (is(TokenType::T_ELSE))
         {
             consume();
 
-            if (!test(TokenType::T_LBRACE))
+            if (!is(TokenType::T_LBRACE))
             {
                 els = parserSingleStmt();
             }
@@ -416,7 +416,7 @@ namespace Yan
         auto cond = expr();
         expect(TokenType::T_RPAREN, ")");
         Stmt *then = nullptr;
-        if (!test(TokenType::T_LBRACE))
+        if (!is(TokenType::T_LBRACE))
         {
             then = parserSingleStmt();
         }
@@ -438,7 +438,7 @@ namespace Yan
         auto inc = expr();
         expect(TokenType::T_RPAREN, ")");
         Stmt *body = nullptr;
-        if (!test(TokenType::T_LBRACE))
+        if (!is(TokenType::T_LBRACE))
         {
             body = parserSingleStmt();
             auto stmt = CompousedStmt::create();
@@ -520,7 +520,7 @@ namespace Yan
             //TODO variabale
             //auto cond = expr();
             selfScope self(*this, Scope::BLOCK);
-            if (!test(TokenType::T_SEMI))
+            if (!is(TokenType::T_SEMI))
             {
                 stmt = CompousedStmt::create();
                 auto init = expr();
@@ -534,7 +534,7 @@ namespace Yan
             }
             return forstmt;
         }
-        if (test(TokenType::T_IDENT))
+        if (is(TokenType::T_IDENT))
         {
             Token varToken = consume();
             Info("vartoken:%s", varToken.tostring().c_str());
@@ -592,7 +592,7 @@ namespace Yan
                 identi->setoffset(currentScop_->caculateOffset(pair.second));
             }
 
-            else if (test(TokenType::T_LBRACE))
+            else if (is(TokenType::T_LBRACE))
             {
                 selfScope self(*this, Scope::BLOCK);
                 auto block = parserCompoundStmt();
@@ -674,7 +674,7 @@ namespace Yan
             auto pair = declarator(type);
             auto name = pair.second;
             auto new_ty = pair.first;
-            if (new_ty->isKindOf(Type::T_FUNC) && test(TokenType::T_LBRACE))
+            if (new_ty->isKindOf(Type::T_FUNC) && is(TokenType::T_LBRACE))
             {
                 auto funcIden = Identifier::create(name, new_ty, false);
                 currentScop_->addSymoble(name, funcIden);
@@ -727,7 +727,7 @@ namespace Yan
                        TokenType::T_TYPDEF,
                        TokenType::T_EXTERN,
                        TokenType::T_LONG) ||
-               (test(TokenType::T_IDENT) && findtypedef(peek().getText()));
+               (is(TokenType::T_IDENT) && findtypedef(peek().getText()));
     }
     bool parser::findtypedef(const std::string &name)
     {
@@ -949,7 +949,7 @@ namespace Yan
 
             return std::make_pair(return_type, pair.second);
         }
-        else if (test(TokenType::T_IDENT))
+        else if (is(TokenType::T_IDENT))
         {
             auto name = consume().getText();
             ty = type_suffix(ty);
@@ -964,11 +964,11 @@ namespace Yan
     }
     Type *parser::type_suffix(Type *type)
     {
-        if (test(TokenType::T_LBRACKET))
+        if (is(TokenType::T_LBRACKET))
         {
             return declarator_array(type);
         }
-        if (test(TokenType::T_LPAREN))
+        if (is(TokenType::T_LPAREN))
         {
             return declarator_func(type);
         }
@@ -980,14 +980,14 @@ namespace Yan
         expect(TokenType::T_LBRACKET, "[");
         bool incomplete = true;
         int len = -1;
-        if (!test(TokenType::T_RBRACKET))
+        if (!is(TokenType::T_RBRACKET))
         {
             len = constExpr<int>();
             expect(TokenType::T_RBRACKET, "]");
             incomplete = false;
         }
 
-        if (test(TokenType::T_LBRACKET))
+        if (is(TokenType::T_LBRACKET))
         {
             type = declarator_array(type);
             if (type->isIncomplete())
