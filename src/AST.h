@@ -248,7 +248,7 @@ namespace Yan
         int byteLen_;
     };
 
-    struct FunctionCall : public Stmt
+    struct FunctionCall : public Expr
     {
         FunctionCall(Identifier *designator) : designator_(designator) {}
         static FunctionCall *create(Identifier *designator) { return new FunctionCall(designator); }

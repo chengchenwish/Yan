@@ -25,9 +25,6 @@ namespace Yan
     Expr *parser::primary()
     {
         Expr *node = nullptr;
-        auto tt = scan.getToken();
-        Info(tt.tostring().c_str());
-        scan.putBack(tt);
 
         if (is(TokenType::T_INTLIT))
         {
@@ -47,7 +44,10 @@ namespace Yan
             {
                 ExitWithError("undefined variable :%s", t.getText().c_str());
             }
-            // return Identifier::create(identi->name_,nullptr);
+            if(match(TokenType::T_LPAREN))
+            {
+                return parseFuncCall(identi);
+            }
             return identi;
         }
         else if (match(TokenType::T_LPAREN))
@@ -550,13 +550,7 @@ namespace Yan
         {
             Token varToken = consume();
             Info("vartoken:%s", varToken.tostring().c_str());
-            if (match(TokenType::T_LPAREN))
-            {
-                return parseFuncCall(varToken);
-            }
-            else
-            {
-                Info("vartoken:%s", varToken.tostring().c_str());
+   
 
                 if (match(TokenType::T_COLON))
                 {
@@ -570,7 +564,7 @@ namespace Yan
                     expect(TokenType::T_SEMI, ";");
                     return assign;
                 }
-            }
+           
         }
         ExitWithError("Token: %s unknow statment", peek().tostring().c_str());
     }
@@ -620,24 +614,10 @@ namespace Yan
         }
         return compoused;
     }
-    FunctionCall *parser::parseFuncCall(Token var)
+    FunctionCall *parser::parseFuncCall(Identifier* identi)
     {
-        Identifier *identi;
-        auto exist = currentScop_->getIdentiInAllScope(var.getText(), &identi);
-        if (!exist)
-        {
-            if (var.getText() == "print")
-            {
-                auto functype = FuncType::create(void_type);
-                auto param = Identifier::create("x", int_type, true);
-                functype->addParam(param);
-                identi = Identifier::create(var.getText(), functype, false);
-            }
-            else
 
-                ExitWithError("undefined variable :%s", var.getText().c_str());
-        }
-        else if (!identi->type_->isKindOf(Type::T_FUNC))
+         if (!identi->type_->isKindOf(Type::T_FUNC))
         {
             ExitWithError("Expect function type");
         }
@@ -657,7 +637,7 @@ namespace Yan
             }
         }
         expect(TokenType::T_RPAREN, ")");
-        expect(TokenType::T_SEMI, ";");
+        // expect(TokenType::T_SEMI, ";");
         return funcCall;
     }
     FunctionDef *parser::parseFuncDef()
@@ -702,9 +682,21 @@ namespace Yan
         expect(TokenType::T_SEMI, ";");
         return Declaration::create(identi);
     }
+     void parser::defineBuildinFunc(std::string name, Type* reType, std::vector<Type*>paramType)
+     {
+         auto functype = FuncType::create(reType);
+         for(const auto& paramT : paramType)
+         {
+             functype->addParam(Identifier::create("",paramT,true));
+         }
+         auto identi = Identifier::create(name, functype, false);
+         currentScop_->addSymoble(name,identi);
+     }
     Program *parser::parseProgram()
     {
         auto program = Program::create();
+        defineBuildinFunc("print", void_type, {int_type});
+  
         symbolTable *funcscop = nullptr;
         while (!match(TokenType::T_EOF))
         {
@@ -1054,7 +1046,6 @@ namespace Yan
         expect(TokenType::T_LPAREN, "(");
         while (1)
         {
-
             if (isOneOf(TokenType::T_EOF, TokenType::T_RPAREN))
             {
                 break;

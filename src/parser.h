@@ -29,7 +29,7 @@ namespace Yan
         Stmt *parseSingleStmt();
         CompousedStmt *parseCompoundStmt();
         FunctionDef *parseFuncDef();
-        FunctionCall *parseFuncCall(Token var);
+        FunctionCall *parseFuncCall(Identifier* identi);
         IfStmt *parseIfStmt();
         LoopStmt *parseWhileStmt();
         LoopStmt *parseForStmt();
@@ -78,6 +78,7 @@ namespace Yan
         bool isTypeName();
         bool findtypedef(const std::string &name);
         bool isFuncdef();
+        void defineBuildinFunc(std::string name, Type* reType, std::vector<Type*>paramType);
 
         //Token ralated function
         bool match(TokenType t);
