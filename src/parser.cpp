@@ -1054,6 +1054,7 @@ namespace Yan
         expect(TokenType::T_LPAREN, "(");
         while (1)
         {
+
             if (isOneOf(TokenType::T_EOF, TokenType::T_RPAREN))
             {
                 break;

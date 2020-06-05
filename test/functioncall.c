@@ -18,7 +18,7 @@ int dump2(int x, int y,int z)
 }
 
 
-int main()
+int main(void)
 {
     int x ;
     x =12;
