@@ -141,7 +141,16 @@ namespace Yan
             }
             return;
         case '.':
-            t->type = TokenType::T_DOT;
+            if(peek() == '.')
+            {
+                consume('.');
+                consume('.');
+                t->type = TokenType::T_ELLIPSIS;
+            }
+            else
+            {
+               t->type = TokenType::T_DOT;
+            }                
             return;
         case '%':
             if ('=' == peek())

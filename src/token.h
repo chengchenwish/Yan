@@ -16,6 +16,7 @@ constexpr int MAX_STR_LEN = 100;
      xx(T_SHORT,    "short")\
      xx(T_ENUM,     "enum") \
      xx(T_STRUCT,   "struct")\
+     xx(T_UNION,    "union")\
      xx(T_BOOL,     "bool")\
      xx(T_EXTERN,   "extern")\
      xx(T_STATIC,   "static")\
@@ -81,7 +82,8 @@ constexpr int MAX_STR_LEN = 100;
     xx(T_RBRACKET,      "]")\
     xx(T_COMMA,         ",")\
     xx(T_SEMI,          ";")\
-    xx(T_COLON,         ":")
+    xx(T_COLON,         ":")\
+    xx(T_ELLIPSIS,      "...")
 
 
 

@@ -28,7 +28,7 @@ namespace Yan
         virtual void visit(FunctionCall *node) override;
         virtual void visit(GotoStmt *node) override;
         virtual void visit(ReturnStmt *node) override;
-        virtual void visit(UnaryOp *node) override {}
+        virtual void visit(UnaryOp *node) override;
         virtual void visit(ConditionExpr *node) override {}
         virtual void visit(StringLiteral *node) override {}
         virtual void visit(BreakContinueStmt *node) override;

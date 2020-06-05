@@ -119,7 +119,26 @@ namespace Yan
         emit(fm.str());
         emit("pushq %rax");
     }
+    void gen::visit(UnaryOp *node)
+    {
+        Info("ppppppppp %d",static_cast<int>(node->op_));
+         //node->operand_->accept(this);
+       //  emit("popq %rax");
+        if(node->op_ == OpType::OP_DEREF)
+        {
+            emit("popq %rax");
 
+            emit("movq %rax, %rbx");
+            emit("movq (%rbx),%rax");
+            emit("pushq %rax");
+        }
+        else if(node->op_ == OpType::OP_ADDR)
+        {
+            genLvalue(static_cast<Identifier *>(node->operand_));
+            //donothing;
+
+        }
+    }
     void gen::visit(BinaryOp *node)
     {
 

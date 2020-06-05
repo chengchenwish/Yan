@@ -64,6 +64,9 @@ namespace Yan
         Type *declarator_func(Type *type);
         Type *type_suffix(Type *type);
         Type *modifyBase(Type *type, Type *base, Type *new_base);
+        Type* parseStructDecl();
+        Type* parseEnumSpecifier();
+        Type* parseUnionSpecifier();
 
         Declarator parse_func_param();
 

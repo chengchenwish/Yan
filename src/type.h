@@ -116,12 +116,15 @@ namespace Yan
         void addParam(Identifier *param);
         std::vector<Identifier *> &getParam();
         static FuncType *create(Type *returnType);
+        void setVarargsFlag(bool has){varargs = has;}
+        bool hasVarargs()const{return varargs;}
 
         virtual FuncType *castToFunc() { return this; }
 
     private:
         FuncType(Type *returnType);
         std::vector<Identifier *> paramList_;
+        bool varargs;
     };
     class StructType : public Type
     {

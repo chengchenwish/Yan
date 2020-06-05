@@ -44,7 +44,7 @@ namespace Yan
             {
                 ExitWithError("undefined variable :%s", t.getText().c_str());
             }
-            if(match(TokenType::T_LPAREN))
+            if (match(TokenType::T_LPAREN))
             {
                 return parseFuncCall(identi);
             }
@@ -363,8 +363,15 @@ namespace Yan
         {
             return BinaryOp::create(OpType::OP_SUBTRACT, IntegerLiteral::create(0), cast());
         }
-        if (match(TokenType::T_STAR))
+        if(match(TokenType::T_AMPER))
         {
+            Info("ffffffffffffffffffffffff");
+            return UnaryOp::create(OpType::OP_ADDR,cast());
+        }
+        if(match(TokenType::T_STAR))
+        {
+            Info("uuuuuuuuuuuuuuuuuuuuu");
+            return UnaryOp::create(OpType::OP_DEREF, cast());
         }
         return postfix();
     }
@@ -550,22 +557,27 @@ namespace Yan
         {
             Token varToken = consume();
             Info("vartoken:%s", varToken.tostring().c_str());
-   
 
-                if (match(TokenType::T_COLON))
-                {
+            if (match(TokenType::T_COLON))
+            {
 
-                    return LabelStmt::create(varToken.getText());
-                }
-                else
-                {
-                    scan.putBack(varToken);
-                    auto assign = expr();
-                    expect(TokenType::T_SEMI, ";");
-                    return assign;
-                }
-           
+                return LabelStmt::create(varToken.getText());
+            }
+            else
+            {
+                scan.putBack(varToken);
+                auto assign = expr();
+                expect(TokenType::T_SEMI, ";");
+                return assign;
+            }
         }
+        else
+        {
+            auto exp = expr();
+            expect(TokenType::T_SEMI, ";");
+            return exp;
+        }
+        
         ExitWithError("Token: %s unknow statment", peek().tostring().c_str());
     }
     CompousedStmt *parser::parseCompoundStmt()
@@ -614,10 +626,10 @@ namespace Yan
         }
         return compoused;
     }
-    FunctionCall *parser::parseFuncCall(Identifier* identi)
+    FunctionCall *parser::parseFuncCall(Identifier *identi)
     {
 
-         if (!identi->type_->isKindOf(Type::T_FUNC))
+        if (!identi->type_->isKindOf(Type::T_FUNC))
         {
             ExitWithError("Expect function type");
         }
@@ -682,21 +694,21 @@ namespace Yan
         expect(TokenType::T_SEMI, ";");
         return Declaration::create(identi);
     }
-     void parser::defineBuildinFunc(std::string name, Type* reType, std::vector<Type*>paramType)
-     {
-         auto functype = FuncType::create(reType);
-         for(const auto& paramT : paramType)
-         {
-             functype->addParam(Identifier::create("",paramT,true));
-         }
-         auto identi = Identifier::create(name, functype, false);
-         currentScop_->addSymoble(name,identi);
-     }
+    void parser::defineBuildinFunc(std::string name, Type *reType, std::vector<Type *> paramType)
+    {
+        auto functype = FuncType::create(reType);
+        for (const auto &paramT : paramType)
+        {
+            functype->addParam(Identifier::create("", paramT, true));
+        }
+        auto identi = Identifier::create(name, functype, false);
+        currentScop_->addSymoble(name, identi);
+    }
     Program *parser::parseProgram()
     {
         auto program = Program::create();
         defineBuildinFunc("print", void_type, {int_type});
-  
+
         symbolTable *funcscop = nullptr;
         while (!match(TokenType::T_EOF))
         {
@@ -813,6 +825,7 @@ namespace Yan
             kunsigned
         } sign = ksignnone;
 
+        Type *ty = nullptr;
         storageClass storage_class = storageClass::UNKNOW;
         while (isTypeName())
         {
@@ -838,7 +851,18 @@ namespace Yan
                 }
             }
             //handle user defined type
-
+            else if (is(TokenType::T_STRUCT))
+            {
+                ty = parseStructDecl();
+            }
+            else if (is(TokenType::T_ENUM))
+            {
+                ty = parseEnumSpecifier();
+            }
+            else if (is(TokenType::T_UNION))
+            {
+                ty = parseUnionSpecifier();
+            }
             //Handle build-in type
 
             else if (isOneOf(TokenType::T_SHORT, TokenType::T_LONG))
@@ -914,7 +938,7 @@ namespace Yan
         {
             *sclass = storage_class;
         }
-        Type *ty = nullptr;
+
         switch (kind)
         {
         case kvoid:
@@ -1050,6 +1074,11 @@ namespace Yan
             {
                 break;
             }
+            if (match(TokenType::T_ELLIPSIS))
+            {
+                functionType->setVarargsFlag(true);
+                break;
+            }
             auto pair = parse_func_param();
             auto param = Identifier::create(pair.second, pair.first, true);
             functionType->addParam(param);
@@ -1088,6 +1117,20 @@ namespace Yan
             ty = PtrType::create(ty);
         }
         return std::make_pair(ty, pair.second);
+    }
+
+    Type *parser::parseStructDecl()
+    {
+        //TODO
+        return nullptr;
+    }
+    Type *parser::parseEnumSpecifier()
+    {
+        return nullptr;
+    }
+    Type *parser::parseUnionSpecifier()
+    {
+        return nullptr;
     }
 
 } // namespace Yan

@@ -189,6 +189,8 @@ namespace Yan
 
         //UnaryOP
         OP_CAST,
+        OP_ADDR,
+        OP_DEREF,
 
         OP_UNKOWN
     };
@@ -215,7 +217,7 @@ namespace Yan
     struct UnaryOp : public Expr
     {
         UnaryOp(OpType op, Expr *operand, Type *ty) : Expr(ty), op_(op), operand_(operand) {}
-        static UnaryOp *create(OpType op, Expr *operand, Type *ty) { return new UnaryOp(op, operand, ty); }
+        static UnaryOp *create(OpType op, Expr *operand, Type *ty = nullptr) { return new UnaryOp(op, operand, ty); }
         virtual void accept(Ivisitor *v) { v->visit(this); }
         OpType op_;
         Expr *operand_;
