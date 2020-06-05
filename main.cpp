@@ -24,7 +24,7 @@ static void compile(std::vector<std::string>&files)
     std::string out_asmeble_file = "a.s";
     Yan::gen gencode(out_asmeble_file);
     Yan::parser pars(pp);
-    auto pp1= pars.parserProgram();
+    auto pp1= pars.parseProgram();
     pp1->accept(&gencode);
     
     if(DEBUG)

@@ -25,7 +25,6 @@ namespace Yan
     Expr *parser::primary()
     {
         Expr *node = nullptr;
-        Info(__func__);
         auto tt = scan.getToken();
         Info(tt.tostring().c_str());
         scan.putBack(tt);
@@ -375,7 +374,7 @@ namespace Yan
         return primary();
     }
 
-    IfStmt *parser::parserIfStmt()
+    IfStmt *parser::parseIfStmt()
     {
         expect(TokenType::T_LPAREN, "(");
         auto condition = expr();
@@ -384,12 +383,12 @@ namespace Yan
         Stmt *els = nullptr;
         if (!is(TokenType::T_LBRACE))
         {
-            then = parserSingleStmt();
+            then = parseSingleStmt();
         }
         else
         {
             selfScope self(*this, Scope::BLOCK);
-            then = parserCompoundStmt();
+            then = parseCompoundStmt();
             static_cast<CompousedStmt *>(then)->scope_ = currentScop_;
         }
         if (is(TokenType::T_ELSE))
@@ -398,12 +397,12 @@ namespace Yan
 
             if (!is(TokenType::T_LBRACE))
             {
-                els = parserSingleStmt();
+                els = parseSingleStmt();
             }
             else
             {
                 selfScope self(*this, Scope::BLOCK);
-                els = parserCompoundStmt();
+                els = parseCompoundStmt();
                 static_cast<CompousedStmt *>(els)->scope_ = currentScop_;
             }
         }
@@ -418,12 +417,12 @@ namespace Yan
         Stmt *then = nullptr;
         if (!is(TokenType::T_LBRACE))
         {
-            then = parserSingleStmt();
+            then = parseSingleStmt();
         }
         else
         {
             selfScope self(*this, Scope::BLOCK);
-            then = parserCompoundStmt();
+            then = parseCompoundStmt();
             static_cast<CompousedStmt *>(then)->scope_ = currentScop_;
         }
 
@@ -440,7 +439,7 @@ namespace Yan
         Stmt *body = nullptr;
         if (!is(TokenType::T_LBRACE))
         {
-            body = parserSingleStmt();
+            body = parseSingleStmt();
             auto stmt = CompousedStmt::create();
             stmt->addStmt(body);
             stmt->addStmt(inc);
@@ -448,7 +447,7 @@ namespace Yan
         }
         else
         {
-            body = parserCompoundStmt();
+            body = parseCompoundStmt();
             static_cast<CompousedStmt *>(body)->addStmt(inc);
             static_cast<CompousedStmt *>(body)->scope_ = currentScop_;
         }
@@ -460,7 +459,7 @@ namespace Yan
         Stmt *then = nullptr;
         {
             selfScope self(*this, Scope::BLOCK);
-            then = parserCompoundStmt();
+            then = parseCompoundStmt();
             static_cast<CompousedStmt *>(then)->scope_ = currentScop_;
         }
         expect(TokenType::T_WHILE, "while");
@@ -475,12 +474,21 @@ namespace Yan
         expect(TokenType::T_SEMI, ";");
         return BreakContinueStmt::create(type);
     }
-    Stmt *parser::parserSingleStmt()
+    ReturnStmt *parser::parseReturnStmt()
     {
-        Info(peek().tostring().c_str());
+        Expr *exp = nullptr;
+        if (!is(TokenType::T_SEMI))
+        {
+            exp = expr();
+        }
+        expect(TokenType::T_SEMI, ";");
+        return ReturnStmt::create(exp);
+    }
+    Stmt *parser::parseSingleStmt()
+    {
         if (match(TokenType::T_IF))
         {
-            return parserIfStmt();
+            return parseIfStmt();
         }
         if (match(TokenType::T_WHILE))
         {
@@ -497,6 +505,10 @@ namespace Yan
         if (match(TokenType::T_CONTINUE))
         {
             return parseContinueBreakStmt(BreakContinueStmt::kcontinue);
+        }
+        if (match(TokenType::T_RETURN))
+        {
+            return parseReturnStmt();
         }
         if (match(TokenType::T_GOTO))
         {
@@ -540,7 +552,7 @@ namespace Yan
             Info("vartoken:%s", varToken.tostring().c_str());
             if (match(TokenType::T_LPAREN))
             {
-                return parserFuncCall(varToken);
+                return parseFuncCall(varToken);
             }
             else
             {
@@ -562,7 +574,7 @@ namespace Yan
         }
         ExitWithError("Token: %s unknow statment", peek().tostring().c_str());
     }
-    CompousedStmt *parser::parserCompoundStmt()
+    CompousedStmt *parser::parseCompoundStmt()
     {
         Info(__func__);
         expect(TokenType::T_LBRACE, "{");
@@ -574,42 +586,41 @@ namespace Yan
                 ExitWithError(__func__);
             }
 
-            if (isTypeName())
+            if (match(TokenType::T_SEMI))
             {
-                storageClass sclass= storageClass::UNKNOW;
-                auto type = baseType(&sclass);
-                auto pair = declarator(type);
-
-                auto identi = Identifier::create(pair.second, pair.first, true);
-                currentScop_->addSymoble(pair.second, identi);
-                if(sclass == storageClass::TYPE_DEF)
+                //consume empty stmt
+                continue;
+            }
+            else if (isTypeName())
+            {
+                auto declaration = parseDeclaration(true);
+                if (declaration)
                 {
-                    identi->class_ = storageClass::TYPE_DEF;
-                    expect(TokenType::T_SEMI,";");
+                    compoused->addStmt(declaration);
+                }
+                else
+                {
                     continue;
                 }
-                compoused->addStmt(parserDeclaration(identi));
-                identi->setoffset(currentScop_->caculateOffset(pair.second));
             }
 
             else if (is(TokenType::T_LBRACE))
             {
                 selfScope self(*this, Scope::BLOCK);
-                auto block = parserCompoundStmt();
+                auto block = parseCompoundStmt();
                 block->scope_ = currentScop_;
                 compoused->addStmt(block);
-                
             }
 
             else
             {
 
-                compoused->addStmt(parserSingleStmt());
+                compoused->addStmt(parseSingleStmt());
             }
         }
         return compoused;
     }
-    FunctionCall *parser::parserFuncCall(Token var)
+    FunctionCall *parser::parseFuncCall(Token var)
     {
         Identifier *identi;
         auto exist = currentScop_->getIdentiInAllScope(var.getText(), &identi);
@@ -649,33 +660,46 @@ namespace Yan
         expect(TokenType::T_SEMI, ";");
         return funcCall;
     }
-    FunctionDef *parser::parserFuncDef(Identifier *identi)
+    FunctionDef *parser::parseFuncDef(Identifier *identi)
     {
         auto func = FunctionDef::create(identi);
-        auto body = parserCompoundStmt();
+        auto body = parseCompoundStmt();
         body->scope_ = currentScop_;
         func->setBody(body);
         Info(__func__);
         return func;
     }
-    Declaration *parser::parserDeclaration(Identifier *identi)
+    Declaration *parser::parseDeclaration(bool isloacl)
     {
+        storageClass sclass = storageClass::UNKNOW;
+        auto type = baseType(&sclass);
+        auto pair = declarator(type);
+
+        auto identi = Identifier::create(pair.second, pair.first, isloacl);
+        currentScop_->addSymoble(pair.second, identi);
+        if (sclass == storageClass::TYPE_DEF)
+        {
+            identi->class_ = storageClass::TYPE_DEF;
+            expect(TokenType::T_SEMI, ";");
+            return nullptr;
+        }
+        identi->setoffset(currentScop_->caculateOffset(pair.second));
         expect(TokenType::T_SEMI, ";");
         return Declaration::create(identi);
     }
-    Program *parser::parserProgram()
+    Program *parser::parseProgram()
     {
         auto program = Program::create();
         symbolTable *funcscop = nullptr;
         while (!match(TokenType::T_EOF))
         {
-            storageClass sclass;
-            auto type = baseType(&sclass);
-            auto pair = declarator(type);
-            auto name = pair.second;
-            auto new_ty = pair.first;
-            if (new_ty->isKindOf(Type::T_FUNC) && is(TokenType::T_LBRACE))
+            if (isFuncdef())
             {
+                storageClass sclass;
+                auto type = baseType(&sclass);
+                auto pair = declarator(type);
+                auto name = pair.second;
+                auto new_ty = pair.first;
                 auto funcIden = Identifier::create(name, new_ty, false);
                 currentScop_->addSymoble(name, funcIden);
                 {
@@ -685,35 +709,57 @@ namespace Yan
                         currentScop_->addSymoble(param->name_, param);
                         param->offset_ = currentScop_->caculateOffset(param->name_);
                     }
-                    program->add(parserFuncDef(funcIden));
+                    program->add(parseFuncDef(funcIden));
                 }
-            }
+            }           
             else
             {
-                //global variable
-                Info("varaibale111");
-                 
-                auto varabile = Identifier::create(name, new_ty, false);
-                    currentScop_->addSymoble(name, varabile);
-                if(sclass == storageClass::TYPE_DEF)
+                auto decl = parseDeclaration(false);
+                if (decl)
                 {
-                    varabile->class_ = storageClass::TYPE_DEF;
-                    expect(TokenType::T_SEMI,";");
-                    continue;
+                    program->add(decl);
                 }
-                    
-               
-                program->add(parserDeclaration(varabile));
             }
         }
 
         return program;
     }
 
+    bool parser::isFuncdef()
+    {
+        std::stack<Token> cache;
+        bool isfuncdef = false;
+        while (!is(TokenType::T_SEMI) && !is(TokenType::T_LBRACE))
+        {
+            if (is(TokenType::T_EOF))
+            {
+                ExitWithError("unexpected Eof");
+            }
+
+            cache.push(consume());
+        }
+        if (is(TokenType::T_SEMI))
+        {
+
+            isfuncdef = false;
+        }
+        //end with pattern .* ) {.*
+        else if (is(TokenType::T_LBRACE) && cache.top().type == TokenType::T_RPAREN)
+        {
+            isfuncdef = true;
+        }
+        while (!cache.empty())
+        {
+            putBack(cache.top());
+            cache.pop();
+        }
+        Info("isfuncdef:%s", std::to_string(isfuncdef).c_str());
+        return isfuncdef;
+    }
+
     bool parser::isTypeName()
     {
         //current only support int/char
-        Info("uuu:%s",peek().tostring().c_str());
         return isOneOf(TokenType::T_INT,
                        TokenType::T_CHAR,
                        TokenType::T_BOOL,
@@ -731,10 +777,9 @@ namespace Yan
     }
     bool parser::findtypedef(const std::string &name)
     {
-        Identifier* identi = nullptr;
-        currentScop_->getIdentiInAllScope(name,&identi);
-        Info("yyyy:%s",name.c_str());
-        if(identi && identi->class_ == storageClass::TYPE_DEF)
+        Identifier *identi = nullptr;
+        currentScop_->getIdentiInAllScope(name, &identi);
+        if (identi && identi->class_ == storageClass::TYPE_DEF)
         {
             return true;
         }
@@ -863,22 +908,19 @@ namespace Yan
                 }
             }
             //handle user defined type;
-            else if(peek().type == TokenType::T_IDENT)
+            else if (peek().type == TokenType::T_IDENT)
             {
-                Identifier* identi =nullptr;
-                if(currentScop_->getIdentiInAllScope(peek().getText(),&identi))
+                Identifier *identi = nullptr;
+                if (currentScop_->getIdentiInAllScope(peek().getText(), &identi))
                 {
                     consume();
                     return identi->type_;
                 }
             }
-
-            
         }
         if (sclass)
         {
             *sclass = storage_class;
-
         }
         Type *ty = nullptr;
         switch (kind)
@@ -930,7 +972,6 @@ namespace Yan
     Declarator parser::declarator(Type *type)
     {
         Type *ty = type;
-        Info("ttttttt:%s", ty->tostring().c_str());
         Info(peek().tostring().c_str());
         while (match(TokenType::T_STAR))
         {
@@ -1017,7 +1058,7 @@ namespace Yan
             {
                 break;
             }
-            auto pair = parser_func_param();
+            auto pair = parse_func_param();
             auto param = Identifier::create(pair.second, pair.first, true);
             functionType->addParam(param);
             if (isOneOf(TokenType::T_EOF, TokenType::T_RPAREN))
@@ -1032,7 +1073,7 @@ namespace Yan
         return functionType;
     }
 
-    Declarator parser::parser_func_param()
+    Declarator parser::parse_func_param()
     {
         Type *ty;
         if (isTypeName())

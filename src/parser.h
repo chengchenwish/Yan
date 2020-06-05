@@ -23,18 +23,19 @@ namespace Yan
         void leaveScope();
         symbolTable *getSymbolTable() { return currentScop_; }
 
-        Program *parserProgram();
+        Program *parseProgram();
 
         //Statments
-        Stmt *parserSingleStmt();
-        CompousedStmt *parserCompoundStmt();
-        FunctionDef *parserFuncDef(Identifier *identi);
-        FunctionCall *parserFuncCall(Token var);
-        IfStmt *parserIfStmt();
+        Stmt *parseSingleStmt();
+        CompousedStmt *parseCompoundStmt();
+        FunctionDef *parseFuncDef(Identifier *identi);
+        FunctionCall *parseFuncCall(Token var);
+        IfStmt *parseIfStmt();
         LoopStmt *parseWhileStmt();
         LoopStmt *parseForStmt();
         LoopStmt *parseDoWhileStmt();
         BreakContinueStmt *parseContinueBreakStmt(BreakContinueStmt::kind type);
+        ReturnStmt* parseReturnStmt();
 
         //EXPR
         Expr *expr();
@@ -56,7 +57,7 @@ namespace Yan
         Expr *primary();
 
         //declaration
-        Declaration *parserDeclaration(Identifier *identi);
+        Declaration *parseDeclaration(bool islocal);
         Type *baseType(storageClass *sclass);
         Declarator declarator(Type *type);
         Type *declarator_array(Type *type);
@@ -64,7 +65,7 @@ namespace Yan
         Type *type_suffix(Type *type);
         Type *modifyBase(Type *type, Type *base, Type *new_base);
 
-        Declarator parser_func_param();
+        Declarator parse_func_param();
 
         template <typename T>
         T constExpr()
@@ -76,10 +77,11 @@ namespace Yan
     private:
         bool isTypeName();
         bool findtypedef(const std::string &name);
+        bool isFuncdef();
 
         //Token ralated function
         bool match(TokenType t);
-        bool is(TokenType t) const;
+        bool is(TokenType t) const;//test if the token is t
 
         bool isOneOf(TokenType K1, TokenType K2) const
         {

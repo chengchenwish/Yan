@@ -1,3 +1,5 @@
+#ifndef _EVALUATOR_H_
+#define _EVALUATOR_H_
 #include "AST.h"
 #include<assert.h>
 namespace Yan
@@ -39,3 +41,4 @@ private:
 
 }
 #include "evaluator.cpp"
+#endif
