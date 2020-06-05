@@ -660,12 +660,27 @@ namespace Yan
         expect(TokenType::T_SEMI, ";");
         return funcCall;
     }
-    FunctionDef *parser::parseFuncDef(Identifier *identi)
+    FunctionDef *parser::parseFuncDef()
     {
-        auto func = FunctionDef::create(identi);
+        storageClass sclass;
+        auto type = baseType(&sclass);
+        auto pair = declarator(type);
+        auto name = pair.second;
+        auto new_ty = pair.first;
+        auto funcIden = Identifier::create(name, new_ty, false);
+        currentScop_->addSymoble(name, funcIden);
+
+        selfScope self(*this, Scope::FUNC);
+        for (auto param : new_ty->castToFunc()->getParam())
+        {
+            currentScop_->addSymoble(param->name_, param);
+            param->offset_ = currentScop_->caculateOffset(param->name_);
+        }
+        auto func = FunctionDef::create(funcIden);
         auto body = parseCompoundStmt();
         body->scope_ = currentScop_;
         func->setBody(body);
+
         Info(__func__);
         return func;
     }
@@ -695,23 +710,8 @@ namespace Yan
         {
             if (isFuncdef())
             {
-                storageClass sclass;
-                auto type = baseType(&sclass);
-                auto pair = declarator(type);
-                auto name = pair.second;
-                auto new_ty = pair.first;
-                auto funcIden = Identifier::create(name, new_ty, false);
-                currentScop_->addSymoble(name, funcIden);
-                {
-                    selfScope self(*this, Scope::FUNC);
-                    for (auto param : new_ty->castToFunc()->getParam())
-                    {
-                        currentScop_->addSymoble(param->name_, param);
-                        param->offset_ = currentScop_->caculateOffset(param->name_);
-                    }
-                    program->add(parseFuncDef(funcIden));
-                }
-            }           
+                program->add(parseFuncDef());
+            }
             else
             {
                 auto decl = parseDeclaration(false);

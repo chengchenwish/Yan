@@ -28,7 +28,7 @@ namespace Yan
         //Statments
         Stmt *parseSingleStmt();
         CompousedStmt *parseCompoundStmt();
-        FunctionDef *parseFuncDef(Identifier *identi);
+        FunctionDef *parseFuncDef();
         FunctionCall *parseFuncCall(Token var);
         IfStmt *parseIfStmt();
         LoopStmt *parseWhileStmt();
