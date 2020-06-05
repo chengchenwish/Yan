@@ -20,6 +20,7 @@ int main()
     }*/
     if(881>90)
         print(90);
+return 0;
     
 }
 /*

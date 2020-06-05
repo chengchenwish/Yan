@@ -277,9 +277,8 @@ namespace Yan
 
         //node->identi_->accept(this);
         node->body_->accept(this);
-        emit("movq $0, %rax");
-        emit("leave");
-        emit("ret");
+        //emit("movq $0, %rax");
+
     }
     void gen::loardArgs(Identifier *node, int index)
     {
@@ -446,6 +445,17 @@ namespace Yan
         s << ".L." << functionName_ << "." << node->label_ << ":";
         emit(s);
     }
+    void gen:: visit(ReturnStmt *node)
+    {
+        if(node->expr_)
+        {
+            Info("ttt");
+            node->expr_->accept(this);
+            emit("popq %rax");
+        }
+        emit("leave");
+        emit("ret");
+    }
     void gen::visit(FunctionCall *node)
     {
         static int seq = 0;
@@ -474,6 +484,7 @@ namespace Yan
         emit("   call " + node->designator_->name_);
         emit(" addq $8,%rsp");
         emit(labe1 + ":");
+        emit("pushq %rax");//store return value
     }
     void gen::visit(CompousedStmt *node)
     {

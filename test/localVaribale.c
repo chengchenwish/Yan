@@ -17,6 +17,8 @@ int main()
     // print(c);
     // print(cc);
 
+    return 0;
+
 }
 /*
 Expected output:

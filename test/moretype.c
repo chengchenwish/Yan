@@ -12,6 +12,8 @@ void main()
     print(c);
     print(b);
     print(tt);
+
+    return;
 }
 /*
 Expected output:

@@ -12,6 +12,7 @@ print(c);
 print(676-9+3/1-6*2);
 b = c+9-8/2*6;
 print(b);
+return 0;
 
 }
 /*

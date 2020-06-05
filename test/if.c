@@ -39,6 +39,7 @@ int main()
   int a;
   a = 100;
   print(a);
+  return ;
 }
 /*
 Expected output:

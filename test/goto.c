@@ -17,6 +17,7 @@ void main()
     print(1);
     ll:
     print(2);
+    return;
 
 }
 /*

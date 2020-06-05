@@ -16,6 +16,8 @@ print(11>2);
 print(22<23);
 print(56!=2);
 print(88 == 88);
+
+return 0;
 }
 /*
 Expected output:

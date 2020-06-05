@@ -10,6 +10,8 @@ void main()
     bb = 322;
     print(a+b);
     print(bb);
+
+    return ;
 }
 /*
 Expected output:

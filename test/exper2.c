@@ -12,6 +12,8 @@ int main()
     
     print(888<(21-2)*6);
 
+   return 0;
+
 }
 /*
 Expected output:

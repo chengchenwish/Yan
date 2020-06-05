@@ -4,6 +4,7 @@ int dump(int x)
     int p;
     p = x+12;
     print(p);
+    return 1;
 }
 int dump2(int x, int y,int z)
 {
@@ -15,6 +16,7 @@ int dump2(int x, int y,int z)
     print(y);
     print(xx+yy);
     print(z);
+    return  0;
 }
 
 
@@ -26,6 +28,7 @@ int main(void)
     y =66;
     dump(x);
     dump2(33,44,88);
+    return 0;
 }
 /*
 Expected output:

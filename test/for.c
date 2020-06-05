@@ -10,6 +10,8 @@ void main(){
   a = 9;
   print(a);
 
+  return;
+
 }
 /*
 Expected output:

@@ -14,6 +14,8 @@ void main(){
       i = i-2;
       
   }while(i >= 0);
+
+  return;
 }
 /*
 Expected output:
