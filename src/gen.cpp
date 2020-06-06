@@ -15,7 +15,7 @@ namespace Yan
         {
             ExitWithError("Open output file:%s fail", fileName.c_str());
         }
-        
+
         addrGnerator_ = new LvalueAddrGenerator(this);
     }
     gen::~gen()
@@ -26,8 +26,7 @@ namespace Yan
             Info("Successfully generated :%s ", outfileName.c_str());
         }
     }
-    
-  
+
     void gen::emit(std::string inst)
     {
         outfstream << "\t" << inst << "\n";
@@ -50,7 +49,7 @@ namespace Yan
         emit("popq %rbx");
         std::stringstream fm;
 
-        if(ty->getsize() == 1)
+        if (ty->getsize() == 1)
         {
             emit("movb %al, (%rbx)");
         }
@@ -68,24 +67,24 @@ namespace Yan
             emit("movq %rax, (%rbx)");
         }
     }
-    //load 
-     void gen::load(Type*ty)
-     {
-         emit("popq %rax");
-         //if(ty->getsize() == 8)
-         {
-             emit("movq (%rax),%rax");
-         }
-         emit("pushq %rax");
-     }
+    //load [rax] to rax 
+    void gen::load(Type *ty)
+    {
+        emit("popq %rax");
+        //if(ty->getsize() == 8)
+        //{
+        emit("movq (%rax),%rax");
+        //}
+        emit("pushq %rax");
+    }
     //load value from stack to register
     void gen::loadLValue(Identifier *node)
     {
 
         std::stringstream fm;
-        if(node->type_->getsize() == 1)
+        if (node->type_->getsize() == 1)
         {
-                fm << "movb  -" << node->offset_ << "(%rbp) , "
+            fm << "movb  -" << node->offset_ << "(%rbp) , "
                << "%al";
         }
         if (node->type_->getsize() == 2)
@@ -109,30 +108,33 @@ namespace Yan
     }
     void gen::visit(UnaryOp *node)
     {
-        Info("ppppppppp %d",static_cast<int>(node->op_));
-         //node->operand_->accept(this);
-       //  emit("popq %rax");
-        if(node->op_ == OpType::OP_DEREF)//*
+        Info("ppppppppp %d", static_cast<int>(node->op_));
+        //node->operand_->accept(this);
+        //  emit("popq %rax");
+        if (node->op_ == OpType::OP_DEREF) //*
         {
-           // node->operand_->accept(addrGnerator_);
-           node->operand_->accept(this);
-            emit("popq %rax");
+            // node->operand_->accept(addrGnerator_);
+            node->operand_->accept(this);
+            //emit("popq %rax");
 
             //emit("movq (%rax), %rax");
-           // emit("movq (%rax),%rax");
+            // emit("movq (%rax),%rax");
             load(node->type_);
             emit("pushq %rax");
-           //storeLValue(node->type_);
-          //  node->operand_->accept(this);
+            //storeLValue(node->type_);
+            //  node->operand_->accept(this);
         }
-        else if(node->op_ == OpType::OP_ADDR)//&
+        else if (node->op_ == OpType::OP_ADDR) //&
         {
             node->operand_->accept(addrGnerator_);
-           // genAddr(static_cast<Identifier *>(node->operand_));
+            // genAddr(static_cast<Identifier *>(node->operand_));
             //donothing;
-
         }
     }
+     void gen::genLvalue(Expr* node)
+     {
+         node->accept(addrGnerator_);
+     }
     void gen::visit(BinaryOp *node)
     {
 
@@ -142,8 +144,9 @@ namespace Yan
         if (node->op == OpType::OP_ASSIGN)
         {
             // node->left->accept(this);
-            node->left->accept(addrGnerator_);
-           // genAddr(static_cast<Identifier *>(node->left));
+            genLvalue(node->left);
+            //node->left->accept(addrGnerator_);
+            // genAddr(static_cast<Identifier *>(node->left));
             node->right->accept(this);
             storeLValue(node->type_);
 
@@ -212,7 +215,6 @@ namespace Yan
             node->left->accept(this);
             node->right->accept(this);
             genCmp("setle");
-            
         }
     }
 
@@ -279,7 +281,7 @@ namespace Yan
         emit("movq %rsp, %rbp");
         // std::stringstream fm;
         // fm << "subq $" << node->getStackSize() << ", %rsp";
-      //  emit(fm.str());
+        //  emit(fm.str());
         //   emit("subq $24, %rsp");
         int index = 0;
         for (auto &arg : static_cast<FuncType *>(node->identi_->type_)->getParam())
@@ -292,7 +294,6 @@ namespace Yan
         //node->identi_->accept(this);
         node->body_->accept(this);
         //emit("movq $0, %rax");
-
     }
     void gen::loardArgs(Identifier *node, int index)
     {
@@ -465,9 +466,9 @@ namespace Yan
         s << ".L." << functionName_ << "." << node->label_ << ":";
         emit(s);
     }
-    void gen:: visit(ReturnStmt *node)
+    void gen::visit(ReturnStmt *node)
     {
-        if(node->expr_)
+        if (node->expr_)
         {
             Info("ttt");
             node->expr_->accept(this);
@@ -504,27 +505,27 @@ namespace Yan
         emit("   call " + node->designator_->name_);
         emit(" addq $8,%rsp");
         emit(labe1 + ":");
-        emit("pushq %rax");//store return value
+        emit("pushq %rax"); //store return value
     }
     void gen::visit(CompousedStmt *node)
     {
         int offset = 0;
-        if(node->scope_)
-        {//extend stack size for block statments
+        if (node->scope_)
+        { //extend stack size for block statments
             offset = node->scope_->getTyepSize();
             std::stringstream f;
-            f<<"subq $"<<offset<<", %rsp";
+            f << "subq $" << offset << ", %rsp";
             emit(f);
         }
         for (auto &stmt : node->stmtlist_)
         {
             stmt->accept(this);
         }
-        if(offset>0)
+        if (offset > 0)
         {
             //restore
             std::stringstream f;
-            f<<"addq $"<<offset<<", %rsp";
+            f << "addq $" << offset << ", %rsp";
             emit(f);
         }
 

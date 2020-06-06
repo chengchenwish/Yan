@@ -81,7 +81,11 @@ def run_test():
     files = os.listdir(TEST_DIR)
     for file in files:
         if(re.match(r"^.*\.c$",file)):
-            compile(file)   
+            compile(file)
+    # errorfiles = os.listdir(TEST_DIR+"/error_test")
+    # for f in errorfiles:
+    #     if(re.match(r"^.*\.c$",file)):
+    #         compile(file)   
 
 
 

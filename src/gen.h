@@ -17,6 +17,7 @@ namespace Yan
         explicit gen(const std::string &fileName = "a.s");
         ~gen();
         std::string genLabe();
+        void visitExpr(Expr* node){node->accept(this);}
         //impliment Ivistor
         virtual void visit(BinaryOp *node) override;
         virtual void visit(Identifier *node) override;
@@ -37,6 +38,7 @@ namespace Yan
         virtual void visit(LabelStmt *node) override;
 
         void genAddr(Identifier *node);
+        void genLvalue(Expr* node);
         void loardArgs(Identifier *node, int index);
         void checkCondition(Expr *node, std::string trueLabel, std::string falsedLabel);
 
@@ -98,7 +100,7 @@ namespace Yan
         virtual void visit(GotoStmt *node) override { assert(0); }
         virtual void visit(ReturnStmt *node) override { assert(0); }
         virtual void visit(StringLiteral *node) override { assert(0); }
-        virtual void visit(UnaryOp *node) override { generator_->visit(node); }
+        virtual void visit(UnaryOp *node) override {assert(node->op_ == OpType::OP_DEREF); generator_->visitExpr(node->operand_); }
         virtual void visit(ConditionExpr *node) override { assert(0); }
         virtual void visit(LoopStmt *node) override { assert(0); }
         virtual void visit(BreakContinueStmt *node) override { assert(0); }
