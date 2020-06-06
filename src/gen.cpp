@@ -15,6 +15,8 @@ namespace Yan
         {
             ExitWithError("Open output file:%s fail", fileName.c_str());
         }
+        
+        addrGnerator_ = new LvalueAddrGenerator(this);
     }
     gen::~gen()
     {
@@ -24,31 +26,8 @@ namespace Yan
             Info("Successfully generated :%s ", outfileName.c_str());
         }
     }
-    /*
-   void gen::emit(char* mt, ...)
-   {
-     // Replace "#" with "%%" so that vfprintf prints out "#" as "%".
-    char buf[256];
-    int i = 0;
-    for (char *p = mt; *p; p++) {
-       // assert(i < sizeof(buf) - 3);
-        if (*p == '#') {
-            buf[i++] = '%';
-            buf[i++] = '%';
-        } else {
-            buf[i++] = *p;
-        }
-    }
-    buf[i] = '\0';
-    va_list args;
-    va_start(args, mt);
-    char outputstr[100];
-    int col = sprintf(outputstr, buf, args);
-    va_end(args);
-    outfstream <<"\t"<< std::string(outputstr)<<std::endl;
-
-   }*/
-
+    
+  
     void gen::emit(std::string inst)
     {
         outfstream << "\t" << inst << "\n";
@@ -134,7 +113,8 @@ namespace Yan
         }
         else if(node->op_ == OpType::OP_ADDR)
         {
-            genLvalue(static_cast<Identifier *>(node->operand_));
+         node->operand_->accept(addrGnerator_);
+           // genLvalue(static_cast<Identifier *>(node->operand_));
             //donothing;
 
         }
@@ -148,7 +128,8 @@ namespace Yan
         if (node->op == OpType::OP_ASSIGN)
         {
             // node->left->accept(this);
-            genLvalue(static_cast<Identifier *>(node->left));
+            node->left->accept(addrGnerator_);
+           // genLvalue(static_cast<Identifier *>(node->left));
             node->right->accept(this);
             storeLValue(node->type_);
 
@@ -365,6 +346,27 @@ namespace Yan
 
         //  Info(static_cast<FuncType*>(node->type_)->
     }
+   /* 
+    void LvalueAddrGenerator::visit(Identifier* node)
+    {
+        std::stringstream fm;
+        if (node->isLocal_)
+        {
+            Info("name:%s offset :%d", node->name_.c_str(), node->offset_);
+            fm << "leaq  -" << node->offset_ << "(%rbp) , "
+               << "%rax";
+            instance_->emit(fm);
+            instance_->emit("pushq %rax");
+        }
+        else
+        {
+
+            fm << "leaq " << node->name_ << "(%rip), %rax";
+           instance_-> emit(fm.str());
+           instance_-> emit("pushq %rax");
+        }   
+    }
+    */
     void gen::genLvalue(Identifier *node)
     {
         std::stringstream fm;
