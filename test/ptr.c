@@ -7,12 +7,12 @@ int main()
     //*p = 100;
     //*p =2;
      p =&a;
-     a=100;
+     a=1000;
     print(*p);
     return 0;
 }
 
 /*
 Expected output:
-100
+1000
 */

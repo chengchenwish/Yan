@@ -36,13 +36,14 @@ namespace Yan
         virtual void visit(BreakContinueStmt *node) override;
         virtual void visit(LabelStmt *node) override;
 
-        void genLvalue(Identifier *node);
+        void genAddr(Identifier *node);
         void loardArgs(Identifier *node, int index);
         void checkCondition(Expr *node, std::string trueLabel, std::string falsedLabel);
 
     private:
         void storeLValue(Type *ty);
         void loadLValue(Identifier *node);
+        void load(Type* ty);
         //operator
         void genAdd();
         void genSub();
@@ -82,11 +83,11 @@ namespace Yan
     class LvalueAddrGenerator : public Ivisitor
     {
     public:
-        LvalueAddrGenerator(gen *instance) : instance_(instance) {}
+        LvalueAddrGenerator(gen *instance) : generator_(instance) {}
 
     private:
         virtual void visit(BinaryOp *node) override { assert(0); }
-        virtual void visit(Identifier *node) override { instance_->genLvalue(node); }
+        virtual void visit(Identifier *node) override { generator_->genAddr(node); }
         virtual void visit(IntegerLiteral *node) override { assert(0); }
         virtual void visit(FunctionDef *node) override { assert(0); }
         virtual void visit(Declaration *node) override { assert(0); }
@@ -97,13 +98,13 @@ namespace Yan
         virtual void visit(GotoStmt *node) override { assert(0); }
         virtual void visit(ReturnStmt *node) override { assert(0); }
         virtual void visit(StringLiteral *node) override { assert(0); }
-        virtual void visit(UnaryOp *node) override { assert(0); }
+        virtual void visit(UnaryOp *node) override { generator_->visit(node); }
         virtual void visit(ConditionExpr *node) override { assert(0); }
         virtual void visit(LoopStmt *node) override { assert(0); }
         virtual void visit(BreakContinueStmt *node) override { assert(0); }
         virtual void visit(LabelStmt *node) override { assert(0); }
 private:
-        gen *instance_;
+        gen *generator_;
     };
 } // namespace Yan
 #endif

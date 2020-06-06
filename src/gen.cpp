@@ -68,8 +68,17 @@ namespace Yan
             emit("movq %rax, (%rbx)");
         }
     }
+    //load 
+     void gen::load(Type*ty)
+     {
+         emit("popq %rax");
+         //if(ty->getsize() == 8)
+         {
+             emit("movq (%rax),%rax");
+         }
+         emit("pushq %rax");
+     }
     //load value from stack to register
-
     void gen::loadLValue(Identifier *node)
     {
 
@@ -103,18 +112,23 @@ namespace Yan
         Info("ppppppppp %d",static_cast<int>(node->op_));
          //node->operand_->accept(this);
        //  emit("popq %rax");
-        if(node->op_ == OpType::OP_DEREF)
+        if(node->op_ == OpType::OP_DEREF)//*
         {
+           // node->operand_->accept(addrGnerator_);
+           node->operand_->accept(this);
             emit("popq %rax");
 
-            emit("movq %rax, %rbx");
-            emit("movq (%rbx),%rax");
+            //emit("movq (%rax), %rax");
+           // emit("movq (%rax),%rax");
+            load(node->type_);
             emit("pushq %rax");
+           //storeLValue(node->type_);
+          //  node->operand_->accept(this);
         }
-        else if(node->op_ == OpType::OP_ADDR)
+        else if(node->op_ == OpType::OP_ADDR)//&
         {
-         node->operand_->accept(addrGnerator_);
-           // genLvalue(static_cast<Identifier *>(node->operand_));
+            node->operand_->accept(addrGnerator_);
+           // genAddr(static_cast<Identifier *>(node->operand_));
             //donothing;
 
         }
@@ -129,7 +143,7 @@ namespace Yan
         {
             // node->left->accept(this);
             node->left->accept(addrGnerator_);
-           // genLvalue(static_cast<Identifier *>(node->left));
+           // genAddr(static_cast<Identifier *>(node->left));
             node->right->accept(this);
             storeLValue(node->type_);
 
@@ -346,28 +360,9 @@ namespace Yan
 
         //  Info(static_cast<FuncType*>(node->type_)->
     }
-   /* 
-    void LvalueAddrGenerator::visit(Identifier* node)
-    {
-        std::stringstream fm;
-        if (node->isLocal_)
-        {
-            Info("name:%s offset :%d", node->name_.c_str(), node->offset_);
-            fm << "leaq  -" << node->offset_ << "(%rbp) , "
-               << "%rax";
-            instance_->emit(fm);
-            instance_->emit("pushq %rax");
-        }
-        else
-        {
 
-            fm << "leaq " << node->name_ << "(%rip), %rax";
-           instance_-> emit(fm.str());
-           instance_-> emit("pushq %rax");
-        }   
-    }
-    */
-    void gen::genLvalue(Identifier *node)
+    //load a identifier's address to register
+    void gen::genAddr(Identifier *node)
     {
         std::stringstream fm;
         if (node->isLocal_)
@@ -376,6 +371,10 @@ namespace Yan
             fm << "leaq  -" << node->offset_ << "(%rbp) , "
                << "%rax";
             emit(fm);
+            // if(node->type_->isKindOf(Type::T_PTR))
+            // {
+            //     emit("movq (%rax),%rax");
+            // }
             emit("pushq %rax");
         }
         else

@@ -371,7 +371,19 @@ namespace Yan
         if(match(TokenType::T_STAR))
         {
             Info("uuuuuuuuuuuuuuuuuuuuu");
-            return UnaryOp::create(OpType::OP_DEREF, cast());
+             auto operand = cast();
+             Type* t;
+             if(operand->type_->isKindOf(Type::T_PTR))
+             {
+                 t = operand->type_->castToPtr()->getBaseType();
+             }
+             else 
+             {
+                 ExitWithError(operand->type_->tostring().c_str());
+             }
+
+            return UnaryOp::create(OpType::OP_DEREF,operand,t);
+            //return UnaryOp::create(OpType::OP_DEREF, cast());
         }
         return postfix();
     }
