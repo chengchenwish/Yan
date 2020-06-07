@@ -21,6 +21,8 @@ namespace Yan
     extern std::string scopeToString(ScopeKind s);
     class Scope
     {
+        public:
+        int depth = 1;
     public:
         using Symbol = std::pair<std::string, Identifier *>;
         using SymbolTable = std::vector<Symbol>;
@@ -28,6 +30,7 @@ namespace Yan
         Scope();
         ~Scope();
         Scope* getGlobalScope();
+        int getdepth(){return depth;}
         //stringlit
         bool stringLitExist(const std::string& str);
         bool addstringLit(const std::string& str);
@@ -61,9 +64,11 @@ namespace Yan
         }
         int getTyepSize()
         {
+            Info(__func__);
             int size = 0;
             for (const auto &kv : symbols_)
             {
+                Info("key=%s",kv.first.c_str());
                 size += kv.second->type_->getsize();
             }
             return size;
@@ -94,6 +99,8 @@ namespace Yan
         StringLitTable stringLit_;//only valid in global scope
 
         Scope *parent_;
+
+        
 
         //disable copy and assign
         Scope(const Scope &) = delete;

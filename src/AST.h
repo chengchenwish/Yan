@@ -76,7 +76,7 @@ namespace Yan
         virtual void accept(Ivisitor *v) override;
 
         StmtList stmtlist_;
-        Scope *scope_;
+        Scope *scope_ = nullptr;
     };
 
     struct IfStmt : public Stmt
@@ -191,6 +191,10 @@ namespace Yan
         OP_CAST,
         OP_ADDR,
         OP_DEREF,
+        OP_POSTINC,
+        OP_PREINC,
+        OP_POSTDEC,
+        OP_PREDEC,
 
         OP_UNKOWN
     };

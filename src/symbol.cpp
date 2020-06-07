@@ -101,7 +101,7 @@ namespace Yan
 
     void Scope::dumpSymbol(std::ostream &os)
     {
-        os << " Current scope:" << scopeToString(kind_) << std::endl;
+        os << " Current scope:" << scopeToString(kind_) <<" depth: "<<depth<< std::endl;
         os << std::endl;
         os << std::endl;
         if(kind_ == ScopeKind::GLOBAL)

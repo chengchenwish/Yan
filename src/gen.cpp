@@ -130,6 +130,17 @@ namespace Yan
             // genAddr(static_cast<Identifier *>(node->operand_));
             //donothing;
         }
+        else if(node->op_ == OpType::OP_POSTINC)
+        {
+            genLvalue(node->operand_);
+            node->operand_->accept(this);
+            emit("popq %rax");
+            emit("addq $1, %rax");
+            emit("pushq %rax");
+            storeLValue(node->type_);
+
+
+        }
     }
     void gen::visit(StringLiteral *node)
     {
@@ -337,8 +348,10 @@ namespace Yan
         {
             return;
         }
+        Info("gen global variable:");
 
         auto &name = node->obj_->name_;
+         Info("gen global variable:%s",name.c_str());
 
         auto align = (node->obj_->type_)->getalign();
         auto size = node->obj_->type_->getsize();
@@ -413,6 +426,7 @@ namespace Yan
     }
     void gen::visit(LoopStmt *node)
     {
+        Info("gen loop");
 
         auto startLabel = genLabe();
         auto endLabel = genLabe();
@@ -454,6 +468,7 @@ namespace Yan
     }
     void gen::checkCondition(Expr *node, std::string trueLabel, std::string falsedLabel)
     {
+        Info(__func__);
         node->accept(this);
         emit("popq %rax");
         emit("cmp $0, %rax");
@@ -517,9 +532,15 @@ namespace Yan
     }
     void gen::visit(CompousedStmt *node)
     {
+        Info("gen Compoused statment");
+        if(node == nullptr)
+        {
+            Info("compoused statmets is null");
+        }
         int offset = 0;
         if (node->scope_)
         { //extend stack size for block statments
+
             offset = node->scope_->getTyepSize();
             std::stringstream f;
             f << "subq $" << offset << ", %rsp";
@@ -556,6 +577,7 @@ namespace Yan
     }
     void gen::visit(Program *node)
     {
+        Info("Begin generate assemble code...");
         genStringLitLables();
         //emit(".intel_syntax noprefix\n");
         //buildin print

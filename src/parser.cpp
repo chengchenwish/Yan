@@ -15,10 +15,13 @@ namespace Yan
         auto sc = new Scope;
         sc->setParent(this->currentScop_);
         sc->setScope(kind);
+        sc->depth = currentScop_->depth+1;
+        
         currentScop_ = sc;
     }
     void parser::leaveScope()
     {
+
         currentScop_ = currentScop_->getParentScop();
         Info(__func__);
     }
@@ -374,6 +377,10 @@ namespace Yan
         {
             return BinaryOp::create(OpType::OP_SUBTRACT, IntegerLiteral::create(0), cast());
         }
+        if(match(TokenType::T_INC))
+        {
+            return UnaryOp::create(OpType::OP_PREINC, cast());
+        }
         if(match(TokenType::T_AMPER))
         {
             Info("ffffffffffffffffffffffff");
@@ -401,7 +408,13 @@ namespace Yan
 
     Expr *parser::postfix()
     {
-        return primary();
+        auto expr = primary();
+        if(match(TokenType::T_INC))
+        {
+            Info("psot inc");
+            return UnaryOp::create(OpType::OP_POSTINC, expr, expr->type_);
+        }
+        return expr;
     }
 
     IfStmt *parser::parseIfStmt()
@@ -480,6 +493,7 @@ namespace Yan
             body = parseCompoundStmt();
             static_cast<CompousedStmt *>(body)->addStmt(inc);
             static_cast<CompousedStmt *>(body)->scope_ = currentScop_;
+            currentScop_->dumpSymbol(std::cout);
         }
 
         return LoopStmt::create(cond, body);
@@ -557,7 +571,22 @@ namespace Yan
             //before: for (int i = 0; i<10;i++)
             //after:  int i = 0;
             //            ;i<10;i++)
+            //int i;
+            //for(i = 0;i<10;i++)
+            // {
 
+            // }
+//int a;
+//int i;
+//{
+// i = 0;
+//  {
+//
+//  i ++
+//  }
+//}
+//
+//
             expect(TokenType::T_LPAREN, "(");
             //TODO variabale
             //auto cond = expr();
