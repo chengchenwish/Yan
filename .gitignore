@@ -1,8 +1,10 @@
 build/*
 .vscode
-test/*·out
-test/*.s
+test/a·out
+test/a.s
 test/YAN
 test/*.symbol
-test/*.core
+test/tmp
 test/core
+example/a.out
+example/c

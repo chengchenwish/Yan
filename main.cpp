@@ -6,7 +6,7 @@
 #include "src/gen.h"
 #include "src/parser.h"
 
-#define DEBUG 1
+#define DEBUG 0
 //namespace Yan{
 
 static void help()
@@ -22,9 +22,10 @@ static void compile(std::vector<std::string>&files)
     Yan::lexer pp(files.front());
 
     std::string out_asmeble_file = "a.s";
-    Yan::gen gencode(out_asmeble_file);
+    
     Yan::parser pars(pp);
     auto pp1= pars.parseProgram();
+    Yan::gen gencode(pars.getScope(),out_asmeble_file);
     pp1->accept(&gencode);
     
     if(DEBUG)

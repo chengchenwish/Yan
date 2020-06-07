@@ -243,11 +243,12 @@ namespace Yan
     struct StringLiteral : public Expr
     {
 
-        StringLiteral(const char *data, int len) : strData_(data), byteLen_(len) {}
-        static StringLiteral *create(const char *data, int len) { return new StringLiteral(data, len); }
+        StringLiteral(const std::string& data) : strData_(data) {}
+        static StringLiteral *create(const std::string &data) { return new StringLiteral(data); }
         virtual void accept(Ivisitor *v) { v->visit(this); }
-        const char *strData_;
-        int byteLen_;
+       // const char *strData_;
+        //int byteLen_;
+        std::string strData_;
     };
 
     struct FunctionCall : public Expr

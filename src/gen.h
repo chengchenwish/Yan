@@ -5,6 +5,7 @@
 #include <array>
 #include <sstream>
 #include <assert.h>
+#include<map>
 namespace Yan
 {
 
@@ -12,9 +13,10 @@ namespace Yan
     class gen : public Ivisitor
     {
         using LabelStack = std::stack<std::string>;
+        using StringLitLableMap = std::map<std::string, std::string>;
 
     public:
-        explicit gen(const std::string &fileName = "a.s");
+        explicit gen(Scope* sc, const std::string &fileName = "a.s" );
         ~gen();
         std::string genLabe();
         void visitExpr(Expr* node){node->accept(this);}
@@ -33,7 +35,7 @@ namespace Yan
         virtual void visit(ReturnStmt *node) override;
         virtual void visit(UnaryOp *node) override;
         virtual void visit(ConditionExpr *node) override {}
-        virtual void visit(StringLiteral *node) override {}
+        virtual void visit(StringLiteral *node) override;
         virtual void visit(BreakContinueStmt *node) override;
         virtual void visit(LabelStmt *node) override;
 
@@ -53,6 +55,8 @@ namespace Yan
         void genDiv();
         void genCmp(const std::string &how, bool longType = false);
 
+        void genStringLitLables();
+
     private:
         void emit(std::string inst);
         void emit(std::stringstream &inst);
@@ -71,6 +75,9 @@ namespace Yan
         LabelStack breakLabels_;
         LabelStack continueLabels_;
         std::string functionName_;
+        //
+        StringLitLableMap strlitMap_;
+        Scope* globalScope;
 
         std::string outfileName;
         std::fstream outfstream;

@@ -8,7 +8,7 @@ namespace Yan
     const std::vector<std::string> gen::argReg8 = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
 
     int gen::labelseq = 1;
-    gen::gen(const std::string &fileName) : outfileName(fileName)
+    gen::gen(Scope* sc, const std::string &fileName) : globalScope(sc),outfileName(fileName)
     {
         outfstream.open(fileName.c_str(), std::ios::out);
         if (!outfstream.is_open())
@@ -130,6 +130,14 @@ namespace Yan
             // genAddr(static_cast<Identifier *>(node->operand_));
             //donothing;
         }
+    }
+    void gen::visit(StringLiteral *node)
+    {
+       auto LC = strlitMap_[node->strData_]; 
+       std::stringstream fm;
+       fm<<"leaq "<<LC<<"(%rip),%rax";
+       emit(fm);
+       emit("pushq %rax");
     }
      void gen::genLvalue(Expr* node)
      {
@@ -531,10 +539,27 @@ namespace Yan
 
         Info("compoused");
     }
+    void gen::genStringLitLables()
+    {
+        auto table = globalScope->getStringLitTbale();
+        int i = 0;
+        for (auto& str: table)
+        {
+            std::stringstream label, str2;
+            label<<".LC"<<i++;
+            strlitMap_.insert({str,label.str()}); 
+            label<<":";
+            emit(label);
+            str2<<"\t.string \""<<str<<"\"";
+            emit(str2);
+        }
+    }
     void gen::visit(Program *node)
     {
+        genStringLitLables();
         //emit(".intel_syntax noprefix\n");
-        emit(".LC0:");
+        //buildin print
+        emit(".LC10:");
         emit("\t.string \"%d\\n\"");
         emit(".text");
         emit(".global print");
@@ -545,7 +570,25 @@ namespace Yan
         emit("movq %rdi, -8(%rbp)");
         emit("movq -8(%rbp), %rax");
         emit("movq %rax, %rsi");
-        emit("leaq .LC0(%rip), %rdi");
+        emit("leaq .LC10(%rip), %rdi");
+        emit("movq $0,%rax");
+        emit("call printf@PLT");
+        emit("nop");
+        emit("leave");
+        emit("ret");
+//build in printstr
+       emit(".LC11:");
+        emit("\t.string \"%s\\n\"");
+        emit(".text");
+        emit(".global printstr");
+        emit("printstr:");
+        emit("pushq %rbp");
+        emit("movq %rsp, %rbp");
+        emit("subq $16, %rsp");
+        emit("movq %rdi, -8(%rbp)");
+        emit("movq -8(%rbp), %rax");
+        emit("movq %rax, %rsi");
+        emit("leaq .LC11(%rip), %rdi");
         emit("movq $0,%rax");
         emit("call printf@PLT");
         emit("nop");

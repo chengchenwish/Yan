@@ -56,7 +56,8 @@ def excute(file, out):
     p = os.popen(" ./"+out)
     s = p.read()
 
-    result = s.split()
+    result = s.split("\n")
+    result.pop()
     print("result: " + str(result))
     assert len(expect) == len(result) , " expect doesn't match result\n"
     

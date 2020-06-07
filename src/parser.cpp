@@ -37,8 +37,8 @@ namespace Yan
         else if(is(TokenType::T_STRLIT))
         {
             auto t = consume();
-            auto len = t.getText().length()+1;
-            node = StringLiteral::create(t.getText().data(), len);
+           auto len = t.getText().length()+1;
+            node = StringLiteral::create(t.getText());
             auto ty=  ArrayType::create(char_type,len);
             node->type_ = ty;
             auto globalSc = currentScop_->getGlobalScope();
@@ -731,6 +731,7 @@ namespace Yan
     {
         auto program = Program::create();
         defineBuildinFunc("print", void_type, {int_type});
+        defineBuildinFunc("printstr", void_type, {PtrType::create(char_type)});
 
         Scope *funcscop = nullptr;
         while (!match(TokenType::T_EOF))
