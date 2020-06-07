@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <stack>
-#include "error.h"
+#include "log.h"
 namespace Yan
 {
 

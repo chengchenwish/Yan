@@ -3,7 +3,7 @@
 #include <map>
 #include "lexer.h"
 #include "AST.h"
-#include "error.h"
+#include "log.h"
 #include "symbol.h"
 #include "evaluator.h"
 namespace Yan

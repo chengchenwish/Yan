@@ -730,6 +730,7 @@ namespace Yan
     }
     Declaration *parser::parseDeclaration(bool isloacl)
     {
+        DEBUG_LOG<<" islocal = "<<isloacl;
         storageClass sclass = storageClass::UNKNOW;
         auto type = baseType(&sclass);
         auto pair = declarator(type);
@@ -758,6 +759,7 @@ namespace Yan
     }
     Program *parser::parseProgram()
     {
+        DEBUG(__func__);
         auto program = Program::create();
         defineBuildinFunc("print", void_type, {int_type});
         defineBuildinFunc("printstr", void_type, {PtrType::create(char_type)});

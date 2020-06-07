@@ -1,6 +1,6 @@
 #include<assert.h>
 #include "symbol.h"
-#include "error.h"
+#include "log.h"
 
 namespace Yan
 {

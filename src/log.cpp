@@ -1,11 +1,11 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
-#include "error.h"
+#include "log.h"
 #include "token.h"
 namespace Yan
 {
-
+Loglevel log_level = L_DEBUG; 
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_YELLOW "\x1b[33m"
@@ -15,6 +15,17 @@ namespace Yan
 #define ANSI_COLOR_RESET "\x1b[0m"
 
   const char *program = "Yan";
+
+  logger::logger( std::ostream& os,  const char* func, int line, Loglevel level):
+  impl(os,func,line, level)
+  {
+
+
+  }
+  logger::Impl::Impl(std::ostream& stream,  const char* func, int line, Loglevel level):os(stream)
+  {
+    stream<<func<<": line: "<<line<<" LogLevel: "<<level;
+  }
 
   void static vError(const location &loc,
                      const char *format,

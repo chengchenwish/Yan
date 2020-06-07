@@ -10,7 +10,7 @@ target_sources(compiler
     src/lexer.cpp
     src/parser.cpp
     src/token.cpp
-    src/error.cpp
+    src/log.cpp
     src/symbol.cpp
     src/AST.cpp
     src/gen.cpp
