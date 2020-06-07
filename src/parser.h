@@ -19,9 +19,9 @@ namespace Yan
         parser(lexer &s);
         ~parser();
         //Begin a block scope;
-        void enterScope(Scope kind);
+        void enterScope(ScopeKind kind);
         void leaveScope();
-        symbolTable *getSymbolTable() { return currentScop_; }
+        Scope *getScope() { return currentScop_; }
 
         Program *parseProgram();
 
@@ -104,8 +104,9 @@ namespace Yan
     private:
         lexer &scan;
         //Token currenttoken_;//used for error output
+        
 
-        symbolTable *currentScop_;
+        Scope *currentScop_;
 
         //disable copy and assign
         parser(const parser &) = delete;
@@ -115,7 +116,7 @@ namespace Yan
     class selfScope
     {
     public:
-        selfScope(parser &p, Scope kind) : self(p)
+        selfScope(parser &p, ScopeKind kind) : self(p)
         {
             self.enterScope(kind);
         }

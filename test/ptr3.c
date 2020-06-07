@@ -1,11 +1,11 @@
-int test(int *a)
+int test(int *a, int x)
 {
     if(*a == 9)
     {
         *a = 90;
     }
     print(*a);
-    return 88;
+    return 88+x;
 }
 
 int main()
@@ -14,6 +14,7 @@ int main()
     
    // int *a;
     int b;
+    
     int*a;
     int c;
     b = 9;
@@ -28,7 +29,7 @@ int main()
     //*a = 90;
     print(*a);
     
-    print(test(a));
+    print(test(a,1));
     print(*a);
      return 0;
      
@@ -38,6 +39,6 @@ int main()
 Expected output:
 9
 90
-88
+89
 90
 */

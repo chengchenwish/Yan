@@ -4,24 +4,24 @@
 namespace Yan
 {
 
-    symbolTable::symbolTable()
+    Scope::Scope()
     {
     }
-    symbolTable::~symbolTable()
+    Scope::~Scope()
     {
     }
-    void symbolTable::addSymoble(const std::string &name, Identifier *indenti)
+    void Scope::addSymoble(const std::string &name, Identifier *indenti)
     {
-        list_.push_back({name, indenti});
+        symbols_.push_back({name, indenti});
     }
-    bool symbolTable::getIdentiInCurrentScope(const std::string &name, Identifier **indenti)
+    bool Scope::getIdentiInCurrentScope(const std::string &name, Identifier **indenti)
 
     {
-        auto ele = std::find_if(list_.begin(), list_.end(), [&name](Symbol &s) {
+        auto ele = std::find_if(symbols_.begin(), symbols_.end(), [&name](Symbol &s) {
             return s.first == name;
         });
 
-        if (ele != list_.end())
+        if (ele != symbols_.end())
         {
             *indenti = ele->second;
             return true;
@@ -31,14 +31,14 @@ namespace Yan
             return false;
         }
     }
-    bool symbolTable::existInCurrentScope(const std::string &name)
+    bool Scope::existInCurrentScope(const std::string &name)
     {
-        auto ele = std::find_if(list_.begin(), list_.end(), [&name](Symbol &s) {
+        auto ele = std::find_if(symbols_.begin(), symbols_.end(), [&name](Symbol &s) {
             return s.first == name;
         });
-        return (ele != list_.end());
+        return (ele != symbols_.end());
     }
-    bool symbolTable::getIdentiInAllScope(const std::string &name, Identifier **indenti)
+    bool Scope::getIdentiInAllScope(const std::string &name, Identifier **indenti)
     {
         if (getIdentiInCurrentScope(name, indenti))
         {
@@ -51,31 +51,31 @@ namespace Yan
         return false;
     }
 
-    void symbolTable::dumpSymbol(std::ostream &os)
+    void Scope::dumpSymbol(std::ostream &os)
     {
-        os << " Current scope:" << scopeToString(scope_) << std::endl;
+        os << " Current scope:" << scopeToString(kind_) << std::endl;
         os << std::endl;
         os << std::endl;
 
         os << "name" << std::setw(20) << "Type" << std::setw(20) << "size" << std::setw(20) << "scope" << std::endl;
 
-        for (const auto &kv : list_)
+        for (const auto &kv : symbols_)
         {
 
             os << kv.first << std::setw(20) << kv.second->type_->tostring() << std::setw(20) << kv.second->type_->getsize();
-            os << std::setw(20) << scopeToString(scope_) << std::endl;
+            os << std::setw(20) << scopeToString(kind_) << std::endl;
         }
         //    os<<std::setiosflags(std::ios::left)<<std::endl;
     }
-    std::string scopeToString(Scope s)
+    std::string scopeToString(ScopeKind s)
     {
         switch (s)
         {
-        case Scope::BLOCK:
+        case ScopeKind::BLOCK:
             return "block";
-        case Scope::FUNC:
+        case ScopeKind::FUNC:
             return "function";
-        case Scope::GLOBAL:
+        case ScopeKind::GLOBAL:
             return "global";
         }
         return "";

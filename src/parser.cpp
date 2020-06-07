@@ -4,15 +4,15 @@ namespace Yan
 
     parser::parser(lexer &s) : scan(s)
     {
-        currentScop_ = new symbolTable;
-        currentScop_->setScope(Scope::GLOBAL);
+        currentScop_ = new Scope;
+        currentScop_->setScope(ScopeKind::GLOBAL);
     }
     parser::~parser()
     {
     }
-    void parser::enterScope(Scope kind)
+    void parser::enterScope(ScopeKind kind)
     {
-        auto sc = new symbolTable;
+        auto sc = new Scope;
         sc->setParent(this->currentScop_);
         sc->setScope(kind);
         currentScop_ = sc;
@@ -33,6 +33,15 @@ namespace Yan
             Info(std::to_string(t.getValue()).c_str());
             node = IntegerLiteral::create(t.getValue());
             node->type_ = int_type;
+        }
+        else if(is(TokenType::T_STRLIT))
+        {
+            auto t = consume();
+            auto len = t.getText().length()+1;
+            node = StringLiteral::create(t.getText().data(), len);
+            auto ty=  ArrayType::create(char_type,len);
+            node->type_ = ty;
+            
         }
         else if (is(TokenType::T_IDENT))
         {
@@ -406,7 +415,7 @@ namespace Yan
         }
         else
         {
-            selfScope self(*this, Scope::BLOCK);
+            selfScope self(*this, ScopeKind::BLOCK);
             then = parseCompoundStmt();
             static_cast<CompousedStmt *>(then)->scope_ = currentScop_;
         }
@@ -420,7 +429,7 @@ namespace Yan
             }
             else
             {
-                selfScope self(*this, Scope::BLOCK);
+                selfScope self(*this, ScopeKind::BLOCK);
                 els = parseCompoundStmt();
                 static_cast<CompousedStmt *>(els)->scope_ = currentScop_;
             }
@@ -440,7 +449,7 @@ namespace Yan
         }
         else
         {
-            selfScope self(*this, Scope::BLOCK);
+            selfScope self(*this, ScopeKind::BLOCK);
             then = parseCompoundStmt();
             static_cast<CompousedStmt *>(then)->scope_ = currentScop_;
         }
@@ -477,7 +486,7 @@ namespace Yan
     {
         Stmt *then = nullptr;
         {
-            selfScope self(*this, Scope::BLOCK);
+            selfScope self(*this, ScopeKind::BLOCK);
             then = parseCompoundStmt();
             static_cast<CompousedStmt *>(then)->scope_ = currentScop_;
         }
@@ -550,7 +559,7 @@ namespace Yan
             expect(TokenType::T_LPAREN, "(");
             //TODO variabale
             //auto cond = expr();
-            selfScope self(*this, Scope::BLOCK);
+            selfScope self(*this, ScopeKind::BLOCK);
             if (!is(TokenType::T_SEMI))
             {
                 stmt = CompousedStmt::create();
@@ -624,7 +633,7 @@ namespace Yan
 
             else if (is(TokenType::T_LBRACE))
             {
-                selfScope self(*this, Scope::BLOCK);
+                selfScope self(*this, ScopeKind::BLOCK);
                 auto block = parseCompoundStmt();
                 block->scope_ = currentScop_;
                 compoused->addStmt(block);
@@ -674,7 +683,7 @@ namespace Yan
         auto funcIden = Identifier::create(name, new_ty, false);
         currentScop_->addSymoble(name, funcIden);
 
-        selfScope self(*this, Scope::FUNC);
+        selfScope self(*this, ScopeKind::FUNC);
         for (auto param : new_ty->castToFunc()->getParam())
         {
             currentScop_->addSymoble(param->name_, param);
@@ -721,7 +730,7 @@ namespace Yan
         auto program = Program::create();
         defineBuildinFunc("print", void_type, {int_type});
 
-        symbolTable *funcscop = nullptr;
+        Scope *funcscop = nullptr;
         while (!match(TokenType::T_EOF))
         {
             if (isFuncdef())

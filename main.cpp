@@ -31,7 +31,7 @@ static void compile(std::vector<std::string>&files)
     {
         std::ofstream f(files.front()+".symbol");
 
-        pars.getSymbolTable()->dumpSymbol(f);
+        pars.getScope()->dumpSymbol(f);
         f.close();
     }
    // gencode.genProgram(pp1);

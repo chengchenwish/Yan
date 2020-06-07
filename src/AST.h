@@ -9,7 +9,7 @@
 
 namespace Yan
 {
-    class symbolTable;
+    class Scope;
 
     struct Expr;
     struct BinaryOp;
@@ -76,7 +76,7 @@ namespace Yan
         virtual void accept(Ivisitor *v) override;
 
         StmtList stmtlist_;
-        symbolTable *scope_;
+        Scope *scope_;
     };
 
     struct IfStmt : public Stmt

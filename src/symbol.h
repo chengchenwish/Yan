@@ -12,37 +12,37 @@ namespace Yan
 
     //class Idetifier;
 
-    enum class Scope
+    enum class ScopeKind
     {
         GLOBAL,
         FUNC,
         BLOCK
     };
-    extern std::string scopeToString(Scope s);
-    class symbolTable
+    extern std::string scopeToString(ScopeKind s);
+    class Scope
     {
     public:
         using Symbol = std::pair<std::string, Identifier *>;
-        using SymbolList = std::vector<Symbol>;
-        symbolTable();
-        ~symbolTable();
+        using SymbolTable = std::vector<Symbol>;
+        Scope();
+        ~Scope();
         //new
         void addSymoble(const std::string &name, Identifier *indenti);
         bool getIdentiInCurrentScope(const std::string &name, Identifier **indenti);
         bool getIdentiInAllScope(const std::string &name, Identifier **indenti);
-        void setParent(symbolTable *parent) { parent_ = parent; }
-        void setScope(const Scope s) { scope_ = s; }
-        Scope getScope() { return scope_; }
-        SymbolList &getlist() { return list_; }
+        void setParent(Scope *parent) { parent_ = parent; }
+        void setScope(const ScopeKind s) { kind_ = s; }
+        ScopeKind getScope() { return kind_; }
+        SymbolTable &getlist() { return symbols_; }
         bool existInCurrentScope(const std::string &name);
-        symbolTable *getParentScop() { return parent_; }
-        SymbolList::iterator begin() { return list_.begin(); }
-        SymbolList::iterator end() { return list_.end(); }
+        Scope *getParentScop() { return parent_; }
+        SymbolTable::iterator begin() { return symbols_.begin(); }
+        SymbolTable::iterator end() { return symbols_.end(); }
 
         int caculateOffset(const std::string &name)
         {
             int off = caculateParentScopeOffSet(parent_);
-            for (const auto &kv : list_)
+            for (const auto &kv : symbols_)
             {
                 off += kv.second->type_->getsize();
 
@@ -56,7 +56,7 @@ namespace Yan
         int getTyepSize()
         {
             int size = 0;
-            for (const auto &kv : list_)
+            for (const auto &kv : symbols_)
             {
                 size += kv.second->type_->getsize();
             }
@@ -65,10 +65,10 @@ namespace Yan
         void dumpSymbol(std::ostream &os);
 
     private:
-        int caculateParentScopeOffSet(symbolTable *sc)
+        int caculateParentScopeOffSet(Scope *sc)
         {
             int off = 0;
-            if (sc && (sc->getScope() == Scope::BLOCK || (sc->getScope() == Scope::FUNC)))
+            if (sc && (sc->getScope() == ScopeKind::BLOCK || (sc->getScope() == ScopeKind::FUNC)))
             {
                 Info("iiiiii");
                 off += caculateParentScopeOffSet(sc->getParentScop());
@@ -83,13 +83,13 @@ namespace Yan
             }
             return off;
         }
-        Scope scope_;
-        SymbolList list_;
-        symbolTable *parent_;
+        ScopeKind kind_;
+        SymbolTable symbols_;
+        Scope *parent_;
 
         //disable copy and assign
-        symbolTable(const symbolTable &) = delete;
-        symbolTable &operator=(const symbolTable &) = delete;
+        Scope(const Scope &) = delete;
+        Scope &operator=(const Scope &) = delete;
     };
 } // namespace Yan
 #endif
