@@ -5,7 +5,7 @@
 #include "token.h"
 namespace Yan
 {
-Loglevel log_level = L_DEBUG; 
+
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_YELLOW "\x1b[33m"
@@ -16,16 +16,36 @@ Loglevel log_level = L_DEBUG;
 
   const char *program = "Yan";
 
-  logger::logger( std::ostream& os,  const char* func, int line, Loglevel level):
-  impl(os,func,line, level)
+  Loglevel log_level = L_DEBUG;
+
+  logger::logger(std::ostream &os, const char *func, int line, Loglevel level) : impl(os, func, line, level)
+  {
+  }
+  logger::logger(std::ostream&os, Loglevel level):impl(os,level)
   {
 
-
   }
-  logger::Impl::Impl(std::ostream& stream,  const char* func, int line, Loglevel level):os(stream)
+  logger::Impl::Impl(std::ostream &os, const char *func, int line, Loglevel level) : os_(os)
   {
-    stream<<func<<": line: "<<line<<" LogLevel: "<<level;
+    stream_ << ANSI_COLOR_GREEN<<func << ": line: " << line << " LogLevel: " << level;
+    level_ = level;
   }
+
+  logger::Impl::Impl(std::ostream& os, Loglevel level):os_(os)
+  {
+    stream_<<ANSI_COLOR_RED<<level;
+    level_ = level;
+  }
+  logger::Impl:: ~Impl() 
+  { 
+    os_ << stream_.str() << std::endl;
+
+    if(level_ == L_ERROR_EXIT)
+    {
+      exit(-1);
+    }
+    
+   }
 
   void static vError(const location &loc,
                      const char *format,

@@ -72,7 +72,10 @@ namespace Yan
         }
         else
         {
-            ExitWithError("The Primary token must be a number or identifier");
+            //auto t =peek();
+           // std::cout<<t;
+           ERROR_EXIT<<peek()<<" : Invalid Primary expr";
+           // ExitWithError("The Primary token must be a number or identifier");
         }
 
         return node;
@@ -629,8 +632,8 @@ namespace Yan
             expect(TokenType::T_SEMI, ";");
             return exp;
         }
-        
-        ExitWithError("Token: %s unknow statment", peek().tostring().c_str());
+        ERROR_EXIT<<"Token:"<<peek().tostring()<<" Unkown statment";
+      //  ExitWithError("Token: %s unknow statment", peek().tostring().c_str());
     }
     CompousedStmt *parser::parseCompoundStmt()
     {

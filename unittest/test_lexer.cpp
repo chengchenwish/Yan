@@ -1,11 +1,20 @@
 #include"gtest/gtest.h"
 #include<fstream>
 #include "../src/lexer.h"
+#include<iostream>
 
  static std::string inputfile = "test.c";
 class lexerTest :public testing::Test {
 
 };
+TEST(lexerTest, testToken)
+{
+  using namespace Yan;
+  Token t;
+  t.text = "hhhhh";
+  t.type = TokenType::T_IDENT;
+  std::cout<<t;
+}
 TEST(lexerTest, test_token_cache)
 {
   std::ofstream f(inputfile);

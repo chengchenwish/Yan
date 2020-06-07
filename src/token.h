@@ -2,12 +2,13 @@
 #define _TOKEN_H_
 #include<string>
 #include<variant>
+#include<iostream>
 namespace Yan{
 
 //max str len for one token
 
 constexpr int MAX_STR_LEN = 100;
-
+class Token;
 #define KEYWORD(xx)         \
     xx(T_VOID , "void") \
     xx(T_CHAR,     "char") \
@@ -126,20 +127,34 @@ struct location
 {   
 
 public:
+    friend std::ostream& operator << (std::ostream& s, const Token& t);
     Token() = default;
     Token(const location& l):loc(l){}
     TokenType type;
        // store identifier name or num litri
     std::variant<int,std::string> text;
-    std::string  tostring();
-    std::string getText();
-    int getValue();
+    std::string  tostring()const;
+    std::string getText()const ;
+    int getValue()const;
     const location& getLocation();
+   //friend std::ostream& operator << (std::ostream& s, const Token t);
+    // std::ostream& operator <<(std::ostream& os)
+    // {
+    //     os<<"hh";
+    //    // os<<loc.fileName<<":"<<loc.line<<":"<<loc.colum<<" "<<tostring();
+    //     return os;
+    // }
 private:
      
     location loc;
 
 };
+extern std::ostream& operator << (std::ostream& s, const Token& t);
+// {    s<<t.tostring();
+//     //os<<t.loc.fileName<<":"<<t.loc.line<<":"<<t.loc.colum<<" "<<t.tostring();
+//     return s;
+// }
+
 }
 
 #endif

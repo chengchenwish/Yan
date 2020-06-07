@@ -3,7 +3,7 @@
 namespace Yan
 {
 
-    std::string Token::tostring()
+    std::string Token::tostring() const
     {
 #define xx(T, Text)    \
     case TokenType::T: \
@@ -35,11 +35,11 @@ namespace Yan
 #undef xx
     }
 
-    std::string Token::getText()
+    std::string Token::getText()const
     {
         return std::get<std::string>(text);
     }
-    int Token::getValue()
+    int Token::getValue()const
     {
         return std::get<int>(text);
     }
@@ -48,5 +48,9 @@ namespace Yan
     {
         return loc;
     }
-
+std::ostream& operator<<(std::ostream& os, const Token& t)
+{
+    os<<t.loc.fileName<<":"<<t.loc.line<<":"<<t.loc.colum<<" "<<t.tostring();
+    return os;
+ }
 } // namespace Yan
