@@ -6,7 +6,7 @@
 #include "src/gen.h"
 #include "src/parser.h"
 
-#define DEBUG false
+#define DEBUG 1
 //namespace Yan{
 
 static void help()

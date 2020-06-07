@@ -41,6 +41,8 @@ namespace Yan
             node = StringLiteral::create(t.getText().data(), len);
             auto ty=  ArrayType::create(char_type,len);
             node->type_ = ty;
+            auto globalSc = currentScop_->getGlobalScope();
+            globalSc->addstringLit(t.getText());
             
         }
         else if (is(TokenType::T_IDENT))

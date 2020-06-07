@@ -24,8 +24,14 @@ namespace Yan
     public:
         using Symbol = std::pair<std::string, Identifier *>;
         using SymbolTable = std::vector<Symbol>;
+        using StringLitTable = std::vector<std::string>;
         Scope();
         ~Scope();
+        Scope* getGlobalScope();
+        //stringlit
+        bool stringLitExist(const std::string& str);
+        bool addstringLit(const std::string& str);
+        const StringLitTable& getStringLitTbale()const;
         //new
         void addSymoble(const std::string &name, Identifier *indenti);
         bool getIdentiInCurrentScope(const std::string &name, Identifier **indenti);
@@ -85,6 +91,8 @@ namespace Yan
         }
         ScopeKind kind_;
         SymbolTable symbols_;
+        StringLitTable stringLit_;//only valid in global scope
+
         Scope *parent_;
 
         //disable copy and assign
