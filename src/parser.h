@@ -50,6 +50,8 @@ namespace Yan
         Expr *relational();
         Expr *shift();
         Expr *sum();
+        Expr *richadd(Expr *lhs, Expr* rhs);
+        Expr *richsub(Expr *lhs, Expr* rhs);
         Expr *mul();
         Expr *cast();
         Expr *unary();
@@ -78,6 +80,7 @@ namespace Yan
         }
 
     private:
+        bool isInteger(Expr* node);
         bool isTypeName();
         bool findtypedef(const std::string &name);
         bool isFuncdef();

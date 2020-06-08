@@ -15,8 +15,8 @@ namespace Yan
         auto sc = new Scope;
         sc->setParent(this->currentScop_);
         sc->setScope(kind);
-        sc->depth = currentScop_->depth+1;
-        
+        sc->depth = currentScop_->depth + 1;
+
         currentScop_ = sc;
     }
     void parser::leaveScope()
@@ -37,16 +37,15 @@ namespace Yan
             node = IntegerLiteral::create(t.getValue());
             node->type_ = int_type;
         }
-        else if(is(TokenType::T_STRLIT))
+        else if (is(TokenType::T_STRLIT))
         {
             auto t = consume();
-           auto len = t.getText().length()+1;
+            auto len = t.getText().length() + 1;
             node = StringLiteral::create(t.getText());
-            auto ty=  ArrayType::create(char_type,len);
+            auto ty = ArrayType::create(char_type, len);
             node->type_ = ty;
             auto globalSc = currentScop_->getGlobalScope();
             globalSc->addstringLit(t.getText());
-            
         }
         else if (is(TokenType::T_IDENT))
         {
@@ -73,9 +72,9 @@ namespace Yan
         else
         {
             //auto t =peek();
-           // std::cout<<t;
-           ERROR_EXIT<<peek()<<" : Invalid Primary expr";
-           // ExitWithError("The Primary token must be a number or identifier");
+            // std::cout<<t;
+            ERROR_EXIT << peek() << " : Invalid Primary expr";
+            // ExitWithError("The Primary token must be a number or identifier");
         }
 
         return node;
@@ -312,11 +311,11 @@ namespace Yan
         {
             if (match(TokenType::T_ADD))
             {
-                node = BinaryOp::create(OpType::OP_ADD, node, mul());
+                node = richadd(node, mul());
             }
             else if (match(TokenType::T_MINUS))
             {
-                node = BinaryOp::create(OpType::OP_SUBTRACT, node, mul());
+                node = richsub(node, mul());
             }
             else
             {
@@ -324,7 +323,40 @@ namespace Yan
             }
         }
     }
+    Expr *parser::richadd(Expr *lhs, Expr* rhs)
+    {
+        return  BinaryOp::create(OpType::OP_ADD, lhs, rhs);
+        /*
+        if(isInteger(lhs) && isInteger(rhs))        
+        {
+           auto exp = BinaryOp::create(OpType::OP_ADD, lhs, rhs);
+           exp->type_ = lhs->type_;
+           return exp;
+        }
+        if(lhs->type_->castToDeried() && isInteger(rhs))
+        {
+         //    lhs = mayCasttoPtr(lhs->type_)
+            auto exp =  BinaryOp::create(OpType::OP_PTRADD, lhs, rhs);
+           
+            return exp;           
+            
+        }
+        if(isInteger(lhs) && rhs->type_->castToDeried() )
+        {
+             //rhs = mayCasttoPtr(rhs->type_)
+            auto exp =  BinaryOp::create(OpType::OP_PTRADD, rhs, lhs);
+            return exp;
+        }
 
+        ERROR_EXIT<<peek()<<" unsupported Type for add/sub operation";
+*/        
+
+        
+    }
+    Expr *parser::richsub(Expr *lhs, Expr* rhs)
+    {
+        return BinaryOp::create(OpType::OP_SUBTRACT, lhs, rhs);
+    }
     Expr *parser::mul()
     {
         Expr *node = cast();
@@ -380,30 +412,29 @@ namespace Yan
         {
             return BinaryOp::create(OpType::OP_SUBTRACT, IntegerLiteral::create(0), cast());
         }
-        if(match(TokenType::T_INC))
+        if (match(TokenType::T_INC))
         {
             return UnaryOp::create(OpType::OP_PREINC, cast());
         }
-        if(match(TokenType::T_AMPER))
+        if (match(TokenType::T_AMPER))
         {
             Info("ffffffffffffffffffffffff");
-            return UnaryOp::create(OpType::OP_ADDR,cast());
+            return UnaryOp::create(OpType::OP_ADDR, cast());
         }
-        if(match(TokenType::T_STAR))
+        if (match(TokenType::T_STAR))
         {
-            Info("uuuuuuuuuuuuuuuuuuuuu");
-             auto operand = cast();
-             Type* t;
-             if(operand->type_->isKindOf(Type::T_PTR))
-             {
-                 t = operand->type_->castToPtr()->getBaseType();
-             }
-             else 
-             {
-                 ExitWithError(operand->type_->tostring().c_str());
-             }
+            auto operand = cast();
+            Type *t;
+            if (operand->type_->isKindOf(Type::T_PTR))
+            {
+                t = operand->type_->castToPtr()->getBaseType();
+            }
+            else
+            {
+                ExitWithError(operand->type_->tostring().c_str());
+            }
 
-            return UnaryOp::create(OpType::OP_DEREF,operand,t);
+            return UnaryOp::create(OpType::OP_DEREF, operand, t);
             //return UnaryOp::create(OpType::OP_DEREF, cast());
         }
         return postfix();
@@ -411,13 +442,24 @@ namespace Yan
 
     Expr *parser::postfix()
     {
-        auto expr = primary();
-        if(match(TokenType::T_INC))
+        auto node = primary();
+        while (1)
         {
-            Info("psot inc");
-            return UnaryOp::create(OpType::OP_POSTINC, expr, expr->type_);
+            if (match(TokenType::T_INC))
+            {
+                return UnaryOp::create(OpType::OP_POSTINC, node, node->type_);
+            }
+            if (match(TokenType::T_LBRACKET))
+            {
+                //x[i] = *(x+i)
+                auto exp = BinaryOp::create(OpType::OP_PTRADD, node, expr(), node->type_);
+                expect(TokenType::T_RBRACKET, "]");
+                DEBUG_LOG << node->type_->castToDeried()->getBaseType()->tostring();
+                node = UnaryOp::create(OpType::OP_DEREF, exp, node->type_->castToDeried()->getBaseType());
+                continue;
+            }
+            return node;
         }
-        return expr;
     }
 
     IfStmt *parser::parseIfStmt()
@@ -579,17 +621,17 @@ namespace Yan
             // {
 
             // }
-//int a;
-//int i;
-//{
-// i = 0;
-//  {
-//
-//  i ++
-//  }
-//}
-//
-//
+            //int a;
+            //int i;
+            //{
+            // i = 0;
+            //  {
+            //
+            //  i ++
+            //  }
+            //}
+            //
+            //
             expect(TokenType::T_LPAREN, "(");
             //TODO variabale
             //auto cond = expr();
@@ -632,8 +674,8 @@ namespace Yan
             expect(TokenType::T_SEMI, ";");
             return exp;
         }
-        ERROR_EXIT<<"Token:"<<peek().tostring()<<" Unkown statment";
-      //  ExitWithError("Token: %s unknow statment", peek().tostring().c_str());
+        ERROR_EXIT << "Token:" << peek().tostring() << " Unkown statment";
+        //  ExitWithError("Token: %s unknow statment", peek().tostring().c_str());
     }
     CompousedStmt *parser::parseCompoundStmt()
     {
@@ -733,7 +775,7 @@ namespace Yan
     }
     Declaration *parser::parseDeclaration(bool isloacl)
     {
-        DEBUG_LOG<<" islocal = "<<isloacl;
+        DEBUG_LOG << " islocal = " << isloacl;
         storageClass sclass = storageClass::UNKNOW;
         auto type = baseType(&sclass);
         auto pair = declarator(type);
@@ -762,7 +804,6 @@ namespace Yan
     }
     Program *parser::parseProgram()
     {
-        DEBUG(__func__);
         auto program = Program::create();
         defineBuildinFunc("print", void_type, {int_type});
         defineBuildinFunc("printstr", void_type, {PtrType::create(char_type)});
@@ -1190,5 +1231,10 @@ namespace Yan
     {
         return nullptr;
     }
+     bool parser::isInteger(Expr* node)
+     {
+      
+         node->type_->isOnekindOf(Type::T_INT, Type::T_CHAR, Type::T_LONG, Type::T_SHORT);
+     }
 
 } // namespace Yan

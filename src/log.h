@@ -38,9 +38,9 @@ namespace Yan
 #define NOTICE_LOG \
     if (log_level <= L_NOTICE) \
         logger(std::cout, __func__, __LINE__, L_NOTICE).stream()
-
 #define ERROR_EXIT \
-    logger(std::cout, L_ERROR_EXIT).stream()
+    logger(std::cerr, L_ERROR_EXIT).stream()
+
 #define DEBUG(format, ...)    \
     if (log_level <= L_DEBUG) \
     Info(format, ##__VA_ARGS__)

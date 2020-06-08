@@ -97,4 +97,14 @@ StructType::StructType():Type(0,14,T_STRUCT,true)
 {
 
 }
+
+
+ Type* mayCasttoPtr(Type* ty)
+ {
+     if(ty->castToDeried() == nullptr || ty->isKindOf(Type::T_PTR))
+     {
+         return ty;
+     }
+     return PtrType::create(ty->castToDeried()->getBaseType());
+ }
 }

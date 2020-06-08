@@ -17,6 +17,15 @@ namespace Yan
   const char *program = "Yan";
 
   Loglevel log_level = L_DEBUG;
+  static   std::string levelToString(Loglevel l)
+  {
+    switch(l)
+    {
+      case L_DEBUG: return "[DEBUG] ";
+      case L_NOTICE: return "[NOTICE] ";
+      case L_ERROR_EXIT: return "[ERROR] ";
+    }
+  };
 
   logger::logger(std::ostream &os, const char *func, int line, Loglevel level) : impl(os, func, line, level)
   {
@@ -27,13 +36,13 @@ namespace Yan
   }
   logger::Impl::Impl(std::ostream &os, const char *func, int line, Loglevel level) : os_(os)
   {
-    stream_ << ANSI_COLOR_GREEN<<func << ": line: " << line << " LogLevel: " << level;
+    stream_ << ANSI_COLOR_GREEN<<levelToString(level)<<ANSI_COLOR_RESET<<func << ": line: " << line ;
     level_ = level;
   }
 
   logger::Impl::Impl(std::ostream& os, Loglevel level):os_(os)
   {
-    stream_<<ANSI_COLOR_RED<<level;
+    stream_<<ANSI_COLOR_RED<<levelToString(level)<<ANSI_COLOR_RESET;
     level_ = level;
   }
   logger::Impl:: ~Impl() 

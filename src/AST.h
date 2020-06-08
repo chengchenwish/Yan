@@ -154,7 +154,9 @@ namespace Yan
     {
         //BinaryOP
         OP_ADD,
+        OP_PTRADD,
         OP_SUBTRACT,
+        OP_PTRSUB,
         OP_MULTIPLY,
         OP_DIVIDE,
         OP_MOD,

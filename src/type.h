@@ -56,9 +56,18 @@ namespace Yan
         int getalign() const;
         int getsize() const;
         void setIncomplete(bool incomplete) { isIncomplete_ = incomplete; }
-        std::string tostring();
-        bool isKindOf(TypeKind kind) const { return kind_ == kind; }
+        std::string tostring();        
         bool isIncomplete() { return isIncomplete_; }
+        bool isKindOf(TypeKind kind) const { return kind_ == kind; }
+        bool isOnekindOf(TypeKind k1, TypeKind k2)
+        {
+            return isKindOf(k1)||isKindOf(k2);
+        }
+        template<typename ...TS>
+        bool isOnekindOf(TypeKind k1, TypeKind k2, TS ...ts)
+        {
+            return isKindOf(k1)||isOnekindOf(k2,ts...);
+        }
 
         //cast
         virtual DerivedType *castToDeried() { return nullptr; }
@@ -157,6 +166,8 @@ namespace Yan
     extern CharType *char_type;
     extern ShortType *short_type;
     extern LongType *long_type;
+
+    extern Type* toPtrType(Type* ty);
 
 } // namespace Yan
 #endif

@@ -27,13 +27,13 @@ static void compile(std::vector<std::string>&files)
     Yan::gen gencode(pars.getScope(),out_asmeble_file);
     pp1->accept(&gencode);
     
-    if(Yan::log_level  == Yan::L_DEBUG)
-    {
-        std::ofstream f(files.front()+".symbol");
+    // if(Yan::log_level  == Yan::L_DEBUG)
+    // {
+    //     std::ofstream f(files.front()+".symbol");
 
-        pars.getScope()->dumpSymbol(f);
-        f.close();
-    }
+    //     pars.getScope()->dumpSymbol(f);
+    //     f.close();
+    // }
    // gencode.genProgram(pp1);
         
 }

@@ -156,10 +156,7 @@ namespace Yan
      }
     void gen::visit(BinaryOp *node)
     {
-
-        //i++;
-        Info("binary");
-        Info("fff:%d", node->op);
+        DEBUG_LOG<<"node op = "<<static_cast<int>(node->op);
         if (node->op == OpType::OP_ASSIGN)
         {
             // node->left->accept(this);
@@ -170,6 +167,18 @@ namespace Yan
             storeLValue(node->type_);
 
             //emit("pushq %rax");
+        }
+        else if(node->op == OpType::OP_PTRADD)
+        {
+            genLvalue(node->left);
+            node->right->accept(this);
+            emit("popq %rdx");
+            emit("popq %rax");
+            std::stringstream fm;
+            fm<<"imulq $"<<node->left->type_->castToDeried()->getBaseType()->getsize()<<", %rdx";
+            emit(fm);
+            emit("addq %rdx,%rax");
+            emit("pushq %rax");
         }
         else if (node->op == OpType::OP_ADD)
         {
@@ -364,9 +373,7 @@ namespace Yan
     }
     void gen::visit(Identifier *node)
     {
-        Info("identifier");
-        //if(node)
-        Info(node->name_.c_str());
+        DEBUG_LOG<<"name = "<<node->name_<<" node->isLocal_ = "<<node->isLocal_;
         std::stringstream fm;
         if (node->isLocal_)
         {
