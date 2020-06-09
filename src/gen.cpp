@@ -134,10 +134,11 @@ namespace Yan
         {
             genLvalue(node->operand_);
             node->operand_->accept(this);
-            emit("popq %rax");
-            emit("addq $1, %rax");
-            emit("pushq %rax");
+            emit("popq %rdx");
+            emit("addq $1, %rdx");
+            emit("pushq %rdx");
             storeLValue(node->type_);
+            emit("pushq %rdx");
 
 
         }
