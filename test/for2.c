@@ -10,11 +10,17 @@ int main()
     for(i=0; i<2;i++)    
         for(j=0;j<2;j++) 
                   print(c++);
+    for(;;)
+    {
+        if(c++ == 100)
+        break;
+    }
  
   
 
     print(i);
     print(j);
+    print(c);
     return 0;
 }
 /*
@@ -25,4 +31,5 @@ Expected output:
 4
 2
 2
+100
 */

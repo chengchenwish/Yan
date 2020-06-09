@@ -481,7 +481,12 @@ namespace Yan
     }
     void gen::checkCondition(Expr *node, std::string trueLabel, std::string falsedLabel)
     {
-        Info(__func__);
+        if(node == nullptr)
+        {
+            //for(;;)
+             emit("jmp " + trueLabel);
+             return;
+        }
         node->accept(this);
         emit("popq %rax");
         emit("cmp $0, %rax");
