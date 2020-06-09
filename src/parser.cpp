@@ -323,9 +323,9 @@ namespace Yan
             }
         }
     }
-    Expr *parser::richadd(Expr *lhs, Expr* rhs)
+    Expr *parser::richadd(Expr *lhs, Expr *rhs)
     {
-        return  BinaryOp::create(OpType::OP_ADD, lhs, rhs);
+        return BinaryOp::create(OpType::OP_ADD, lhs, rhs);
         /*
         if(isInteger(lhs) && isInteger(rhs))        
         {
@@ -349,11 +349,9 @@ namespace Yan
         }
 
         ERROR_EXIT<<peek()<<" unsupported Type for add/sub operation";
-*/        
-
-        
+*/
     }
-    Expr *parser::richsub(Expr *lhs, Expr* rhs)
+    Expr *parser::richsub(Expr *lhs, Expr *rhs)
     {
         return BinaryOp::create(OpType::OP_SUBTRACT, lhs, rhs);
     }
@@ -516,32 +514,54 @@ namespace Yan
 
         return LoopStmt::create(cond, then);
     }
-    LoopStmt *parser::parseForStmt()
+    Stmt *parser::parseForStmt()
     {
         //this function should only be called by singleStmt
+        Expr *init = nullptr;
+        Expr *cond = nullptr;
+        Expr *inc = nullptr;
+        selfScope self(*this, ScopeKind::BLOCK);
+        expect(TokenType::T_LPAREN, "(");
+        if (!is(TokenType::T_SEMI))
+        {
+            init = expr();
+        }
+
         expect(TokenType::T_SEMI, ";");
-        auto cond = expr();
+
+        if (!is(TokenType::T_SEMI))
+        {
+            cond = expr();
+        }
         expect(TokenType::T_SEMI, ";");
-        auto inc = expr();
+
+        if (!is(TokenType::T_RPAREN))
+        {
+            inc = expr();
+        }
         expect(TokenType::T_RPAREN, ")");
         Stmt *body = nullptr;
         if (!is(TokenType::T_LBRACE))
         {
             body = parseSingleStmt();
-            auto stmt = CompousedStmt::create();
-            stmt->addStmt(body);
-            stmt->addStmt(inc);
-            stmt->scope_ = currentScop_;
         }
         else
         {
             body = parseCompoundStmt();
-            static_cast<CompousedStmt *>(body)->addStmt(inc);
             static_cast<CompousedStmt *>(body)->scope_ = currentScop_;
             currentScop_->dumpSymbol(std::cout);
         }
 
-        return LoopStmt::create(cond, body);
+        auto forloop = LoopStmt::create(cond, body);
+        forloop->inc_ = inc;
+        if(init)
+        {
+            auto compstmt = CompousedStmt::create();
+            compstmt->addStmt(init);
+            compstmt->addStmt(forloop);
+            return compstmt;
+        }        
+        return forloop;
     }
     LoopStmt *parser::parseDoWhileStmt()
     {
@@ -611,44 +631,8 @@ namespace Yan
         }
         if (match(TokenType::T_FOR))
         {
-            CompousedStmt *stmt = nullptr;
-            //split for into two part
-            //before: for (int i = 0; i<10;i++)
-            //after:  int i = 0;
-            //            ;i<10;i++)
-            //int i;
-            //for(i = 0;i<10;i++)
-            // {
+            return parseForStmt();
 
-            // }
-            //int a;
-            //int i;
-            //{
-            // i = 0;
-            //  {
-            //
-            //  i ++
-            //  }
-            //}
-            //
-            //
-            expect(TokenType::T_LPAREN, "(");
-            //TODO variabale
-            //auto cond = expr();
-            selfScope self(*this, ScopeKind::BLOCK);
-            if (!is(TokenType::T_SEMI))
-            {
-                stmt = CompousedStmt::create();
-                auto init = expr();
-                stmt->addStmt(init);
-            }
-            auto forstmt = parseForStmt();
-            if (stmt)
-            {
-                stmt->addStmt(forstmt);
-                return stmt;
-            }
-            return forstmt;
         }
         if (is(TokenType::T_IDENT))
         {
@@ -1231,10 +1215,10 @@ namespace Yan
     {
         return nullptr;
     }
-     bool parser::isInteger(Expr* node)
-     {
-      
-         node->type_->isOnekindOf(Type::T_INT, Type::T_CHAR, Type::T_LONG, Type::T_SHORT);
-     }
+    bool parser::isInteger(Expr *node)
+    {
+
+        node->type_->isOnekindOf(Type::T_INT, Type::T_CHAR, Type::T_LONG, Type::T_SHORT);
+    }
 
 } // namespace Yan

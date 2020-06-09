@@ -32,7 +32,7 @@ namespace Yan
         FunctionCall *parseFuncCall(Identifier* identi);
         IfStmt *parseIfStmt();
         LoopStmt *parseWhileStmt();
-        LoopStmt *parseForStmt();
+        Stmt *parseForStmt();
         LoopStmt *parseDoWhileStmt();
         BreakContinueStmt *parseContinueBreakStmt(BreakContinueStmt::kind type);
         ReturnStmt* parseReturnStmt();

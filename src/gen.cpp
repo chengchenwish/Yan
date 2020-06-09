@@ -433,12 +433,13 @@ namespace Yan
     }
     void gen::visit(LoopStmt *node)
     {
-        Info("gen loop");
+        DEBUG_LOG<<" Gen LoopStmtmet";
 
         auto startLabel = genLabe();
         auto endLabel = genLabe();
         breakLabels_.push(endLabel);
         continueLabels_.push(startLabel);
+
         if (node->postcheck_)
         {
             emit("jmp " + startLabel);
@@ -448,7 +449,11 @@ namespace Yan
             checkCondition(node->cond_, startLabel, endLabel);
         }
         emit(startLabel + ":");
-        node->then_->accept(this);
+        node->body_->accept(this);
+        if(node->inc_)
+        {
+            node->inc_->accept(this);
+        }
         checkCondition(node->cond_, startLabel, endLabel);
         emit(endLabel + ":");
         breakLabels_.pop();

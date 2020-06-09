@@ -96,17 +96,21 @@ namespace Yan
     struct LoopStmt : public Stmt
     {
         LoopStmt(Expr *cond, Stmt *then, bool postcheck)
-            : cond_(cond), then_(then), postcheck_(postcheck) {}
+            : cond_(cond), body_(then), postcheck_(postcheck) {}
         static LoopStmt *create(Expr *cond, Stmt *then, bool postcheck = false)
         {
             return new LoopStmt(cond, then, postcheck);
         }
         virtual void accept(Ivisitor *v) override { v->visit(this); }
+
+        Expr *inc_ = nullptr;//only for 'for loop'
+        
         Expr *cond_;
-        Stmt *then_;
+        Stmt *body_;
         // true for do-while
         bool postcheck_;
     };
+
     struct BreakContinueStmt : public Stmt
     {
         enum kind
