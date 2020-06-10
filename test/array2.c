@@ -8,9 +8,10 @@ int main()
    // a[]
     for(i = 0; i<2;i++)
     {
+        //print(i);
         for(j = 0;j<2;j++)
         {
-            a[i][j] = i*2 +j;
+            a[i][j] = i*2 +j;//*(*(a+i)+j)
             print(a[i][j]);
 
         }

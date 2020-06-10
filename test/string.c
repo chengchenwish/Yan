@@ -7,11 +7,11 @@ int test(char* s)
 int main()
 {
     char *s;
-    s = "hello world";
+    s = "hello world\n";
 
     {
         char * p;
-        p = "again";
+        p = "again\n";
         test(p);
     }
     printstr(s);

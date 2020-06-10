@@ -23,7 +23,6 @@ namespace Yan
     {
 
         currentScop_ = currentScop_->getParentScop();
-        Info(__func__);
     }
     Expr *parser::primary()
     {
@@ -416,7 +415,6 @@ namespace Yan
         }
         if (match(TokenType::T_AMPER))
         {
-            Info("ffffffffffffffffffffffff");
             return UnaryOp::create(OpType::OP_ADDR, cast());
         }
         if (match(TokenType::T_STAR))
@@ -516,7 +514,6 @@ namespace Yan
     }
     Stmt *parser::parseForStmt()
     {
-        //this function should only be called by singleStmt
         Expr *init = nullptr;
         Expr *cond = nullptr;
         Expr *inc = nullptr;
@@ -663,7 +660,6 @@ namespace Yan
     }
     CompousedStmt *parser::parseCompoundStmt()
     {
-        Info(__func__);
         expect(TokenType::T_LBRACE, "{");
         auto compoused = CompousedStmt::create();
         while (!match(TokenType::T_RBRACE))
@@ -753,8 +749,7 @@ namespace Yan
         auto body = parseCompoundStmt();
         body->scope_ = currentScop_;
         func->setBody(body);
-
-        Info(__func__);
+        
         return func;
     }
     Declaration *parser::parseDeclaration(bool isloacl)

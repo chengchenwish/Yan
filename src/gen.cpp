@@ -73,6 +73,7 @@ namespace Yan
         emit("popq %rax");
         //if(ty->getsize() == 8)
         //{
+        if(!ty->isKindOf(Type::T_ARRAY))
         emit("movq (%rax),%rax");
         //}
         emit("pushq %rax");
@@ -108,19 +109,19 @@ namespace Yan
     }
     void gen::visit(UnaryOp *node)
     {
-        Info("ppppppppp %d", static_cast<int>(node->op_));
         //node->operand_->accept(this);
         //  emit("popq %rax");
         if (node->op_ == OpType::OP_DEREF) //*
         {
             // node->operand_->accept(addrGnerator_);
+            DEBUG_LOG<<"* operator";
             node->operand_->accept(this);
             //emit("popq %rax");
 
             //emit("movq (%rax), %rax");
             // emit("movq (%rax),%rax");
             load(node->type_);
-            emit("pushq %rax");
+           // emit("pushq %rax");
             //storeLValue(node->type_);
             //  node->operand_->accept(this);
         }
@@ -153,6 +154,7 @@ namespace Yan
     }
      void gen::genLvalue(Expr* node)
      {
+         assert(!node->type_->isKindOf(Type::T_ARRAY));
          node->accept(addrGnerator_);
      }
     void gen::visit(BinaryOp *node)
@@ -171,7 +173,8 @@ namespace Yan
         }
         else if(node->op == OpType::OP_PTRADD)
         {
-            genLvalue(node->left);
+           // genLvalue(node->left);
+           node->left->accept(this);
             node->right->accept(this);
             emit("popq %rdx");
             emit("popq %rax");
@@ -376,13 +379,23 @@ namespace Yan
     {
         DEBUG_LOG<<"name = "<<node->name_<<" node->isLocal_ = "<<node->isLocal_;
         std::stringstream fm;
+        if(node->type_->isKindOf(Type::T_ARRAY))
+        {
+            DEBUG_LOG<<"identifier is array type";
+            genAddr(node);
+            return;
+        }
+
         if (node->isLocal_)
         {
-            loadLValue(node);
+           
+            
+                loadLValue(node);
+            
         }
         else
         {
-
+            
             fm << "movq  " << node->name_ << "(%rip), %rax";
             emit(fm.str());
             emit("pushq %rax");
@@ -527,8 +540,8 @@ namespace Yan
         for (int i = 0; i < args.size(); i++)
         {
             args[i]->accept(this);
-            emit("popq %rax");
-            emit("movq %rax, " + argReg8[i]);
+           // emit("popq %rax");
+            emit("popq " + argReg8[i]);
         }
         // align RSP to a 16 byte boundary before
         // calling a function because it is an ABI requirement.
@@ -618,7 +631,7 @@ namespace Yan
         emit("ret");
 //build in printstr
        emit(".LC11:");
-        emit("\t.string \"%s\\n\"");
+        emit("\t.string \"%s\"");
         emit(".text");
         emit(".global printstr");
         emit("printstr:");

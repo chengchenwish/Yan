@@ -92,7 +92,7 @@ namespace Yan
         Stmt *then_;
         Stmt *else_;
     };
-    // while do-while and for Stmt
+    // 'while do-while' and 'for' Stmt
     struct LoopStmt : public Stmt
     {
         LoopStmt(Expr *cond, Stmt *then, bool postcheck)
@@ -146,6 +146,10 @@ namespace Yan
         virtual void accept(Ivisitor *v) override { v->visit(this); }
         std::string label_;
     };
+    // struct SwitchStmt: public Stmt
+    // {
+    //     virtual void accept(Ivisitor* v)override {v->visit(this);}
+    // };
 
     struct Expr : public Stmt
     {

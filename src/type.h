@@ -83,7 +83,6 @@ namespace Yan
         TypeKind kind_;
         bool isIncomplete_;
         bool isunsigned;
-        storageClass class_;
     };
 
     class DerivedType : public Type
