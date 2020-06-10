@@ -516,7 +516,7 @@ namespace Yan
     {
         Expr *init = nullptr;
         Expr *cond = nullptr;
-        Expr *inc = nullptr;
+        ExprStmt *inc = nullptr;
         selfScope self(*this, ScopeKind::BLOCK);
         expect(TokenType::T_LPAREN, "(");
         if (!is(TokenType::T_SEMI))
@@ -534,7 +534,7 @@ namespace Yan
 
         if (!is(TokenType::T_RPAREN))
         {
-            inc = expr();
+            inc = ExprStmt::create(expr());
         }
         expect(TokenType::T_RPAREN, ")");
         Stmt *body = nullptr;
@@ -641,19 +641,34 @@ namespace Yan
 
                 return LabelStmt::create(varToken.getText());
             }
+            // else if (is(TokenType::T_LPAREN))
+            // {
+            //      scan.putBack(varToken);
+            //     auto assign = expr();
+            //     expect(TokenType::T_SEMI, ";");
+            //     return assign;
+            // }
             else
             {
                 scan.putBack(varToken);
                 auto assign = expr();
                 expect(TokenType::T_SEMI, ";");
-                return assign;
+                return ExprStmt::create(assign);
             }
         }
         else
         {
-            auto exp = expr();
+//             if(isOneOf(TokenType::T_STAR,TokenType::T_AMPER))
+//             {
+//  auto exp = expr();
+//             expect(TokenType::T_SEMI, ";");
+//             return exp;
+//             }
+             auto exp = expr();
             expect(TokenType::T_SEMI, ";");
-            return exp;
+           
+
+            return ExprStmt::create(exp);
         }
         ERROR_EXIT << "Token:" << peek().tostring() << " Unkown statment";
         //  ExitWithError("Token: %s unknow statment", peek().tostring().c_str());

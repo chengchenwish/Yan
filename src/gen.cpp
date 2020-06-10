@@ -6,7 +6,12 @@ namespace Yan
     const std::vector<std::string> gen::argReg2 = {"%di", "%si", "%dx", "%cx", "%r8w", "%r9w"};
     const std::vector<std::string> gen::argReg4 = {"%edi", "%esi", "%edx", "%ecx", "%r8d", "%r9d"};
     const std::vector<std::string> gen::argReg8 = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
-
+   //universal registers
+    const std::vector<std::string> gen::regList = {"%r10", "%r11", "%r12", "%r13", "%rbx","%rcx"};
+    const std::vector<std::string> gen::bregList = {"%r10b", "%r11b", "%r12b", "%r13b","%bl","%cl"};
+    const std::vector<std::string> gen::wregList = {"%r10w", "%r11w", "%r12w", "%r13w","%bx","%cx"};
+    const std::vector<std::string> gen::dregList = {"%r10d", "%r11d", "%r12d", "%r13d", "%ebx","%ecx"};
+   
     int gen::labelseq = 1;
     gen::gen(Scope* sc, const std::string &fileName) : globalScope(sc),outfileName(fileName)
     {
@@ -27,6 +32,28 @@ namespace Yan
         }
     }
 
+    gen::RegAllocator::RegAllocator()
+    {
+        RegStatus = { kFreed, kFreed, kFreed, kFreed,kFreed, kFreed};
+    }
+    int gen::RegAllocator::allocateReg()
+    {
+        for(int i= 0; i<reg_num;i++)
+        {
+            if(RegStatus[i] == kFreed)
+            {
+                RegStatus[i] = kUsed;
+                return i;
+            }
+        }
+        ERROR_EXIT<<"There is not enough register";
+    }
+
+    void gen::RegAllocator::freeReg(int reg)
+    {
+        RegStatus[reg] = kFreed;
+    }
+
     void gen::emit(std::string inst)
     {
         outfstream << "\t" << inst << "\n";
@@ -45,27 +72,33 @@ namespace Yan
     //store value from register to statck
     void gen::storeLValue(Type *ty)
     {
-        emit("popq %rax");
-        emit("popq %rbx");
+        auto reg1 = regAllocator_.getStoredreg();
+        auto reg2 = regAllocator_.getStoredreg();
         std::stringstream fm;
+        Info("ooooooooooooooooooooo");Info("ooooooooooooooooooooo");
 
         if (ty->getsize() == 1)
         {
-            emit("movb %al, (%rbx)");
+            emit("movb",bregList[reg1],"("+regList[reg2]+")");
         }
 
         else if (ty->getsize() == 2)
         {
-            emit("movw %ax, (%rbx)");
+            emit("movw",wregList[reg1],"("+regList[reg2]+")");
         }
         else if (ty->getsize() == 4)
         {
-            emit("movl %eax, (%rbx)");
+           emit("movl",dregList[reg1],"("+regList[reg2]+")");
         }
         else if (ty->getsize() == 8)
         {
-            emit("movq %rax, (%rbx)");
+            emit("movq",regList[reg1],"("+regList[reg2]+")");
         }
+       
+       // regAllocator_.freeReg(reg1);
+        regAllocator_.freeReg(reg2);
+        regAllocator_.storeReg(reg1);
+         Info("jjjjjjjjjjjjjj");
     }
     //load [rax] to rax 
     void gen::load(Type *ty)
@@ -83,29 +116,30 @@ namespace Yan
     {
 
         std::stringstream fm;
+        auto reg = regAllocator_.allocateReg();
         if (node->type_->getsize() == 1)
         {
             fm << "movb  -" << node->offset_ << "(%rbp) , "
-               << "%al";
+               <<bregList[reg];
         }
         if (node->type_->getsize() == 2)
         {
             fm << "movw  -" << node->offset_ << "(%rbp) , "
-               << "%ax";
+               << wregList[reg];
         }
         else if (node->type_->getsize() == 4)
         {
             fm << "movl  -" << node->offset_ << "(%rbp) , "
-               << "%eax";
+               <<dregList[reg];
         }
         else if (node->type_->getsize() == 8)
         {
             fm << "movq  -" << node->offset_ << "(%rbp) , "
-               << "%rax";
+               << regList[reg];
         }
 
         emit(fm.str());
-        emit("pushq %rax");
+        regAllocator_.storeReg(reg);
     }
     void gen::visit(UnaryOp *node)
     {
@@ -116,14 +150,20 @@ namespace Yan
             // node->operand_->accept(addrGnerator_);
             DEBUG_LOG<<"* operator";
             node->operand_->accept(this);
-            //emit("popq %rax");
+            auto reg = regAllocator_.getStoredreg();
 
-            //emit("movq (%rax), %rax");
-            // emit("movq (%rax),%rax");
-            load(node->type_);
-           // emit("pushq %rax");
-            //storeLValue(node->type_);
-            //  node->operand_->accept(this);
+        if(!node->type_->isKindOf(Type::T_ARRAY))
+        {
+            emit("movq","("+regList[reg]+")", regList[reg]);
+            regAllocator_.storeReg(reg);
+        }
+        else
+        {
+            regAllocator_.storeReg(reg);
+
+        }
+         
+
         }
         else if (node->op_ == OpType::OP_ADDR) //&
         {
@@ -135,11 +175,11 @@ namespace Yan
         {
             genLvalue(node->operand_);
             node->operand_->accept(this);
-            emit("popq %rdx");
-            emit("addq $1, %rdx");
-            emit("pushq %rdx");
+            auto reg1 = regAllocator_.getStoredreg();
+            emit("addq", "$1", regList[reg1]);
+            Info("88888888888888888888");
+            regAllocator_.storeReg(reg1);
             storeLValue(node->type_);
-            emit("pushq %rdx");
 
 
         }
@@ -148,9 +188,10 @@ namespace Yan
     {
        auto LC = strlitMap_[node->strData_]; 
        std::stringstream fm;
-       fm<<"leaq "<<LC<<"(%rip),%rax";
+       auto reg = regAllocator_.allocateReg();
+       fm<<"leaq "<<LC<<"(%rip) ,"<<regList[reg];
        emit(fm);
-       emit("pushq %rax");
+       regAllocator_.storeReg(reg);
     }
      void gen::genLvalue(Expr* node)
      {
@@ -162,12 +203,11 @@ namespace Yan
         DEBUG_LOG<<"node op = "<<static_cast<int>(node->op);
         if (node->op == OpType::OP_ASSIGN)
         {
-            // node->left->accept(this);
             genLvalue(node->left);
-            //node->left->accept(addrGnerator_);
-            // genAddr(static_cast<Identifier *>(node->left));
             node->right->accept(this);
             storeLValue(node->type_);
+            //auto reg = regAllocator_.getStoredreg();
+            //regAllocator_.freeReg(reg);
 
             //emit("pushq %rax");
         }
@@ -176,13 +216,14 @@ namespace Yan
            // genLvalue(node->left);
            node->left->accept(this);
             node->right->accept(this);
-            emit("popq %rdx");
-            emit("popq %rax");
+           auto reg1 = regAllocator_.getStoredreg();
+            auto reg2 = regAllocator_.getStoredreg();
             std::stringstream fm;
-            fm<<"imulq $"<<node->left->type_->castToDeried()->getBaseType()->getsize()<<", %rdx";
+            fm<<"imulq $"<<node->left->type_->castToDeried()->getBaseType()->getsize()<<","<<regList[reg1];
             emit(fm);
-            emit("addq %rdx,%rax");
-            emit("pushq %rax");
+            emit("addq",regList[reg1],regList[reg2]);
+            regAllocator_.freeReg(reg1);
+            regAllocator_.storeReg(reg2);
         }
         else if (node->op == OpType::OP_ADD)
         {
@@ -252,56 +293,67 @@ namespace Yan
 
     void gen::genAdd()
     {
-        emit("popq %rax");
-        emit("popq %rbx");
-        emit("addq %rbx, %rax");
-        emit("pushq %rax");
+        auto reg1 = regAllocator_.getStoredreg();
+        auto reg2 = regAllocator_.getStoredreg();
+       emit("addq",regList[reg1], regList[reg2]);
+        regAllocator_.freeReg(reg1);
+        regAllocator_.storeReg(reg2);
     }
     void gen::genSub()
     {
+                auto reg1 = regAllocator_.getStoredreg();
+        auto reg2 = regAllocator_.getStoredreg();
+       emit("subq",regList[reg1], regList[reg2]);
+        regAllocator_.freeReg(reg1);
+        regAllocator_.storeReg(reg2);
 
-        emit("popq %rdx");
-        emit("popq %rax");
-        emit("subq %rdx , %rax");
-        emit("pushq %rax");
     }
     void gen::genMul()
     {
-        emit("popq %rdx");
-        emit("popq %rax");
+                auto reg1 = regAllocator_.getStoredreg();
+        auto reg2 = regAllocator_.getStoredreg();
+       emit("imulq",regList[reg1], regList[reg2]);
+       regAllocator_.freeReg(reg1);
+        regAllocator_.storeReg(reg2);
 
-        emit("imulq %rdx , %rax");
-        emit("pushq %rax");
+    
     }
     void gen::genDiv()
     {
-        emit("popq %rdi");
-        emit("popq %rax");
-        emit("cqto");
-        emit("idivq %rdi");
-        emit("push %rax");
+                auto reg1 = regAllocator_.getStoredreg();
+        auto reg2 = regAllocator_.getStoredreg();
+        emit("movq "+regList[reg2]+", %rax");
+        emit("cqto");        
+       emit("idivq  "+regList[reg1]);
+        emit("movq ", "%rax ", regList[reg2]);
+        regAllocator_.storeReg(reg2);
+        regAllocator_.freeReg(reg1);
     }
 
     void gen::genCmp(const std::string &how, bool longType)
     {
-        emit("popq %rdx");
-        emit("popq %rax");
-        if (longType)
+                   auto reg1 = regAllocator_.getStoredreg();
+        auto reg2 = regAllocator_.getStoredreg();
+        if(longType)
         {
-            emit("cmp %rdx, %rax");
+            emit("cmp",regList[reg1], regList[reg2]);
         }
-        emit("cmp %edx, %eax");
-        std::string inst = how + " %al";
+       else
+       {
+           emit("cmp",dregList[reg1], dregList[reg2]);
+       }
+       std::string inst = how +" "+ bregList[reg2];
         emit(inst);
-        emit("movzbq %al, %rax");
-        emit("pushq %rax");
+        emit("movzbq", bregList[reg2], regList[reg2]);
+       regAllocator_.freeReg(reg1);
+        regAllocator_.storeReg(reg2);
     }
 
     void gen::visit(IntegerLiteral *node)
     {
-        emit("movq $" + std::to_string(node->value_) + ", %rax");
-        Info(std::to_string(node->value_).c_str());
-        emit("pushq %rax");
+        auto reg = regAllocator_.allocateReg();
+        emit("movq $" + std::to_string(node->value_) +", "+ regList[reg]);
+        regAllocator_.storeReg(reg);
     }
     void gen::visit(FunctionDef *node)
     {
@@ -318,8 +370,11 @@ namespace Yan
         int index = 0;
         for (auto &arg : static_cast<FuncType *>(node->identi_->type_)->getParam())
         {
+            Info("index%d",index);
             loardArgs(arg, index++);
+           // Info("index%d",index);
         }
+        Info("uuuu");
         //    emit("movq %rdi , -4(%rbp)");
         //    emit("movq %rsi, -8(%rbp)");
 
@@ -339,7 +394,7 @@ namespace Yan
             fm << "movb " << argReg1[index] << ", -" << offset << "(%rbp)";
             break;
         case 2:
-            fm << "mov " << argReg2[index] << ", -" << offset << "(%rbp)";
+            fm << "movw " << argReg2[index] << ", -" << offset << "(%rbp)";
             break;
         case 4:
             fm << "movl " << argReg4[index] << ", -" << offset << "(%rbp)";
@@ -395,10 +450,11 @@ namespace Yan
         }
         else
         {
+           auto reg = regAllocator_.allocateReg();
             
-            fm << "movq  " << node->name_ << "(%rip), %rax";
+            fm << "movq  " << node->name_ << "(%rip), "<<regList[reg];
             emit(fm.str());
-            emit("pushq %rax");
+            regAllocator_.storeReg(reg);
         }
 
         //  Info(static_cast<FuncType*>(node->type_)->
@@ -408,35 +464,36 @@ namespace Yan
     void gen::genAddr(Identifier *node)
     {
         std::stringstream fm;
+        auto reg = regAllocator_.allocateReg();
         if (node->isLocal_)
         {
             Info("name:%s offset :%d", node->name_.c_str(), node->offset_);
+            
             fm << "leaq  -" << node->offset_ << "(%rbp) , "
-               << "%rax";
+               << regList[reg];
             emit(fm);
-            // if(node->type_->isKindOf(Type::T_PTR))
-            // {
-            //     emit("movq (%rax),%rax");
-            // }
-            emit("pushq %rax");
+    
+           
         }
         else
         {
 
-            fm << "leaq " << node->name_ << "(%rip), %rax";
+            fm << "leaq " << node->name_ << "(%rip), "<<regList[reg];
             emit(fm.str());
-            emit("pushq %rax");
+        
         }
+         regAllocator_.storeReg(reg);
     }
     void gen::visit(IfStmt *node)
     {
         node->cond_->accept(this);
-        emit("popq %rax");
-        emit("cmp $0, %rax");
+        auto reg = regAllocator_.getStoredreg();
+        emit("cmp", "$0", regList[reg]);
         // static int seq = 0;
         auto elsLabel = genLabe();
         auto elsEndLabel = genLabe();
         emit("jz " + elsLabel);
+        regAllocator_.freeReg(reg);
         node->then_->accept(this);
         emit("jmp " + elsEndLabel);
         emit(elsLabel + " :");
@@ -501,10 +558,11 @@ namespace Yan
              return;
         }
         node->accept(this);
-        emit("popq %rax");
-        emit("cmp $0, %rax");
+        auto reg = regAllocator_.getStoredreg();
+        emit("cmp $0,"+regList[reg]);
         emit("jz " + falsedLabel);
         emit("jmp " + trueLabel);
+        regAllocator_.freeReg(reg);
     }
 
     void gen::visit(GotoStmt *node)
@@ -524,13 +582,26 @@ namespace Yan
     {
         if (node->expr_)
         {
-            Info("ttt");
             node->expr_->accept(this);
-            emit("popq %rax");
+            auto r = regAllocator_.getStoredreg();
+        emit("movq",regList[r],"%rax");
+            
         }
+        
         emit("leave");
         emit("ret");
     }
+
+     void gen::visit(ExprStmt* node)
+     {
+         Info("ExprStmt");
+         node->expr_->accept(this);
+         auto reg = regAllocator_.getStoredreg();
+         Info("rrr");
+         regAllocator_.freeReg(reg);
+         Info("hukl");
+
+     }
     void gen::visit(FunctionCall *node)
     {
         static int seq = 0;
@@ -540,26 +611,46 @@ namespace Yan
         for (int i = 0; i < args.size(); i++)
         {
             args[i]->accept(this);
-           // emit("popq %rax");
-            emit("popq " + argReg8[i]);
+            Info("hhhhhhhhhhhhhhh");
+            auto reg = regAllocator_.getStoredreg();
+            Info("8888");
+            if(args[i]->type_&&args[i]->type_->getsize() == 1)
+            {
+                emit("movzbq",bregList[reg],argReg8[i]);
+            }
+           else
+           {
+              emit("movq",regList[reg],argReg8[i]);
+           }
+           Info("lll");
+           
+            regAllocator_.freeReg(reg);
+
         }
-        // align RSP to a 16 byte boundary before
-        // calling a function because it is an ABI requirement.
-        emit("movq %rsp, %rax");
-        emit("andq $15, %rax");
+        Info("22");
+        auto reg = regAllocator_.allocateReg();
+        Info("reg =%d",reg);
+        emit("movq", "%rsp", regList[reg]);
+        emit("andq", "$15", regList[reg]);
         auto labe = genLabe();
         auto labe1 = genLabe();
         emit("jnz " + labe);
-        emit("mov $0,%rax");
+        regAllocator_.freeReg(reg);
+       // emit("mov $0,%rax");
         emit("call " + node->designator_->name_);
         emit("jmp " + labe1);
         emit(labe + ":");
         emit("subq $8,%rsp");
-        emit("movq $0,%rax");
+        //emit("movq $0,%rax");
         emit("   call " + node->designator_->name_);
         emit(" addq $8,%rsp");
         emit(labe1 + ":");
-        emit("pushq %rax"); //store return value
+        Info("22");
+        auto r = regAllocator_.allocateReg();
+        Info("tttt");
+        emit("movq"," %rax",regList[r]);
+        regAllocator_.storeReg(r);
+        //emit("pushq %rax"); //store return value
     }
     void gen::visit(CompousedStmt *node)
     {
@@ -580,7 +671,9 @@ namespace Yan
         for (auto &stmt : node->stmtlist_)
         {
             stmt->accept(this);
+           
         }
+        
         if (offset > 0)
         {
             //restore

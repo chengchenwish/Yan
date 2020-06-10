@@ -5,7 +5,7 @@
 #include <array>
 #include <sstream>
 #include <assert.h>
-#include<map>
+#include <map>
 namespace Yan
 {
 
@@ -16,10 +16,10 @@ namespace Yan
         using StringLitLableMap = std::map<std::string, std::string>;
 
     public:
-        explicit gen(Scope* sc, const std::string &fileName = "a.s" );
+        explicit gen(Scope *sc, const std::string &fileName = "a.s");
         ~gen();
         std::string genLabe();
-        void visitExpr(Expr* node){node->accept(this);}
+        void visitExpr(Expr *node) { node->accept(this); }
         //impliment Ivistor
         virtual void visit(BinaryOp *node) override;
         virtual void visit(Identifier *node) override;
@@ -38,16 +38,17 @@ namespace Yan
         virtual void visit(StringLiteral *node) override;
         virtual void visit(BreakContinueStmt *node) override;
         virtual void visit(LabelStmt *node) override;
+         virtual void visit(ExprStmt* node);
 
         void genAddr(Identifier *node);
-        void genLvalue(Expr* node);
+        void genLvalue(Expr *node);
         void loardArgs(Identifier *node, int index);
         void checkCondition(Expr *node, std::string trueLabel, std::string falsedLabel);
 
     private:
         void storeLValue(Type *ty);
         void loadLValue(Identifier *node);
-        void load(Type* ty);
+        void load(Type *ty);
         //operator
         void genAdd();
         void genSub();
@@ -57,10 +58,43 @@ namespace Yan
 
         void genStringLitLables();
 
-    private:
         void emit(std::string inst);
         void emit(std::stringstream &inst);
+        void emit(std::string inst, std::string reg1, std::string reg2)
+        {
+            outfstream<<"\t"<<inst<<" "<<reg1<<", "<<reg2<<std::endl;
+        }
 
+public:
+        class RegAllocator
+        {
+        public:
+            enum Status
+            {
+                kUsed,
+                kFreed
+            };
+            RegAllocator();
+            ~RegAllocator() = default;
+             int allocateReg();
+             void freeReg(int reg);
+
+            void storeReg(int reg){allocatedReg.push(reg);}
+            int getStoredreg()
+            {
+                DEBUG_LOG<<"iiiiii";
+                DEBUG_LOG<<allocatedReg.size();
+                auto reg = allocatedReg.top();
+                allocatedReg.pop();
+                return reg;
+            }
+
+
+            static const int reg_num = 6;
+            std::array<Status, reg_num> RegStatus;
+            std::stack<int> allocatedReg;
+        };
+        private:
         //1 byte
         static const std::vector<std::string> argReg1;
         //2 byte
@@ -70,6 +104,11 @@ namespace Yan
         //8 byte
         static const std::vector<std::string> argReg8;
 
+
+            static const std::vector<std::string> regList;  //8 byte
+            static const std::vector<std::string> bregList; //1 byte
+            static const std::vector<std::string> wregList; //2 byte
+            static const std::vector<std::string> dregList; //4 byte
         //used to avoid generating duplicated label
         static int labelseq;
         LabelStack breakLabels_;
@@ -77,12 +116,13 @@ namespace Yan
         std::string functionName_;
         //
         StringLitLableMap strlitMap_;
-        Scope* globalScope;
+        Scope *globalScope;
 
         std::string outfileName;
         std::fstream outfstream;
 
         LvalueAddrGenerator *addrGnerator_;
+        RegAllocator regAllocator_;
 
         //disable copy and assgin
         gen(const gen &) = delete;
@@ -107,12 +147,18 @@ namespace Yan
         virtual void visit(GotoStmt *node) override { assert(0); }
         virtual void visit(ReturnStmt *node) override { assert(0); }
         virtual void visit(StringLiteral *node) override { assert(0); }
-        virtual void visit(UnaryOp *node) override {assert(node->op_ == OpType::OP_DEREF); generator_->visitExpr(node->operand_); }
+        virtual void visit(UnaryOp *node) override
+        {
+            assert(node->op_ == OpType::OP_DEREF);
+            generator_->visitExpr(node->operand_);
+        }
         virtual void visit(ConditionExpr *node) override { assert(0); }
         virtual void visit(LoopStmt *node) override { assert(0); }
         virtual void visit(BreakContinueStmt *node) override { assert(0); }
         virtual void visit(LabelStmt *node) override { assert(0); }
-private:
+         virtual void visit(ExprStmt* node)override {assert(0);}
+
+    private:
         gen *generator_;
     };
 } // namespace Yan
