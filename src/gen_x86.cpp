@@ -62,6 +62,10 @@ namespace Yan
     {
         outfstream << "\t" << inst.str() << std::endl;
     }
+    void gen::emitLable(const std::string &lebal)
+    {
+        outfstream << lebal << ":\n";
+    }
     std::string gen::genLabe()
     {
         std::stringstream l;
@@ -325,12 +329,12 @@ namespace Yan
     }
     void gen::visit(FunctionDef *node)
     {
-        DEBUG_LOG<<"FunctionDef function name = "<<node->identi_->name_;
-  
+        DEBUG_LOG << "FunctionDef function name = " << node->identi_->name_;
+
         DEBUG_LOG << node->identi_->name_ << " funcdef";
         functionName_ = node->identi_->name_;
         emit(".global " + node->identi_->name_);
-        emit(node->identi_->name_ + ":");
+        emitLable(node->identi_->name_);
         emit("pushq %rbp");
         emit("movq %rsp, %rbp");
         int index = 0;
@@ -339,7 +343,7 @@ namespace Yan
             loardArgs(arg, index++);
         }
         node->body_->accept(this);
-        if(node->identi_->type_->castToFunc()->getBaseType()->isKindOf(Type::T_VOID))
+        if (node->identi_->type_->castToFunc()->getBaseType()->isKindOf(Type::T_VOID))
         {
             emit("leave");
             emit("ret");
@@ -414,7 +418,6 @@ namespace Yan
             emit(fm.str());
             regAllocator_.storeReg(reg);
         }
-
     }
 
     //load a identifier's address to register
@@ -449,11 +452,11 @@ namespace Yan
         regAllocator_.freeReg(reg);
         node->then_->accept(this);
         emit("jmp " + elsEndLabel);
-        emit(elsLabel + " :");
+        emitLable(elsLabel);
         if (node->else_)
             node->else_->accept(this);
-
-        emit(elsEndLabel + ":");
+        emitLable(elsEndLabel);
+       
     }
     void gen::visit(LoopStmt *node)
     {
@@ -472,14 +475,14 @@ namespace Yan
         {
             checkCondition(node->cond_, startLabel, endLabel);
         }
-        emit(startLabel + ":");
+        emitLable(startLabel);
         node->body_->accept(this);
         if (node->inc_)
         {
             node->inc_->accept(this);
         }
         checkCondition(node->cond_, startLabel, endLabel);
-        emit(endLabel + ":");
+        emitLable(endLabel);
         breakLabels_.pop();
         continueLabels_.pop();
     }
@@ -590,18 +593,18 @@ namespace Yan
         // emit("mov $0,%rax");
         emit("call " + node->designator_->name_);
         emit("jmp " + labe1);
-        emit(labe + ":");
+        emitLable(labe);
         emit("subq $8,%rsp");
         //emit("movq $0,%rax");
         emit("   call " + node->designator_->name_);
         emit(" addq $8,%rsp");
-        emit(labe1 + ":");
+        emitLable(labe1);
 
-   
+
         // if(!node->designator_->type_->castToFunc()->getBaseType()->isKindOf(Type::T_VOID))
         {
             auto r = regAllocator_.allocateReg();
-            emit("movq", " %rax", regList[r]);//store return value
+            emit("movq", " %rax", regList[r]); //store return value
             regAllocator_.storeReg(r);
         }
     }
@@ -652,7 +655,7 @@ namespace Yan
     void gen::visit(Program *node)
     {
         Info("Begin generate assemble code...");
-        genStringLitLables();       
+        genStringLitLables();
         //buildin print
         emit(".LC10:");
         emit("\t.string \"%d\\n\"");
@@ -693,7 +696,6 @@ namespace Yan
         for (auto &decl : node->decls_)
         {
             decl->accept(this);
-
         }
     }
 } // namespace Yan

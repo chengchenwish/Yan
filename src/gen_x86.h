@@ -59,6 +59,7 @@ namespace Yan
 
         void emit(std::string inst);
         void emit(std::stringstream &inst);
+        void emitLable(const std::string& lebal);
         void emit(std::string inst, std::string reg1, std::string reg2)
         {
             outfstream << "\t" << inst << " " << reg1 << ", " << reg2 << std::endl;
