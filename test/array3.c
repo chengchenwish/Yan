@@ -1,23 +1,37 @@
-int test(int(*a)[10], int x)
+int test(int(*a)[5])
  {
     int i;
     int j;
-    for(i =0;i<10;i++)
-    for(j =0;j<10;j++)
+    for(i =0;i<2;i++)
+    for(j =0;j<5;j++)
         print(a[i][j]);
 //print(a[9][8]);
 
-return 0;
+return 99;
 }
 int main()
 {
-    int a[10][10];
+    int a[2][5];
         int i;
     int j;
-    for(i =0;i<10;i++)
-    for(j =0;j<10;j++)
+    for(i =0;i<2;i++)
+    for(j =0;j<5;j++)
         a[i][j] = i*10+j;
-   print(test(a,10));
+   print(test(a));
 
     return 0;
 }
+/*
+Expected output:
+0
+1
+2
+3
+4
+10
+11
+12
+13
+14
+99
+*/
