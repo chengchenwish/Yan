@@ -1,51 +1,64 @@
-//n 皇后
-#include<stdio.h>
-void print(const char* msg)
+
+// #include<stdio.h>
+void printmsg(char* msg)
 {
-    printf("%s",msg);
+    printstr(msg);
+    
+    return;
+   // printf(msg);
+    
 }
 
 int print_board(int (*board)[10]) {
+  int i;
+  int j;
+  for (i = 0; i < 10; i++) {
 
-  for (int i = 0; i < 10; i++) {
+    for (j = 0; j < 10; j++)
 
-    for (int j = 0; j < 10; j++)
+      if (board[i][j] != 0)
 
-      if (board[i][j])
-
-	print("Q ");
+	        printmsg("Q ");
 
       else
 
-	print(". ");
+      	printmsg(". ");
 
-    print("\n");
+    printmsg("\n");
 
   }
 
-  print("\n\n");
+  printmsg("\n\n");
+  return 0;
 
 }
 
 
 
 int conflict(int (*board)[10], int row, int col) {
+  int i;
+  for ( i = 0; i < row; i++) {
 
-  for (int i = 0; i < row; i++) {
-
-    if (board[i][col])
-
-      return 1;
-
-    int j = row - i;
-
-    if (0 < col - j + 1 && board[i][col - j])
+    if (board[i][col] != 0)
 
       return 1;
 
-    if (col + j < 10 && board[i][col + j])
+    int j;
+    j= row - i;
+
+    if (0 < col - j + 1)
+    {
+      if(board[i][col - j] != 0)
 
       return 1;
+    }
+
+    if (col + j < 10)
+    {
+    if( board[i][col + j]!= 0)
+
+      return 1;
+    }
 
   }
 
@@ -64,12 +77,15 @@ int solve(int (*board)[10], int row) {
     return 0;
 
   }
+  int i;
+  for ( i = 0; i < 10; i++) {
+   //print(conflict(board, row, i));
 
-  for (int i = 0; i < 10; i++) {
-
-    if (!conflict(board, row, i)) {
+    if (conflict(board, row, i) == 0) {
 
       board[row][i] = 1;
+     // printstr("row = ");
+     // print(row);
 
       solve(board, row + 1);
 
@@ -78,6 +94,7 @@ int solve(int (*board)[10], int row) {
     }
 
   }
+  return 2;
 
 }
 
@@ -85,14 +102,19 @@ int solve(int (*board)[10], int row) {
 
 int main() {
 
-  int board[100];
+  int board[10][10];
+  int j;
+  int i;
+  for( i= 0;i<10;i++)
+  for ( j = 0; j < 10; j++)
 
-  for (int i = 0; i < 100; i++)
-
-    board[i] = 0;
+    board[i][j] = 0;
 
   solve(board, 0);
+ //print_board(board);
 
   return 0;
 
 }
+
+

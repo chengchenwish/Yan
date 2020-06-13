@@ -514,14 +514,14 @@ namespace Yan
     }
     Stmt *parser::parseForStmt()
     {
-        Expr *init = nullptr;
+        Stmt *init = nullptr;
         Expr *cond = nullptr;
         ExprStmt *inc = nullptr;
         selfScope self(*this, ScopeKind::BLOCK);
         expect(TokenType::T_LPAREN, "(");
         if (!is(TokenType::T_SEMI))
         {
-            init = expr();
+            init =ExprStmt::create(expr());
         }
 
         expect(TokenType::T_SEMI, ";");

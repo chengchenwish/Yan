@@ -160,7 +160,7 @@ namespace Yan
         virtual void accept(Ivisitor* v){v->visit(this);}
         Expr* expr_;
     };
-    struct Expr : public Stmt
+    struct Expr : public Node
     {
         Expr(Type *ty) : type_(ty) {}
         Expr() : type_(nullptr) {}

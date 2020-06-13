@@ -75,7 +75,6 @@ namespace Yan
         auto reg1 = regAllocator_.getStoredreg();
         auto reg2 = regAllocator_.getStoredreg();
         std::stringstream fm;
-        Info("ooooooooooooooooooooo");Info("ooooooooooooooooooooo");
 
         if (ty->getsize() == 1)
         {
@@ -98,7 +97,6 @@ namespace Yan
        // regAllocator_.freeReg(reg1);
         regAllocator_.freeReg(reg2);
         regAllocator_.storeReg(reg1);
-         Info("jjjjjjjjjjjjjj");
     }
     //load [rax] to rax 
     void gen::load(Type *ty)
@@ -143,11 +141,9 @@ namespace Yan
     }
     void gen::visit(UnaryOp *node)
     {
-        //node->operand_->accept(this);
         //  emit("popq %rax");
         if (node->op_ == OpType::OP_DEREF) //*
         {
-            // node->operand_->accept(addrGnerator_);
             DEBUG_LOG<<"* operator";
             node->operand_->accept(this);
             auto reg = regAllocator_.getStoredreg();
@@ -168,8 +164,7 @@ namespace Yan
         else if (node->op_ == OpType::OP_ADDR) //&
         {
             node->operand_->accept(addrGnerator_);
-            // genAddr(static_cast<Identifier *>(node->operand_));
-            //donothing;
+
         }
         else if(node->op_ == OpType::OP_POSTINC)
         {
@@ -177,7 +172,6 @@ namespace Yan
             node->operand_->accept(this);
             auto reg1 = regAllocator_.getStoredreg();
             emit("addq", "$1", regList[reg1]);
-            Info("88888888888888888888");
             regAllocator_.storeReg(reg1);
             storeLValue(node->type_);
 
@@ -206,14 +200,9 @@ namespace Yan
             genLvalue(node->left);
             node->right->accept(this);
             storeLValue(node->type_);
-            //auto reg = regAllocator_.getStoredreg();
-            //regAllocator_.freeReg(reg);
-
-            //emit("pushq %rax");
         }
         else if(node->op == OpType::OP_PTRADD)
         {
-           // genLvalue(node->left);
            node->left->accept(this);
             node->right->accept(this);
            auto reg1 = regAllocator_.getStoredreg();
@@ -357,16 +346,13 @@ namespace Yan
     }
     void gen::visit(FunctionDef *node)
     {
-        Info("FunctionDef");
+        Info("FunctionDef %",node->identi_->name_.c_str());
+        DEBUG_LOG<<node->identi_->name_<<" funcdef";
         functionName_ = node->identi_->name_;
         emit(".global " + node->identi_->name_);
         emit(node->identi_->name_ + ":");
         emit("pushq %rbp");
         emit("movq %rsp, %rbp");
-        // std::stringstream fm;
-        // fm << "subq $" << node->getStackSize() << ", %rsp";
-        //  emit(fm.str());
-        //   emit("subq $24, %rsp");
         int index = 0;
         for (auto &arg : static_cast<FuncType *>(node->identi_->type_)->getParam())
         {
@@ -374,11 +360,6 @@ namespace Yan
             loardArgs(arg, index++);
            // Info("index%d",index);
         }
-        Info("uuuu");
-        //    emit("movq %rdi , -4(%rbp)");
-        //    emit("movq %rsi, -8(%rbp)");
-
-        //node->identi_->accept(this);
         node->body_->accept(this);
         //emit("movq $0, %rax");
     }
@@ -585,8 +566,14 @@ namespace Yan
             node->expr_->accept(this);
             auto r = regAllocator_.getStoredreg();
         emit("movq",regList[r],"%rax");
+        regAllocator_.freeReg(r);
             
         }
+        else
+        {
+            emit("movq $0,%rax");
+        }
+        
         
         emit("leave");
         emit("ret");
@@ -611,9 +598,8 @@ namespace Yan
         for (int i = 0; i < args.size(); i++)
         {
             args[i]->accept(this);
-            Info("hhhhhhhhhhhhhhh");
             auto reg = regAllocator_.getStoredreg();
-            Info("8888");
+            
             if(args[i]->type_&&args[i]->type_->getsize() == 1)
             {
                 emit("movzbq",bregList[reg],argReg8[i]);
@@ -622,12 +608,12 @@ namespace Yan
            {
               emit("movq",regList[reg],argReg8[i]);
            }
-           Info("lll");
+           
            
             regAllocator_.freeReg(reg);
 
         }
-        Info("22");
+    
         auto reg = regAllocator_.allocateReg();
         Info("reg =%d",reg);
         emit("movq", "%rsp", regList[reg]);
@@ -645,11 +631,24 @@ namespace Yan
         emit("   call " + node->designator_->name_);
         emit(" addq $8,%rsp");
         emit(labe1 + ":");
-        Info("22");
+        Info("OO");
+        if(node->designator_->type_)
+        {
+            DEBUG_LOG<<node->designator_->type_->tostring();
+            Info("kkk");
+        }
+        else
+        {
+            DEBUG_LOG<<"nullptr";
+            Info("ss");
+        }
+       // if(!node->designator_->type_->castToFunc()->getBaseType()->isKindOf(Type::T_VOID))
+        {
         auto r = regAllocator_.allocateReg();
         Info("tttt");
         emit("movq"," %rax",regList[r]);
         regAllocator_.storeReg(r);
+        }
         //emit("pushq %rax"); //store return value
     }
     void gen::visit(CompousedStmt *node)

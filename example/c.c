@@ -1,16 +1,23 @@
 
+
+#include<stdio.h>
 int a;
 int b;
 typedef int INT;
-void dump()
+void dump(char*s)
 {
-    a = a+b;
+    char*p = "hello";
+    printf("%s",s);
+  
 }
 int main()
 {
-    int x=1;
-    int y =2;
-    int* p;
-    *p = 9;
-    dump();
+    int i;
+    int j;
+    for(i=0;i<9;i++)
+    {
+j =8;
+    }
+    char *s ="hello";
+    dump(s);
 }
