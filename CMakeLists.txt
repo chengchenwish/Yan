@@ -13,7 +13,7 @@ target_sources(compiler
     src/log.cpp
     src/symbol.cpp
     src/AST.cpp
-    src/gen.cpp
+    src/gen_x86.cpp
     )
 add_executable(YAN main.cpp)
 target_link_libraries(YAN compiler)

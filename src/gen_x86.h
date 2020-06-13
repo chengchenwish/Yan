@@ -1,5 +1,5 @@
-#ifndef _GEN_H_
-#define _GEN_H_
+#ifndef _GEN_X86_H_
+#define _GEN_X86_H_
 #include "AST.h"
 #include "symbol.h"
 #include <array>
@@ -38,7 +38,7 @@ namespace Yan
         virtual void visit(StringLiteral *node) override;
         virtual void visit(BreakContinueStmt *node) override;
         virtual void visit(LabelStmt *node) override;
-         virtual void visit(ExprStmt* node);
+        virtual void visit(ExprStmt *node);
 
         void genAddr(Identifier *node);
         void genLvalue(Expr *node);
@@ -48,7 +48,6 @@ namespace Yan
     private:
         void storeLValue(Type *ty);
         void loadLValue(Identifier *node);
-        void load(Type *ty);
         //operator
         void genAdd();
         void genSub();
@@ -62,10 +61,10 @@ namespace Yan
         void emit(std::stringstream &inst);
         void emit(std::string inst, std::string reg1, std::string reg2)
         {
-            outfstream<<"\t"<<inst<<" "<<reg1<<", "<<reg2<<std::endl;
+            outfstream << "\t" << inst << " " << reg1 << ", " << reg2 << std::endl;
         }
 
-public:
+    public:
         class RegAllocator
         {
         public:
@@ -76,25 +75,23 @@ public:
             };
             RegAllocator();
             ~RegAllocator() = default;
-             int allocateReg();
-             void freeReg(int reg);
+            int allocateReg();
+            void freeReg(int reg);
 
-            void storeReg(int reg){allocatedReg.push(reg);}
+            void storeReg(int reg) { allocatedReg.push(reg); }
             int getStoredreg()
             {
-                DEBUG_LOG<<"iiiiii";
-                DEBUG_LOG<<allocatedReg.size();
                 auto reg = allocatedReg.top();
                 allocatedReg.pop();
                 return reg;
             }
 
-
-            static const int reg_num = 6;
+            static constexpr  int reg_num = 6;
             std::array<Status, reg_num> RegStatus;
             std::stack<int> allocatedReg;
         };
-        private:
+
+    private:
         //1 byte
         static const std::vector<std::string> argReg1;
         //2 byte
@@ -104,11 +101,10 @@ public:
         //8 byte
         static const std::vector<std::string> argReg8;
 
-
-            static const std::vector<std::string> regList;  //8 byte
-            static const std::vector<std::string> bregList; //1 byte
-            static const std::vector<std::string> wregList; //2 byte
-            static const std::vector<std::string> dregList; //4 byte
+        static const std::vector<std::string> regList;  //8 byte
+        static const std::vector<std::string> bregList; //1 byte
+        static const std::vector<std::string> wregList; //2 byte
+        static const std::vector<std::string> dregList; //4 byte
         //used to avoid generating duplicated label
         static int labelseq;
         LabelStack breakLabels_;
@@ -156,7 +152,7 @@ public:
         virtual void visit(LoopStmt *node) override { assert(0); }
         virtual void visit(BreakContinueStmt *node) override { assert(0); }
         virtual void visit(LabelStmt *node) override { assert(0); }
-         virtual void visit(ExprStmt* node)override {assert(0);}
+        virtual void visit(ExprStmt *node) override { assert(0); }
 
     private:
         gen *generator_;

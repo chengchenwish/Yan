@@ -1,5 +1,5 @@
 #include"gtest/gtest.h"
-#include "gen.h"
+#include "gen_x86.h"
 namespace Yan
 {
     

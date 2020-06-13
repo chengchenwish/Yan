@@ -127,7 +127,6 @@ struct location
 {   
 
 public:
-    friend std::ostream& operator << (std::ostream& s, const Token& t);
     Token() = default;
     Token(const location& l):loc(l){}
     TokenType type;
@@ -137,23 +136,15 @@ public:
     std::string getText()const ;
     int getValue()const;
     const location& getLocation();
-   //friend std::ostream& operator << (std::ostream& s, const Token t);
-    // std::ostream& operator <<(std::ostream& os)
-    // {
-    //     os<<"hh";
-    //    // os<<loc.fileName<<":"<<loc.line<<":"<<loc.colum<<" "<<tostring();
-    //     return os;
-    // }
+    friend std::ostream& operator << (std::ostream& s, const Token& t);
+   
 private:
      
     location loc;
 
 };
 extern std::ostream& operator << (std::ostream& s, const Token& t);
-// {    s<<t.tostring();
-//     //os<<t.loc.fileName<<":"<<t.loc.line<<":"<<t.loc.colum<<" "<<t.tostring();
-//     return s;
-// }
+
 
 }
 

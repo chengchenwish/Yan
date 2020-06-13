@@ -521,7 +521,7 @@ namespace Yan
         expect(TokenType::T_LPAREN, "(");
         if (!is(TokenType::T_SEMI))
         {
-            init =ExprStmt::create(expr());
+            init = ExprStmt::create(expr());
         }
 
         expect(TokenType::T_SEMI, ";");
@@ -551,13 +551,13 @@ namespace Yan
 
         auto forloop = LoopStmt::create(cond, body);
         forloop->inc_ = inc;
-        if(init)
+        if (init)
         {
             auto compstmt = CompousedStmt::create();
             compstmt->addStmt(init);
             compstmt->addStmt(forloop);
             return compstmt;
-        }        
+        }
         return forloop;
     }
     LoopStmt *parser::parseDoWhileStmt()
@@ -629,7 +629,6 @@ namespace Yan
         if (match(TokenType::T_FOR))
         {
             return parseForStmt();
-
         }
         if (is(TokenType::T_IDENT))
         {
@@ -641,13 +640,6 @@ namespace Yan
 
                 return LabelStmt::create(varToken.getText());
             }
-            // else if (is(TokenType::T_LPAREN))
-            // {
-            //      scan.putBack(varToken);
-            //     auto assign = expr();
-            //     expect(TokenType::T_SEMI, ";");
-            //     return assign;
-            // }
             else
             {
                 scan.putBack(varToken);
@@ -658,20 +650,12 @@ namespace Yan
         }
         else
         {
-//             if(isOneOf(TokenType::T_STAR,TokenType::T_AMPER))
-//             {
-//  auto exp = expr();
-//             expect(TokenType::T_SEMI, ";");
-//             return exp;
-//             }
-             auto exp = expr();
+            auto exp = expr();
             expect(TokenType::T_SEMI, ";");
-           
 
             return ExprStmt::create(exp);
         }
         ERROR_EXIT << "Token:" << peek().tostring() << " Unkown statment";
-        //  ExitWithError("Token: %s unknow statment", peek().tostring().c_str());
     }
     CompousedStmt *parser::parseCompoundStmt()
     {
@@ -732,16 +716,13 @@ namespace Yan
         for (int i = 0; i < argsNum; i++)
         {
             Expr *exp = assign();
-            Info("add args");
             funcCall->addArg(exp);
             if (i < argsNum - 1)
             {
-                Info("i=%d:", i);
                 expect(TokenType::T_COMMA, ",");
             }
         }
         expect(TokenType::T_RPAREN, ")");
-        // expect(TokenType::T_SEMI, ";");
         return funcCall;
     }
     FunctionDef *parser::parseFuncDef()
@@ -764,7 +745,7 @@ namespace Yan
         auto body = parseCompoundStmt();
         body->scope_ = currentScop_;
         func->setBody(body);
-        
+
         return func;
     }
     Declaration *parser::parseDeclaration(bool isloacl)
@@ -850,13 +831,12 @@ namespace Yan
             putBack(cache.top());
             cache.pop();
         }
-        Info("isfuncdef:%s", std::to_string(isfuncdef).c_str());
+        
         return isfuncdef;
     }
 
     bool parser::isTypeName()
     {
-        //current only support int/char
         return isOneOf(TokenType::T_INT,
                        TokenType::T_CHAR,
                        TokenType::T_BOOL,

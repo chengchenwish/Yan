@@ -3,7 +3,7 @@
 #include<stdio.h>
 #include "src/lexer.h"
 #include "src/AST.h"
-#include "src/gen.h"
+#include "src/gen_x86.h"
 #include "src/parser.h"
 
 //namespace Yan{

@@ -36,13 +36,13 @@ namespace Yan
   }
   logger::Impl::Impl(std::ostream &os, const char *func, int line, Loglevel level) : os_(os)
   {
-    stream_ << ANSI_COLOR_GREEN<<levelToString(level)<<ANSI_COLOR_RESET<<func << ": line: " << line ;
+    stream_ << ANSI_COLOR_GREEN<<levelToString(level)<<ANSI_COLOR_RESET<<func << ": line: " << line<<" " ;
     level_ = level;
   }
 
   logger::Impl::Impl(std::ostream& os, Loglevel level):os_(os)
   {
-    stream_<<ANSI_COLOR_RED<<levelToString(level)<<ANSI_COLOR_RESET;
+    stream_<<ANSI_COLOR_RED<<levelToString(level)<<ANSI_COLOR_RESET<<" ";
     level_ = level;
   }
   logger::Impl:: ~Impl() 

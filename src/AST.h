@@ -51,7 +51,7 @@ namespace Yan
         virtual void visit(ConditionExpr *node) = 0;
         virtual void visit(BreakContinueStmt *node) = 0;
         virtual void visit(LabelStmt *node) = 0;
-        virtual void visit(ExprStmt* node) = 0;
+        virtual void visit(ExprStmt *node) = 0;
     };
 
     struct Node
@@ -105,8 +105,8 @@ namespace Yan
         }
         virtual void accept(Ivisitor *v) override { v->visit(this); }
 
-        ExprStmt *inc_ = nullptr;//only for 'for loop'
-        
+        ExprStmt *inc_ = nullptr; //only for 'for loop'
+
         Expr *cond_;
         Stmt *body_;
         // true for do-while
@@ -152,19 +152,19 @@ namespace Yan
     // {
     //     virtual void accept(Ivisitor* v)override {v->visit(this);}
     // };
-    struct ExprStmt: public Stmt
+    struct ExprStmt : public Stmt
     {
-        ExprStmt(Expr* exp):expr_(exp){}
-        static ExprStmt* create(Expr* exp){return new ExprStmt(exp);}
+        ExprStmt(Expr *exp) : expr_(exp) {}
+        static ExprStmt *create(Expr *exp) { return new ExprStmt(exp); }
         virtual ~ExprStmt(){};
-        virtual void accept(Ivisitor* v){v->visit(this);}
-        Expr* expr_;
+        virtual void accept(Ivisitor *v) { v->visit(this); }
+        Expr *expr_;
     };
     struct Expr : public Node
     {
         Expr(Type *ty) : type_(ty) {}
         Expr() : type_(nullptr) {}
-        virtual bool isLvalue(){return false;}
+        virtual bool isLvalue() { return false; }
         virtual ~Expr(){};
         Type *type_;
     };
@@ -243,7 +243,7 @@ namespace Yan
         UnaryOp(OpType op, Expr *operand, Type *ty) : Expr(ty), op_(op), operand_(operand) {}
         static UnaryOp *create(OpType op, Expr *operand, Type *ty = nullptr) { return new UnaryOp(op, operand, ty); }
         virtual void accept(Ivisitor *v) { v->visit(this); }
-        virtual bool isLvalue(){return true;}
+        virtual bool isLvalue() { return true; }
 
         OpType op_;
         Expr *operand_;
@@ -269,10 +269,10 @@ namespace Yan
     struct StringLiteral : public Expr
     {
 
-        StringLiteral(const std::string& data) : strData_(data) {}
+        StringLiteral(const std::string &data) : strData_(data) {}
         static StringLiteral *create(const std::string &data) { return new StringLiteral(data); }
         virtual void accept(Ivisitor *v) { v->visit(this); }
-       // const char *strData_;
+        // const char *strData_;
         //int byteLen_;
         std::string strData_;
     };
@@ -299,8 +299,7 @@ namespace Yan
         void setoffset(int offset) { offset_ = offset; }
         Identifier(const std::string &name, Type *type, bool islocal) : Expr(type), name_(name), isLocal_(islocal) {}
         static Identifier *create(const std::string &name, Type *type, bool islocal) { return new Identifier(name, type, islocal); }
-        virtual bool isLvalue(){return true;}
-
+        virtual bool isLvalue() { return true; }
     };
     //using ExtDecl = Node;
     struct FunctionDef : Node
