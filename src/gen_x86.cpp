@@ -264,6 +264,51 @@ namespace Yan
             node->right->accept(this);
             genCmp("setle");
         }
+        else if (node->op == OpType::OP_LOGICAND)
+        {
+            node->left->accept(this);
+            node->right->accept(this);
+            auto reg1 = regAllocator_.getStoredreg();
+            auto reg2 = regAllocator_.getStoredreg();
+            auto falseLabel = genLabe();
+            auto endLabel = genLabe();
+            emit("cmp ", "$0", regList[reg1]);
+
+            emit("je " + falseLabel);
+
+            emit("cmp ", "$0", regList[reg2]);
+            emit("je " + falseLabel);
+            emit("movq", "$1", regList[2]);
+            emit("jmp " + endLabel);
+            emitLable(falseLabel);
+            emit("movq", "$0", regList[reg2]);
+            emitLable(endLabel);
+            regAllocator_.freeReg(reg1);
+            regAllocator_.storeReg(reg2);
+        }
+
+        else if (node->op == OpType::OP_LOGICOR)
+        {
+            node->left->accept(this);
+            node->right->accept(this);
+            auto reg1 = regAllocator_.getStoredreg();
+            auto reg2 = regAllocator_.getStoredreg();
+            auto trueLabel = genLabe();
+            auto endLabel = genLabe();
+            emit("cmp ", "$0", regList[reg1]);
+
+            emit("jne " + trueLabel);
+
+            emit("cmp ", "$0", regList[reg2]);
+            emit("jne " + trueLabel);
+            emit("movq", "$0", regList[2]);
+            emit("jmp " + endLabel);
+            emitLable(trueLabel);
+            emit("movq", "$1", regList[reg2]);
+            emitLable(endLabel);
+            regAllocator_.freeReg(reg1);
+            regAllocator_.storeReg(reg2);
+        }
     }
 
     void gen::genAdd()
@@ -456,7 +501,6 @@ namespace Yan
         if (node->else_)
             node->else_->accept(this);
         emitLable(elsEndLabel);
-       
     }
     void gen::visit(LoopStmt *node)
     {
@@ -599,7 +643,6 @@ namespace Yan
         emit("   call " + node->designator_->name_);
         emit(" addq $8,%rsp");
         emitLable(labe1);
-
 
         // if(!node->designator_->type_->castToFunc()->getBaseType()->isKindOf(Type::T_VOID))
         {
