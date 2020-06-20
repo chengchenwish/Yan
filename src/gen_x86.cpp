@@ -163,6 +163,15 @@ namespace Yan
             regAllocator_.storeReg(reg1);
             storeLValue(node->type_);
         }
+        else if(node->op_ == OpType::OP_NOT)
+        {
+            node->operand_->accept(this);
+            auto r = regAllocator_.getStoredreg();
+            emit("cmp","$0",regList[r]);
+            emit("sete "+bregList[r]);
+            emit("movzbq ",bregList[r], regList[r]);
+            regAllocator_.storeReg(r);
+        }
     }
     void gen::visit(StringLiteral *node)
     {

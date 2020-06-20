@@ -215,6 +215,7 @@ namespace Yan
         OP_PREINC,
         OP_POSTDEC,
         OP_PREDEC,
+        OP_NOT,
 
         OP_UNKOWN
     };

@@ -433,6 +433,10 @@ namespace Yan
             return UnaryOp::create(OpType::OP_DEREF, operand, t);
             //return UnaryOp::create(OpType::OP_DEREF, cast());
         }
+        if(match(TokenType::T_LOGNOT))
+        {
+            return UnaryOp::create(OpType::OP_NOT,cast());
+        }
         return postfix();
     }
 
