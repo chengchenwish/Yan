@@ -1195,9 +1195,55 @@ namespace Yan
         }
         return std::make_pair(ty, pair.second);
     }
-
+//struct-decl = "struct" identi? ({struct members})
     Type *parser::parseStructDecl()
     {
+        expect(TokenType::T_STRUCT,"struct");
+        if(is(TokenType::T_IDENT))
+        {
+           auto t =  consume();
+            if(!is(TokenType::T_LBRACE))
+            {
+                //struct Name bb;
+                auto find = currentScop_->findTagInAllScope(t.getText());
+                if(!find)
+                {
+                    auto ty = StructType::create();
+                    
+                    currentScop_->addTag(t.getText(),Identifier::create(t.getText(),ty,false));
+                    return ty;
+                    
+                }
+                if(!find->type_->isKindOf(Type::T_STRUCT))
+                {
+                    ERROR_EXIT<<t.getText()<<" not a struct type";
+                }
+                return find->type_;
+
+            }
+            putBack(t);
+        }
+
+        ///handle "struct *ss" ss is a pointer to unnamed incomplete struct type;
+        if(is(TokenType::T_STAR))
+        {
+            return StructType::create();
+        }
+        Type* ty;
+        if(is(TokenType::T_IDENT))
+        {
+            auto t = consume();
+            if(currentScop_->findTagInAllScope(t.getText()))
+            {
+                ERROR_EXIT<<"Redefined struct type";   
+            }
+            else
+            {
+                ty = StructType::create();
+                currentScop_->addTag(t.getText(),Identifier::create(t.getText(),ty,false));   
+            }
+        }
+
         //TODO
         return nullptr;
     }

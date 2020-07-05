@@ -21,20 +21,21 @@ namespace Yan
     extern std::string scopeToString(ScopeKind s);
     class Scope
     {
-        public:
+    public:
         int depth = 1;
+
     public:
         using Symbol = std::pair<std::string, Identifier *>;
         using SymbolTable = std::vector<Symbol>;
         using StringLitTable = std::vector<std::string>;
         Scope();
         ~Scope();
-        Scope* getGlobalScope();
-        int getdepth(){return depth;}
+        Scope *getGlobalScope();
+        int getdepth() { return depth; }
         //stringlit
-        bool stringLitExist(const std::string& str);
-        bool addstringLit(const std::string& str);
-        const StringLitTable& getStringLitTbale()const;
+        bool stringLitExist(const std::string &str);
+        bool addstringLit(const std::string &str);
+        const StringLitTable &getStringLitTbale() const;
         //new
         void addSymoble(const std::string &name, Identifier *indenti);
         bool getIdentiInCurrentScope(const std::string &name, Identifier **indenti);
@@ -48,59 +49,22 @@ namespace Yan
         SymbolTable::iterator begin() { return symbols_.begin(); }
         SymbolTable::iterator end() { return symbols_.end(); }
 
-        int caculateOffset(const std::string &name)
-        {
-            int off = caculateParentScopeOffSet(parent_);
-            for (const auto &kv : symbols_)
-            {
-                off += kv.second->type_->getsize();
+        Identifier *findTagInCurrentScope(const std::string &tagname);
+        Identifier *findTagInAllScope(const std::string &tagname);
+        void addTag(const std::string &tagname, Identifier *tag);
 
-                if (kv.first == name)
-                {
-                    break;
-                }
-            }
-            return off;
-        }
-        int getTyepSize()
-        {
-            Info(__func__);
-            int size = 0;
-            for (const auto &kv : symbols_)
-            {
-                Info("key=%s",kv.first.c_str());
-                size += kv.second->type_->getsize();
-            }
-            return size;
-        }
+        int caculateOffset(const std::string &name);
+        int getTyepSize();
         void dumpSymbol(std::ostream &os);
 
     private:
-        int caculateParentScopeOffSet(Scope *sc)
-        {
-            int off = 0;
-            if (sc && (sc->getScope() == ScopeKind::BLOCK || (sc->getScope() == ScopeKind::FUNC)))
-            {
-                Info("iiiiii");
-                off += caculateParentScopeOffSet(sc->getParentScop());
-                for (const auto &kv : sc->getlist())
-                {
-                    off += kv.second->type_->getsize();
-                }
-            }
-            else
-            {
-                return 0;
-            }
-            return off;
-        }
+        int caculateParentScopeOffSet(Scope *sc);
         ScopeKind kind_;
         SymbolTable symbols_;
-        StringLitTable stringLit_;//only valid in global scope
+        SymbolTable tags_;         //store defined struct union
+        StringLitTable stringLit_; //only valid in global scope
 
         Scope *parent_;
-
-        
 
         //disable copy and assign
         Scope(const Scope &) = delete;
