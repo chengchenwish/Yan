@@ -10,7 +10,8 @@ int main()
     print(R);
 
     print(1+G);
-   int  b;
+    enum rgb b;
+  //s int  b;
     b= B;
     print(b);
     return 0;

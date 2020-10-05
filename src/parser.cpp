@@ -52,10 +52,11 @@ namespace Yan
             auto t = consume();
             Info(t.tostring().c_str());
             auto exist = currentScop_->getIdentiInAllScope(t.getText(), &identi);
-            if(!exist ){
+          /*  if(!exist ){
                 identi = currentScop_->findTagInAllScope(t.getText());
             }
-            if (identi == nullptr)
+            if (identi == nullptr)*/
+            if(!exist)
             {
 
                 ExitWithError("undefined variable :%s", t.getText().c_str());
@@ -1332,12 +1333,17 @@ namespace Yan
             {
                 ERROR_EXIT<<"redefined the enumerator :"<<str;
             }
-            currentScop_->addTag(str,enumerator);
+            currentScop_->addSymoble(str,enumerator);
 
 
 
         }
+        if(!anmous)
+        {
 
+        
+        currentScop_->addTag(t.getText(),Identifier::create(t.getText(),ty,false));
+        }
         return ty;
     }
     Type *parser::parseUnionSpecifier()
