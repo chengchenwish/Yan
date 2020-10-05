@@ -381,6 +381,12 @@ namespace Yan
         emit("movq $" + std::to_string(node->value_) + ", " + regList[reg]);
         regAllocator_.storeReg(reg);
     }
+     void gen::visit(Enumerator* node)
+     {
+                auto reg = regAllocator_.allocateReg();
+        emit("movq $" + std::to_string(node->value) + ", " + regList[reg]);
+        regAllocator_.storeReg(reg);
+     }
     void gen::visit(FunctionDef *node)
     {
         DEBUG_LOG << "FunctionDef function name = " << node->identi_->name_;

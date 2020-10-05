@@ -12,5 +12,9 @@ void astPrinter::visit(Declaration* node)
 {
 
 }
+void astPrinter::visit(Enumerator * node)
+{
+   
+}
 
 }

@@ -7,11 +7,17 @@ int main()
         B = 200,
         G = 400
     };
-    print(100);
+    print(R);
 
+    print(1+G);
+   int  b;
+    b= B;
+    print(b);
     return 0;
 }
 /*
 Expected output:
 100
+401
+200
 */

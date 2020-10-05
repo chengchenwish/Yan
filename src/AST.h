@@ -30,6 +30,7 @@ namespace Yan
     struct BreakContinueStmt;
     struct LabelStmt;
     struct ExprStmt;
+    struct Enumerator;
 
     class Ivisitor
     {
@@ -52,6 +53,7 @@ namespace Yan
         virtual void visit(BreakContinueStmt *node) = 0;
         virtual void visit(LabelStmt *node) = 0;
         virtual void visit(ExprStmt *node) = 0;
+        virtual void visit(Enumerator * node) = 0;
     };
 
     struct Node
@@ -308,7 +310,7 @@ namespace Yan
         {
             return new Enumerator(name,val);
         }
-        virtual void accept(Ivisitor* v) override{ }//v->visit(this);}
+        virtual void accept(Ivisitor* v) override{ v->visit(this);}
         Enumerator(const std::string&name, int val):Identifier(name,int_type,false)
         {
             value = val;

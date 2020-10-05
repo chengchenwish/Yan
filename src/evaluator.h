@@ -26,6 +26,7 @@ public:
    virtual void visit(BreakContinueStmt* node)override{assert(0);}
    virtual void visit(LabelStmt* node)override{assert(0);}
     virtual void visit(ExprStmt* node)override{assert(0);}
+    virtual void visit(Enumerator * node)override{}//todo};
 
    T eval(Expr* node)
    {

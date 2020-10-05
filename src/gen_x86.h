@@ -39,6 +39,7 @@ namespace Yan
         virtual void visit(BreakContinueStmt *node) override;
         virtual void visit(LabelStmt *node) override;
         virtual void visit(ExprStmt *node);
+        virtual void visit(Enumerator* node);
 
         void genAddr(Identifier *node);
         void genLvalue(Expr *node);
@@ -154,6 +155,7 @@ namespace Yan
         virtual void visit(BreakContinueStmt *node) override { assert(0); }
         virtual void visit(LabelStmt *node) override { assert(0); }
         virtual void visit(ExprStmt *node) override { assert(0); }
+        virtual void visit(Enumerator* node)override{ assert(0);}
 
     private:
         gen *generator_;

@@ -29,6 +29,7 @@ public:
    virtual void visit(LoopStmt* node)override;
    virtual void visit(BreakContinueStmt* node)override;
    virtual void visit(LabelStmt* node)override;
+   virtual void visit(Enumerator * node) override;
  private:
  std::ostream& out_;
     /* data */

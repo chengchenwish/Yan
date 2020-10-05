@@ -48,12 +48,16 @@ namespace Yan
         }
         else if (is(TokenType::T_IDENT))
         {
-            Identifier *identi;
+            Identifier *identi = nullptr;
             auto t = consume();
             Info(t.tostring().c_str());
             auto exist = currentScop_->getIdentiInAllScope(t.getText(), &identi);
-            if (!exist)
+            if(!exist ){
+                identi = currentScop_->findTagInAllScope(t.getText());
+            }
+            if (identi == nullptr)
             {
+
                 ExitWithError("undefined variable :%s", t.getText().c_str());
             }
             if (match(TokenType::T_LPAREN))
