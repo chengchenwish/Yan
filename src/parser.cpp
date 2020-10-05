@@ -752,11 +752,23 @@ namespace Yan
 
         return func;
     }
+
+// declaration = basetype declarator type-suffix ("=" lvar-initializer)? ";"
+//             | basetype ";"
     Declaration *parser::parseDeclaration(bool isloacl)
     {
+
         DEBUG_LOG << " islocal = " << isloacl;
         storageClass sclass = storageClass::UNKNOW;
         auto type = baseType(&sclass);
+        if(match(TokenType::T_SEMI))
+        {
+            //; struct u{int a;};
+            return nullptr;
+            //don't need create a ast node;
+
+        }
+
         auto pair = declarator(type);
 
         auto identi = Identifier::create(pair.second, pair.first, isloacl);
@@ -935,7 +947,7 @@ namespace Yan
             else if (is(TokenType::T_ENUM))
             {
                 ty = parseEnumSpecifier();
-                expect(TokenType::T_SEMI,";");
+              //  expect(TokenType::T_SEMI,";");
             }
             else if (is(TokenType::T_UNION))
             {
