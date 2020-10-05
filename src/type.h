@@ -50,6 +50,7 @@ namespace Yan
             T_STRUCT,
             T_FUNC,
         };
+        //默认是complete的类型，也就是说知道具体的大小
         Type(int size, int align, TypeKind kind, bool incomplete = false);
         Type() = default;
         TypeKind getKind();
@@ -150,6 +151,19 @@ namespace Yan
     private:
         StructType();
         std::vector<Member> members_;
+    };
+    class enumType :public Type
+    {
+        public:
+        static enumType*create()
+        {
+            return new enumType();
+        }
+        private:
+        enumType():Type(4,4,T_ENUM)
+        {
+
+        }
     };
 
     BUILD_IN_TYPE(IntType, 4, 4, T_INT)

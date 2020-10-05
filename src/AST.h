@@ -302,6 +302,19 @@ namespace Yan
         static Identifier *create(const std::string &name, Type *type, bool islocal) { return new Identifier(name, type, islocal); }
         virtual bool isLvalue() { return true; }
     };
+    struct Enumerator : public Identifier
+    {
+        static Enumerator* create(const std::string& name,int val)
+        {
+            return new Enumerator(name,val);
+        }
+        virtual void accept(Ivisitor* v) override{ }//v->visit(this);}
+        Enumerator(const std::string&name, int val):Identifier(name,int_type,false)
+        {
+            value = val;
+        }
+        int value;
+    };
     //using ExtDecl = Node;
     struct FunctionDef : Node
     {

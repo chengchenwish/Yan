@@ -935,6 +935,7 @@ namespace Yan
             else if (is(TokenType::T_ENUM))
             {
                 ty = parseEnumSpecifier();
+                expect(TokenType::T_SEMI,";");
             }
             else if (is(TokenType::T_UNION))
             {
@@ -1199,7 +1200,7 @@ namespace Yan
     Type *parser::parseStructDecl()
     {
         expect(TokenType::T_STRUCT,"struct");
-        if(is(TokenType::T_IDENT))
+        if(is(TokenType::T_IDENT)) //identi
         {
            auto t =  consume();
             if(!is(TokenType::T_LBRACE))
@@ -1242,14 +1243,86 @@ namespace Yan
                 ty = StructType::create();
                 currentScop_->addTag(t.getText(),Identifier::create(t.getText(),ty,false));   
             }
+            
+        }
+        else
+        {
+            ERROR_EXIT<<"Wrong struct define";
         }
 
         //TODO
         return nullptr;
     }
+// enum-specifier = ident? "{" enum-list? "}"
+//                | ident ("{" enum-list? "}")?
+//
+// enum-list      = ident ("=" num)? ("," ident ("=" num)?)* ","?
     Type *parser::parseEnumSpecifier()
     {
-        return nullptr;
+        expect(TokenType::T_ENUM,"enum");//期待关键字enum
+        Type* ty= enumType::create();
+        bool anmous = true;
+        Token t;
+        if(is(TokenType::T_IDENT))
+        {
+            //enum identi;
+             t = consume();
+            anmous = false;
+            
+        }
+
+        if(!anmous && !is(TokenType::T_LBRACE))
+        {
+            //enum test;
+            //auto s = consume();
+          //  ERROR_EXIT<<s.tostring()<<"   kkk";
+            auto identi = currentScop_->findTagInAllScope(t.getText());
+            if(identi == nullptr)
+            {
+                //没有找到enum的定义
+                ERROR_EXIT<<" unknow enum type";
+            }
+            if(identi->type_->isKindOf(Type::T_ENUM) == false)
+            {
+                //不是enum 类型
+                ERROR_EXIT<<"not an enum tag:"<<t.getText();
+            }
+            return identi->type_;
+        }
+        expect(TokenType::T_LBRACE,"{");
+        int value = 0;
+        int i = 0;
+        while(!match(TokenType::T_RBRACE))//"遇到}则结束"
+        {
+            //enum RGB
+            //{
+//                   R = 1,
+//                    G = 2,
+//                   B = 3
+            //}
+            if(i++>0)
+            {
+                expect(TokenType::T_COMMA,",");
+            }
+
+            auto str = consume().getText();
+            if(match(TokenType::T_ASSIGN))
+            {
+                value = constExpr<int>();
+            }
+
+            auto enumerator = Enumerator::create(str,value++);
+            if(currentScop_->findTagInCurrentScope(str))
+            {
+                ERROR_EXIT<<"redefined the enumerator :"<<str;
+            }
+            currentScop_->addTag(str,enumerator);
+
+
+
+        }
+
+        return ty;
     }
     Type *parser::parseUnionSpecifier()
     {
