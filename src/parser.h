@@ -71,6 +71,7 @@ namespace Yan
         Type* parseStructDecl();
         Type* parseEnumSpecifier();
         Type* parseUnionSpecifier();
+        Type* structUnionDecl();
 
          StructType::Member  parseStructMember();
 

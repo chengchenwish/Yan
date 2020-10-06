@@ -52,8 +52,8 @@ namespace Yan
             auto t = consume();
             Info(t.tostring().c_str());
             auto exist = currentScop_->getIdentiInAllScope(t.getText(), &identi);
- 
-            if(!exist)
+
+            if (!exist)
             {
 
                 ExitWithError("undefined variable :%s", t.getText().c_str());
@@ -435,14 +435,14 @@ namespace Yan
             return UnaryOp::create(OpType::OP_DEREF, operand, t);
             //return UnaryOp::create(OpType::OP_DEREF, cast());
         }
-        if(match(TokenType::T_LOGNOT))
+        if (match(TokenType::T_LOGNOT))
         {
-            return UnaryOp::create(OpType::OP_NOT,cast());
+            return UnaryOp::create(OpType::OP_NOT, cast());
         }
         return postfix();
     }
-// postfix = compound-literal
-//         | primary ("[" expr "]" | "." ident | "->" ident | "++" | "--")*
+    // postfix = compound-literal
+    //         | primary ("[" expr "]" | "." ident | "->" ident | "++" | "--")*
     Expr *parser::postfix()
     {
         auto node = primary();
@@ -461,13 +461,13 @@ namespace Yan
                 node = UnaryOp::create(OpType::OP_DEREF, exp, node->type_->castToDeried()->getBaseType());
                 continue;
             }
-            if(match(TokenType::T_DOT))
+            if (match(TokenType::T_DOT))
             {
                 node = structRef(node);
                 continue;
             }
-            if(match(TokenType::T_ARROW))
-            {//A->a == (*A).a
+            if (match(TokenType::T_ARROW))
+            {                                                            //A->a == (*A).a
                 node = UnaryOp::create(OpType::OP_DEREF, node, nullptr); //todo type
                 node = structRef(node);
             }
@@ -475,33 +475,31 @@ namespace Yan
         }
     }
 
-    Expr* parser::structRef(Expr* node)
+    Expr *parser::structRef(Expr *node)
     {
-        if(node->type_->isKindOf(Type::T_STRUCT) == false)
+        if (node->type_->isKindOf(Type::T_STRUCT) == false)
         {
-            ERROR_EXIT<<"Expected a struct type";
+            ERROR_EXIT << "Expected a struct type";
         }
-        if(is(TokenType::T_IDENT) == false)
+        if (is(TokenType::T_IDENT) == false)
         {
-            ERROR_EXIT<<"Expect identifiler in struct ref";
+            ERROR_EXIT << "Expect identifiler in struct ref";
         }
-        auto token =  consume();
-        auto* mem = node->type_->castToStruct()->findMember(token.getText());
+        auto token = consume();
+        auto *mem = node->type_->castToStruct()->findMember(token.getText());
 
-       // auto baseOffset = node->type_->offset;
-        if(mem == nullptr)
+        // auto baseOffset = node->type_->offset;
+        if (mem == nullptr)
         {
-            ERROR_EXIT<<"there is no member :"<<token.getText()<<" in struct";
+            ERROR_EXIT << "there is no member :" << token.getText() << " in struct";
         }
-                auto newmem = Identifier::clone(mem);
-                //update offset struct Test t;
-        newmem->offset_ += static_cast<Identifier*>(node)->offset_;
-        node = UnaryOp::create(OpType::OP_DOT,newmem,newmem->type_);
-       // node =  BinaryOp::create(OpType::OP_DOT, node, mem,mem->type);
- 
+        auto newmem = Identifier::clone(mem);
+        //update offset struct Test t;
+        newmem->offset_ += static_cast<Identifier *>(node)->offset_;
+        node = UnaryOp::create(OpType::OP_DOT, newmem, newmem->type_);
+        // node =  BinaryOp::create(OpType::OP_DOT, node, mem,mem->type);
+
         return node;
-
-
     }
 
     IfStmt *parser::parseIfStmt()
@@ -795,20 +793,19 @@ namespace Yan
         return func;
     }
 
-// declaration = basetype declarator type-suffix ("=" lvar-initializer)? ";"
-//             | basetype ";"
+    // declaration = basetype declarator type-suffix ("=" lvar-initializer)? ";"
+    //             | basetype ";"
     Declaration *parser::parseDeclaration(bool isloacl)
     {
 
         DEBUG_LOG << " islocal = " << isloacl;
         storageClass sclass = storageClass::UNKNOW;
         auto type = baseType(&sclass);
-        if(match(TokenType::T_SEMI))
+        if (match(TokenType::T_SEMI))
         {
             //; struct u{int a;};
             return nullptr;
             //don't need create a ast node;
-
         }
 
         auto pair = declarator(type);
@@ -889,7 +886,7 @@ namespace Yan
             putBack(cache.top());
             cache.pop();
         }
-        
+
         return isfuncdef;
     }
 
@@ -904,6 +901,7 @@ namespace Yan
                        TokenType::T_UNSIGNED,
                        TokenType::T_STATIC,
                        TokenType::T_STRUCT,
+                       TokenType::T_UNION,
                        TokenType::T_VOID,
                        TokenType::T_TYPDEF,
                        TokenType::T_EXTERN,
@@ -989,7 +987,7 @@ namespace Yan
             else if (is(TokenType::T_ENUM))
             {
                 ty = parseEnumSpecifier();
-              //  expect(TokenType::T_SEMI,";");
+                //  expect(TokenType::T_SEMI,";");
             }
             else if (is(TokenType::T_UNION))
             {
@@ -1250,35 +1248,32 @@ namespace Yan
         }
         return std::make_pair(ty, pair.second);
     }
-// struct-decl = "struct" ident? ("{" struct-member "}")?
-    Type *parser::parseStructDecl()
+    // struct-union-decl = attribute? ident? ("{" struct-members)?
+    Type *parser::structUnionDecl()
     {
-        expect(TokenType::T_STRUCT,"struct");
-        if(is(TokenType::T_IDENT)) //identi
+        if (is(TokenType::T_IDENT)) //identi
         {
-           auto t =  consume();
-            if(!is(TokenType::T_LBRACE))
+            auto t = consume();
+            if (!is(TokenType::T_LBRACE))
             {
                 //struct Name bb;
                 auto find = currentScop_->findTagInAllScope(t.getText());
-                if(!find)
+                if (!find)
                 {
                     //没有找到，是前置声明，创建tag
                     auto ty = StructType::create();
-                    
-                    currentScop_->addTag(t.getText(),Identifier::create(t.getText(),ty,false));
+
+                    currentScop_->addTag(t.getText(), Identifier::create(t.getText(), ty, false));
                     return ty;
-                    
                 }
-                if(!find->type_->isKindOf(Type::T_STRUCT))
+                if (!find->type_->isKindOf(Type::T_STRUCT))
                 {
                     //找到了，类型不匹配，错误退出。
-                    ERROR_EXIT<<t.getText()<<" not a struct type";
+                    ERROR_EXIT << t.getText() << " not a struct type";
                 }
                 //找到了，类型也匹配，返回类型
                 //struct IPADDR　ａｄｄｒ
                 return find->type_;
-
             }
             //struct point {
 
@@ -1287,151 +1282,173 @@ namespace Yan
         }
 
         ///handle "struct *ss" ss is a pointer to unnamed incomplete struct type;
-        if(is(TokenType::T_STAR))
+        if (is(TokenType::T_STAR))
         {
             return StructType::create();
         }
-        Type* ty;
-        if(is(TokenType::T_IDENT))
+        Type *ty;
+        if (is(TokenType::T_IDENT))
         {
             auto t = consume();
-            if(auto* identi = currentScop_->findTagInCurrentScope(t.getText()))
+            if (auto *identi = currentScop_->findTagInCurrentScope(t.getText()))
             {
-               if(identi->type_->isKindOf(Type::T_STRUCT) == false)
-               {
-                   ERROR_EXIT<<"Not a struct tag:"<<t.getText();
-               }
-               ty = identi->type_;   
+                if (identi->type_->isKindOf(Type::T_STRUCT) == false)
+                {
+                    ERROR_EXIT << "Not a struct tag:" << t.getText();
+                }
+                ty = identi->type_;
             }
             else
             {
                 ty = StructType::create();
-                currentScop_->addTag(t.getText(),Identifier::create(t.getText(),ty,false));   
+                currentScop_->addTag(t.getText(), Identifier::create(t.getText(), ty, false));
             }
-            
         }
         else
         {
-            ERROR_EXIT<<"Wrong struct define";
+            ERROR_EXIT << "Wrong struct define";
         }
 
         //struct members
-        expect(TokenType::T_LBRACE,"{");
+        expect(TokenType::T_LBRACE, "{");
         auto struct_ty = ty->castToStruct();
-        while(!match(TokenType::T_RBRACE))
+        while (!match(TokenType::T_RBRACE))
         {
-             struct_ty->addMember( parseStructMember());
+            struct_ty->addMember(parseStructMember());
         }
+        return struct_ty;
+    }
+    // struct-decl = "struct" ident? ("{" struct-member "}")?
+    Type *parser::parseStructDecl()
+    {
+        expect(TokenType::T_STRUCT, "struct");
+        auto *struct_ty = structUnionDecl()->castToStruct();
         //Assign offset
         int offset = 0;
-        for(auto& mem : struct_ty->getMembers())
+        for (auto &mem : struct_ty->getMembers())
         {
-            if(mem.type_->isIncomplete())
+            if (mem.type_->isIncomplete())
             {
-                ERROR_EXIT<<"incomplete struct member "<<mem.name_;
+                ERROR_EXIT << "incomplete struct member " << mem.name_;
             }
-            offset = align_to(offset,mem.type_->getalign());
+            offset = align_to(offset, mem.type_->getalign());
             mem.offset_ = offset;
             offset += mem.type_->getsize();
-            if(struct_ty->getalign()<mem.type_->getalign())
+            if (struct_ty->getalign() < mem.type_->getalign())
             {
                 struct_ty->setalign(mem.type_->getalign());
             }
-
         }
-        struct_ty->setSize(align_to(offset,struct_ty->getalign()));
+        struct_ty->setSize(align_to(offset, struct_ty->getalign()));
         struct_ty->setIncomplete(false);
-       return ty;
+        return struct_ty;
     }
-     // struct-member = basetype declarator type-suffix ";"
-    StructType::Member parser:: parseStructMember()
+    // struct-member = basetype declarator type-suffix ";"
+    StructType::Member parser::parseStructMember()
     {
-       Type* ty = baseType(nullptr);
-      auto pair =  declarator(ty);
-      expect(TokenType::T_SEMI,";");
-      StructType::Member mem( pair.second,pair.first,true);
+        Type *ty = baseType(nullptr);
+        auto pair = declarator(ty);
+        expect(TokenType::T_SEMI, ";");
+        StructType::Member mem(pair.second, pair.first, true);
 
-      return mem;      
-
+        return mem;
     }
-// enum-specifier = ident? "{" enum-list? "}"
-//                | ident ("{" enum-list? "}")?
-//
-// enum-list      = ident ("=" num)? ("," ident ("=" num)?)* ","?
+    // enum-specifier = ident? "{" enum-list? "}"
+    //                | ident ("{" enum-list? "}")?
+    //
+    // enum-list      = ident ("=" num)? ("," ident ("=" num)?)* ","?
     Type *parser::parseEnumSpecifier()
     {
-        expect(TokenType::T_ENUM,"enum");//期待关键字enum
-        Type* ty= enumType::create();
+        expect(TokenType::T_ENUM, "enum"); //期待关键字enum
+        Type *ty = enumType::create();
         bool anmous = true;
         Token t;
-        if(is(TokenType::T_IDENT))
+        if (is(TokenType::T_IDENT))
         {
             //enum identi;
-             t = consume();
+            t = consume();
             anmous = false;
-            
         }
 
-        if(!anmous && !is(TokenType::T_LBRACE))
+        if (!anmous && !is(TokenType::T_LBRACE))
         {
             //enum test;
             //auto s = consume();
-          //  ERROR_EXIT<<s.tostring()<<"   kkk";
+            //  ERROR_EXIT<<s.tostring()<<"   kkk";
             auto identi = currentScop_->findTagInAllScope(t.getText());
-            if(identi == nullptr)
+            if (identi == nullptr)
             {
                 //没有找到enum的定义
-                ERROR_EXIT<<" unknow enum type";
+                ERROR_EXIT << " unknow enum type";
             }
-            if(identi->type_->isKindOf(Type::T_ENUM) == false)
+            if (identi->type_->isKindOf(Type::T_ENUM) == false)
             {
                 //不是enum 类型
-                ERROR_EXIT<<"not an enum tag:"<<t.getText();
+                ERROR_EXIT << "not an enum tag:" << t.getText();
             }
             return identi->type_;
         }
-        expect(TokenType::T_LBRACE,"{");
+        expect(TokenType::T_LBRACE, "{");
         int value = 0;
         int i = 0;
-        while(!match(TokenType::T_RBRACE))//"遇到}则结束"
+        while (!match(TokenType::T_RBRACE)) //"遇到}则结束"
         {
             //enum RGB
             //{
-//                   R = 1,
-//                    G = 2,
-//                   B = 3
+            //                   R = 1,
+            //                    G = 2,
+            //                   B = 3
             //}
-            if(i++>0)
+            if (i++ > 0)
             {
-                expect(TokenType::T_COMMA,",");
+                expect(TokenType::T_COMMA, ",");
             }
 
             auto str = consume().getText();
-            if(match(TokenType::T_ASSIGN))
+            if (match(TokenType::T_ASSIGN))
             {
                 value = constExpr<int>();
             }
 
-            auto enumerator = Enumerator::create(str,value++);
-            if(currentScop_->findTagInCurrentScope(str))
+            auto enumerator = Enumerator::create(str, value++);
+            if (currentScop_->findTagInCurrentScope(str))
             {
-                ERROR_EXIT<<"redefined the enumerator :"<<str;
+                ERROR_EXIT << "redefined the enumerator :" << str;
             }
-            currentScop_->addSymoble(str,enumerator);
-
-
-
+            currentScop_->addSymoble(str, enumerator);
         }
-        if(!anmous)
+        if (!anmous)
         {
-        
-        currentScop_->addTag(t.getText(),Identifier::create(t.getText(),ty,false));
+
+            currentScop_->addTag(t.getText(), Identifier::create(t.getText(), ty, false));
         }
         return ty;
     }
     Type *parser::parseUnionSpecifier()
     {
-        return nullptr;
+
+        expect(TokenType::T_UNION, "union");
+        auto *struct_ty = structUnionDecl()->castToStruct();
+
+        for (auto &mem : struct_ty->getMembers())
+        {
+            if (mem.type_->isIncomplete())
+            {
+                ERROR_EXIT << "incomplete struct member " << mem.name_;
+            }
+
+            if (struct_ty->getalign() < mem.type_->getalign())
+            {
+                struct_ty->setalign(mem.type_->getalign());
+            }
+            if (struct_ty->getsize() < mem.type_->getsize())
+            {
+                struct_ty->setSize(mem.type_->getsize());
+            }
+        }
+        struct_ty->setSize(align_to(struct_ty->getsize(),struct_ty->getalign()));//对齐
+        struct_ty->setIncomplete(false);
+        return struct_ty;
     }
     bool parser::isInteger(Expr *node)
     {
