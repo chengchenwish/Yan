@@ -487,11 +487,18 @@ namespace Yan
         }
         auto token =  consume();
         auto* mem = node->type_->castToStruct()->findMember(token.getText());
+
+       // auto baseOffset = node->type_->offset;
         if(mem == nullptr)
         {
             ERROR_EXIT<<"there is no member :"<<token.getText()<<" in struct";
         }
-         node = UnaryOp::create(OpType::OP_DOT,mem,mem->type_);
+                auto newmem = Identifier::clone(mem);
+                //update offset struct Test t;
+        newmem->offset_ += static_cast<Identifier*>(node)->offset_;
+        node = UnaryOp::create(OpType::OP_DOT,newmem,newmem->type_);
+       // node =  BinaryOp::create(OpType::OP_DOT, node, mem,mem->type);
+ 
         return node;
 
 

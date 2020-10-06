@@ -61,8 +61,8 @@ namespace Yan
     private:
         int caculateParentScopeOffSet(Scope *sc);
         ScopeKind kind_;
-        SymbolTable symbols_;
-        SymbolTable tags_;         //store defined struct union
+        SymbolTable symbols_;// TODO ower the  identifier
+        SymbolTable tags_;         //store defined struct union TODO ower the tags
         StringLitTable stringLit_; //only valid in global scope
 
         Scope *parent_;

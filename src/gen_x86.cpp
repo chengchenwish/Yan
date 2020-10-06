@@ -328,6 +328,7 @@ namespace Yan
             regAllocator_.freeReg(reg1);
             regAllocator_.storeReg(reg2);
         }
+      
     }
 
     void gen::genAdd()

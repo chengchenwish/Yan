@@ -168,7 +168,7 @@ namespace Yan
         Expr() : type_(nullptr) {}
         virtual bool isLvalue() { return false; }
         virtual ~Expr(){};
-        Type *type_;
+        Type *type_;//Todo ower the type
     };
     enum class OpType
     {
@@ -208,6 +208,7 @@ namespace Yan
         OP_BITOR,
         OP_BITXOR,
         OP_BITAND,
+        OP_DOT,//.
 
         //UnaryOP
         OP_CAST,
@@ -218,7 +219,7 @@ namespace Yan
         OP_POSTDEC,
         OP_PREDEC,
         OP_NOT,
-        OP_DOT,
+        
 
         OP_UNKOWN
     };
@@ -302,6 +303,13 @@ namespace Yan
         virtual void accept(Ivisitor *v) override { v->visit(this); }
         void setoffset(int offset) { offset_ = offset; }
         Identifier(const std::string &name, Type *type, bool islocal) : Expr(type), name_(name), isLocal_(islocal) {}
+        static Identifier* clone(Identifier* old)
+        {
+            auto newnode = new Identifier(old->name_, old->type_,old->isLocal_);
+            newnode->offset_ = old->offset_;
+            newnode->class_ = old->class_;
+            return newnode;
+        }
         static Identifier *create(const std::string &name, Type *type, bool islocal) { return new Identifier(name, type, islocal); }
         virtual bool isLvalue() { return true; }
     };
