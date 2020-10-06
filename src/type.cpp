@@ -93,7 +93,7 @@ void StructType::addMember(const StructType::Member& memb)
 {
     members_.push_back(memb);
 }
-StructType::StructType():Type(0,14,T_STRUCT,true)
+StructType::StructType():Type(0,4,T_STRUCT,true)
 {
 
 }

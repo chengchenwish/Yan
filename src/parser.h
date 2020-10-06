@@ -6,6 +6,7 @@
 #include "log.h"
 #include "symbol.h"
 #include "evaluator.h"
+#include "util.h"
 namespace Yan
 {
 
@@ -69,6 +70,8 @@ namespace Yan
         Type* parseStructDecl();
         Type* parseEnumSpecifier();
         Type* parseUnionSpecifier();
+
+         StructType::Member  parseStructMember();
 
         Declarator parse_func_param();
 

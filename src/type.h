@@ -55,7 +55,9 @@ namespace Yan
         Type() = default;
         TypeKind getKind();
         int getalign() const;
+        void setalign(int align){align_ = align;}
         int getsize() const;
+        void setSize(int sz){size_ = sz;}
         void setIncomplete(bool incomplete) { isIncomplete_ = incomplete; }
         std::string tostring();        
         bool isIncomplete() { return isIncomplete_; }
@@ -142,11 +144,12 @@ namespace Yan
         {
             Type *ty_;
             std::string name_;
-            int offset;
+            int offset_;
         };
         static StructType *create();
         void addMember(const Member &memb);
         virtual StructType *castToStruct() { return this; }
+        std::vector<Member>& getMembers(){return members_;}
 
     private:
         StructType();

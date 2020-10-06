@@ -52,10 +52,7 @@ namespace Yan
             auto t = consume();
             Info(t.tostring().c_str());
             auto exist = currentScop_->getIdentiInAllScope(t.getText(), &identi);
-          /*  if(!exist ){
-                identi = currentScop_->findTagInAllScope(t.getText());
-            }
-            if (identi == nullptr)*/
+ 
             if(!exist)
             {
 
@@ -1213,7 +1210,7 @@ namespace Yan
         }
         return std::make_pair(ty, pair.second);
     }
-//struct-decl = "struct" identi? ({struct members})
+// struct-decl = "struct" ident? ("{" struct-member "}")?
     Type *parser::parseStructDecl()
     {
         expect(TokenType::T_STRUCT,"struct");
@@ -1226,6 +1223,7 @@ namespace Yan
                 auto find = currentScop_->findTagInAllScope(t.getText());
                 if(!find)
                 {
+                    //没有找到，是前置声明，创建tag
                     auto ty = StructType::create();
                     
                     currentScop_->addTag(t.getText(),Identifier::create(t.getText(),ty,false));
@@ -1234,11 +1232,17 @@ namespace Yan
                 }
                 if(!find->type_->isKindOf(Type::T_STRUCT))
                 {
+                    //找到了，类型不匹配，错误退出。
                     ERROR_EXIT<<t.getText()<<" not a struct type";
                 }
+                //找到了，类型也匹配，返回类型
+                //struct IPADDR　ａｄｄｒ
                 return find->type_;
 
             }
+            //struct point {
+
+            //}
             putBack(t);
         }
 
@@ -1251,9 +1255,13 @@ namespace Yan
         if(is(TokenType::T_IDENT))
         {
             auto t = consume();
-            if(currentScop_->findTagInAllScope(t.getText()))
+            if(auto* identi = currentScop_->findTagInCurrentScope(t.getText()))
             {
-                ERROR_EXIT<<"Redefined struct type";   
+               if(identi->type_->isKindOf(Type::T_STRUCT) == false)
+               {
+                   ERROR_EXIT<<"Not a struct tag:"<<t.getText();
+               }
+               ty = identi->type_;   
             }
             else
             {
@@ -1267,8 +1275,45 @@ namespace Yan
             ERROR_EXIT<<"Wrong struct define";
         }
 
-        //TODO
-        return nullptr;
+        //struct members
+        expect(TokenType::T_LBRACE,"{");
+        auto struct_ty = ty->castToStruct();
+        while(!match(TokenType::T_RBRACE))
+        {
+             struct_ty->addMember( parseStructMember());
+        }
+        //Assign offset
+        int offset = 0;
+        for(auto& mem : struct_ty->getMembers())
+        {
+            if(mem.ty_->isIncomplete())
+            {
+                ERROR_EXIT<<"incomplete struct member "<<mem.name_;
+            }
+            offset = align_to(offset,mem.ty_->getalign());
+            mem.offset_ = offset;
+            offset += mem.ty_->getsize();
+            if(struct_ty->getalign()<mem.ty_->getalign())
+            {
+                struct_ty->setalign(mem.ty_->getalign());
+            }
+
+        }
+        struct_ty->setSize(align_to(offset,struct_ty->getalign()));
+        struct_ty->setIncomplete(false);
+       return ty;
+    }
+     // struct-member = basetype declarator type-suffix ";"
+    StructType::Member parser:: parseStructMember()
+    {
+       Type* ty = baseType(nullptr);
+      auto pair =  declarator(ty);
+      expect(TokenType::T_SEMI,";");
+      StructType::Member mem;
+      mem.name_ = pair.second;
+      mem.ty_ = pair.first;
+      return mem;      
+
     }
 // enum-specifier = ident? "{" enum-list? "}"
 //                | ident ("{" enum-list? "}")?
@@ -1340,7 +1385,6 @@ namespace Yan
         }
         if(!anmous)
         {
-
         
         currentScop_->addTag(t.getText(),Identifier::create(t.getText(),ty,false));
         }
