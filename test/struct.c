@@ -7,10 +7,14 @@ struct Point
 int main()
 {
    struct Point p;
-    print(99);
+   p.x = 100;
+   p.y = 200;
+    print(p.x+p.y);
+   print(p.x);
     return 0;
 }
 /*
 Expected output:
-99
+300
+100
 */

@@ -134,6 +134,8 @@ namespace Yan
     }
     void gen::visit(UnaryOp *node)
     {
+        Info("66");
+         Info("unary");
         if (node->op_ == OpType::OP_DEREF) //*
         {
             DEBUG_LOG << "* operator";
@@ -172,6 +174,13 @@ namespace Yan
             emit("movzbq ",bregList[r], regList[r]);
             regAllocator_.storeReg(r);
         }
+        else if(node->op_ == OpType::OP_DOT)
+        {
+            NOTICE_LOG<<" 111";
+            Info("111");
+            node->operand_->accept(this);
+           Info("22");
+        }
     }
     void gen::visit(StringLiteral *node)
     {
@@ -184,6 +193,7 @@ namespace Yan
     }
     void gen::genLvalue(Expr *node)
     {
+        NOTICE_LOG<<"lvalue";
         assert(!node->type_->isKindOf(Type::T_ARRAY));
         node->accept(addrGnerator_);
     }
@@ -483,6 +493,7 @@ namespace Yan
     //load a identifier's address to register
     void gen::genAddr(Identifier *node)
     {
+        NOTICE_LOG<<"genaddr";
         std::stringstream fm;
         auto reg = regAllocator_.allocateReg();
         if (node->isLocal_)
@@ -614,7 +625,12 @@ namespace Yan
     void gen::visit(ExprStmt *node)
     {
         Info("ExprStmt");
+        if(node->expr_)
+        {
+            Info("null");
+        }
         node->expr_->accept(this);
+        Info("ExprStmt22");
         auto reg = regAllocator_.getStoredreg();
         regAllocator_.freeReg(reg);
     }

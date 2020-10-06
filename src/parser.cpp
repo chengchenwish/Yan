@@ -441,7 +441,8 @@ namespace Yan
         }
         return postfix();
     }
-
+// postfix = compound-literal
+//         | primary ("[" expr "]" | "." ident | "->" ident | "++" | "--")*
     Expr *parser::postfix()
     {
         auto node = primary();
@@ -460,8 +461,40 @@ namespace Yan
                 node = UnaryOp::create(OpType::OP_DEREF, exp, node->type_->castToDeried()->getBaseType());
                 continue;
             }
+            if(match(TokenType::T_DOT))
+            {
+                node = structRef(node);
+                continue;
+            }
+            if(match(TokenType::T_ARROW))
+            {//A->a == (*A).a
+                node = UnaryOp::create(OpType::OP_DEREF, node, nullptr); //todo type
+                node = structRef(node);
+            }
             return node;
         }
+    }
+
+    Expr* parser::structRef(Expr* node)
+    {
+        if(node->type_->isKindOf(Type::T_STRUCT) == false)
+        {
+            ERROR_EXIT<<"Expected a struct type";
+        }
+        if(is(TokenType::T_IDENT) == false)
+        {
+            ERROR_EXIT<<"Expect identifiler in struct ref";
+        }
+        auto token =  consume();
+        auto* mem = node->type_->castToStruct()->findMember(token.getText());
+        if(mem == nullptr)
+        {
+            ERROR_EXIT<<"there is no member :"<<token.getText()<<" in struct";
+        }
+         node = UnaryOp::create(OpType::OP_DOT,mem,mem->type_);
+        return node;
+
+
     }
 
     IfStmt *parser::parseIfStmt()
@@ -1286,16 +1319,16 @@ namespace Yan
         int offset = 0;
         for(auto& mem : struct_ty->getMembers())
         {
-            if(mem.ty_->isIncomplete())
+            if(mem.type_->isIncomplete())
             {
                 ERROR_EXIT<<"incomplete struct member "<<mem.name_;
             }
-            offset = align_to(offset,mem.ty_->getalign());
+            offset = align_to(offset,mem.type_->getalign());
             mem.offset_ = offset;
-            offset += mem.ty_->getsize();
-            if(struct_ty->getalign()<mem.ty_->getalign())
+            offset += mem.type_->getsize();
+            if(struct_ty->getalign()<mem.type_->getalign())
             {
-                struct_ty->setalign(mem.ty_->getalign());
+                struct_ty->setalign(mem.type_->getalign());
             }
 
         }
@@ -1309,9 +1342,8 @@ namespace Yan
        Type* ty = baseType(nullptr);
       auto pair =  declarator(ty);
       expect(TokenType::T_SEMI,";");
-      StructType::Member mem;
-      mem.name_ = pair.second;
-      mem.ty_ = pair.first;
+      StructType::Member mem( pair.second,pair.first,true);
+
       return mem;      
 
     }

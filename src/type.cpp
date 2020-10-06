@@ -1,4 +1,5 @@
 #include "type.h"
+#include"AST.h"
 namespace Yan
 {
   
@@ -97,6 +98,22 @@ StructType::StructType():Type(0,4,T_STRUCT,true)
 {
 
 }
+ Identifier* StructType::findMember(const std::string& name)
+        {
+            auto find = std::find_if(members_.begin(),members_.end(),[&name](Member& m)
+            {
+                return name == m.name_;
+            });
+
+            if(find != members_.end())
+            {
+                return find.base();
+            }
+            else
+            {
+                return nullptr;
+            }
+        }
 
 
  Type* mayCasttoPtr(Type* ty)

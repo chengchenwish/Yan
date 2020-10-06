@@ -57,6 +57,7 @@ namespace Yan
         Expr *cast();
         Expr *unary();
         Expr *postfix();
+        Expr *structRef(Expr* node);
         Expr *primary();
 
         //declaration

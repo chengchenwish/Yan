@@ -2,6 +2,7 @@
 #define TYPE_H_
 #include <vector>
 #include <string>
+#include <algorithm>
 namespace Yan
 {
 
@@ -140,16 +141,18 @@ namespace Yan
     class StructType : public Type
     {
     public:
-        struct Member
+    using Member = Identifier;
+     /*   struct Member
         {
             Type *ty_;
             std::string name_;
             int offset_;
-        };
+        };*/
         static StructType *create();
         void addMember(const Member &memb);
         virtual StructType *castToStruct() { return this; }
         std::vector<Member>& getMembers(){return members_;}
+        Member* findMember(const std::string& name);
 
     private:
         StructType();

@@ -218,6 +218,7 @@ namespace Yan
         OP_POSTDEC,
         OP_PREDEC,
         OP_NOT,
+        OP_DOT,
 
         OP_UNKOWN
     };
@@ -235,7 +236,7 @@ namespace Yan
         Expr *right;
     };
     /*
-// unary = ("+" | "-" | "*" | "&" | "!" | "~")? cast
+// unary = ("+" | "-" | "*" | "&" | "!" | "~"|".")? cast
 
 //       | ("++" | "--") unary
 
@@ -317,6 +318,7 @@ namespace Yan
         }
         int value;
     };
+    
     //using ExtDecl = Node;
     struct FunctionDef : Node
     {

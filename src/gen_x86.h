@@ -147,8 +147,20 @@ namespace Yan
         virtual void visit(StringLiteral *node) override { assert(0); }
         virtual void visit(UnaryOp *node) override
         {
-            assert(node->op_ == OpType::OP_DEREF);
-            generator_->visitExpr(node->operand_);
+           // assert(node->op_ == OpType::OP_DEREF);
+           NOTICE_LOG<<"LvalueAddrGenerator";
+           if(node->op_ == OpType::OP_DEREF)
+            {
+                generator_->visitExpr(node->operand_);
+            }
+            else if(node->op_ == OpType::OP_DOT)
+            {
+                node->operand_->accept(this);
+            }
+            else
+            {
+                ERROR_EXIT<<" not support gen addr";
+            }
         }
         virtual void visit(ConditionExpr *node) override { assert(0); }
         virtual void visit(LoopStmt *node) override { assert(0); }

@@ -40,6 +40,7 @@ namespace Yan
         void addSymoble(const std::string &name, Identifier *indenti);
         bool getIdentiInCurrentScope(const std::string &name, Identifier **indenti);
         bool getIdentiInAllScope(const std::string &name, Identifier **indenti);
+        
         void setParent(Scope *parent) { parent_ = parent; }
         void setScope(const ScopeKind s) { kind_ = s; }
         ScopeKind getScope() { return kind_; }
