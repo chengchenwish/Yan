@@ -556,21 +556,47 @@ namespace Yan
 
         return LoopStmt::create(cond, then);
     }
+
+    //for(int i =0;i<n;i++)
+    // {
+    //do something
+    //}
+    //
+    // { int a=0;
+    //for(;i<n;i++)
+    //{
+
+    //}
+
+    //}
+    //
     Stmt *parser::parseForStmt()
     {
-        Stmt *init = nullptr;
+        // Stmt *init = nullptr;
         Expr *cond = nullptr;
         ExprStmt *inc = nullptr;
-        selfScope self(*this, ScopeKind::BLOCK);
+        CompousedStmt *compstmt = nullptr;
+
         expect(TokenType::T_LPAREN, "(");
         if (!is(TokenType::T_SEMI))
         {
-      //todo for(int i = 0;i<m;i++)
+            enterScope(ScopeKind::BLOCK);
+            compstmt = CompousedStmt::create();
 
-            init = ExprStmt::create(expr());
+            if (isTypeName())
+            {
+                parseDeclaration(true, compstmt);
+            }
+            else
+            {
+                compstmt->addStmt(ExprStmt::create(expr()));
+                expect(TokenType::T_SEMI, ";");
+            }
         }
-
-        expect(TokenType::T_SEMI, ";");
+        else
+        {
+            expect(TokenType::T_SEMI, ";");
+        }
 
         if (!is(TokenType::T_SEMI))
         {
@@ -590,6 +616,7 @@ namespace Yan
         }
         else
         {
+            selfScope self(*this, ScopeKind::BLOCK);
             body = parseCompoundStmt();
             static_cast<CompousedStmt *>(body)->scope_ = currentScop_;
             currentScop_->dumpSymbol(std::cout);
@@ -597,13 +624,19 @@ namespace Yan
 
         auto forloop = LoopStmt::create(cond, body);
         forloop->inc_ = inc;
-        if (init)
+        if (compstmt)
         {
-            auto compstmt = CompousedStmt::create();
-            compstmt->addStmt(init);
+            // auto compstmt = CompousedStmt::create();
+            //
             compstmt->addStmt(forloop);
+            //           static_cast<CompousedStmt *>(body)->scope_ = currentScop_;
+            currentScop_->dumpSymbol(std::cout);
+            compstmt->scope_ = currentScop_;
+            leaveScope();
+            currentScop_->dumpSymbol(std::cout);
             return compstmt;
         }
+        currentScop_->dumpSymbol(std::cout);
         return forloop;
     }
     LoopStmt *parser::parseDoWhileStmt()
@@ -721,8 +754,7 @@ namespace Yan
             }
             else if (isTypeName())
             {
-                parseDeclaration(true,compoused);
-               
+                parseDeclaration(true, compoused);
             }
 
             else if (is(TokenType::T_LBRACE))
@@ -787,24 +819,22 @@ namespace Yan
 
         return func;
     }
-//Initializer parser::parseInitializerList(Type*ty)
-////{
+    //Initializer parser::parseInitializerList(Type*ty)
+    ////{
 
-//}
-Initializer parser:: parseDecInitializer(Type* ty)
-{
-    if(match(TokenType::T_LBRACE) || isString(ty))//{}
+    //}
+    Initializer parser::parseDecInitializer(Type *ty)
     {
-        //return parseInitializerList(ty);
+        if (match(TokenType::T_LBRACE) || isString(ty)) //{}
+        {
+            //return parseInitializerList(ty);
+        }
+        else
+        {
+            auto exp = assign();
+            return Initializer(ty, 0, exp);
+        }
     }
-    else
-    {
-        auto exp = assign();
-        return Initializer(ty,0,exp);
-
-    }
-
-}
     // declaration = basetype declarator type-suffix ("=" lvar-initializer)? ";"
     //             | basetype ";"
     void parser::parseDeclaration(bool islocal, Node *node)
@@ -834,14 +864,14 @@ Initializer parser:: parseDecInitializer(Type* ty)
             identi->setoffset(currentScop_->caculateOffset(pair.second));
             auto *decl = Declaration::create(identi);
             //TODO init
-            if(match(TokenType::T_ASSIGN))
-            {            
+            if (match(TokenType::T_ASSIGN))
+            {
                 auto init = parseDecInitializer(identi->type_);
                 decl->inits_.push_back(init);
             }
             //
             //
-             if (islocal)
+            if (islocal)
             {
                 static_cast<CompousedStmt *>(node)->addStmt(decl);
             }
@@ -853,11 +883,9 @@ Initializer parser:: parseDecInitializer(Type* ty)
             {
                 continue;
             }
-
         }
     }
 
-  
     void parser::defineBuildinFunc(std::string name, Type *reType, std::vector<Type *> paramType)
     {
         auto functype = FuncType::create(reType);
@@ -892,8 +920,7 @@ Initializer parser:: parseDecInitializer(Type* ty)
             }
             else
             {
-                parseDeclaration(false,program);
-
+                parseDeclaration(false, program);
             }
         }
 
@@ -1496,13 +1523,12 @@ Initializer parser:: parseDecInitializer(Type* ty)
     bool parser::isInteger(Expr *node)
     {
 
-       return  node->type_->isOnekindOf(Type::T_INT, Type::T_CHAR, Type::T_LONG, Type::T_SHORT);
+        return node->type_->isOnekindOf(Type::T_INT, Type::T_CHAR, Type::T_LONG, Type::T_SHORT);
     }
-    bool parser::isString(Type*ty)
+    bool parser::isString(Type *ty)
     {
- 
-        return  ty->isKindOf(Type::T_ARRAY) && ty->castToArray()->getBaseType()->isKindOf(Type::T_CHAR);
 
+        return ty->isKindOf(Type::T_ARRAY) && ty->castToArray()->getBaseType()->isKindOf(Type::T_CHAR);
     }
 
 } // namespace Yan
