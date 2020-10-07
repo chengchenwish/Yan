@@ -90,6 +90,7 @@ namespace Yan
         bool findtypedef(const std::string &name);
         bool isFuncdef();
         void defineBuildinFunc(std::string name, Type* reType, std::vector<Type*>paramType);
+        void addBuildinFunctions();
 
         //Token ralated function
         bool match(TokenType t);

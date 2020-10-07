@@ -9,6 +9,7 @@ namespace Yan
  CharType*    char_type = CharType::create();
  ShortType*   short_type = ShortType::create();
  LongType*    long_type = LongType::create();
+ EnumType*    enum_type  = EnumType::create();
 Type::Type(int size, int align, TypeKind kind, bool incomplete):size_(size),
 align_(align), kind_(kind),isIncomplete_(incomplete)
 {

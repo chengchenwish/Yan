@@ -48,7 +48,7 @@ namespace Yan
             T_ENUM,
             T_PTR,
             T_ARRAY,
-            T_STRUCT,
+            T_STRUCT,//struct or union
             T_FUNC,
         };
         //默认是complete的类型，也就是说知道具体的大小
@@ -158,19 +158,7 @@ namespace Yan
         StructType();
         std::vector<Member> members_;
     };
-    class enumType :public Type
-    {
-        public:
-        static enumType*create()
-        {
-            return new enumType();
-        }
-        private:
-        enumType():Type(4,4,T_ENUM)
-        {
 
-        }
-    };
 
     BUILD_IN_TYPE(IntType, 4, 4, T_INT)
     BUILD_IN_TYPE(VoidType, 1, 1, T_VOID)
@@ -178,6 +166,7 @@ namespace Yan
     BUILD_IN_TYPE(CharType, 1, 1, T_CHAR)
     BUILD_IN_TYPE(ShortType, 2, 2, T_SHORT)
     BUILD_IN_TYPE(LongType, 8, 8, T_LONG)
+    BUILD_IN_TYPE(EnumType, 4, 4, T_ENUM)
 #undef BUILD_IN_TYPE
     extern IntType *int_type;
     extern VoidType *void_type;
@@ -185,6 +174,8 @@ namespace Yan
     extern CharType *char_type;
     extern ShortType *short_type;
     extern LongType *long_type;
+    extern EnumType* enum_type;
+    //function
 
     extern Type* toPtrType(Type* ty);
 

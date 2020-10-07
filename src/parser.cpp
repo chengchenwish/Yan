@@ -832,11 +832,20 @@ namespace Yan
         auto identi = Identifier::create(name, functype, false);
         currentScop_->addSymoble(name, identi);
     }
+    void parser::addBuildinFunctions()
+    {
+        //user add buildin function 
+        defineBuildinFunc("print", void_type, {int_type});
+        defineBuildinFunc("printstr", void_type, {PtrType::create(char_type)});
+        //system buildin function
+        auto void_ptr = PtrType::create(void_type);
+        defineBuildinFunc("__builtin_va_arg",void_type,{void_ptr,void_ptr});
+        defineBuildinFunc("__builtin_va_start",void_type,{void_ptr});
+    }
     Program *parser::parseProgram()
     {
         auto program = Program::create();
-        defineBuildinFunc("print", void_type, {int_type});
-        defineBuildinFunc("printstr", void_type, {PtrType::create(char_type)});
+       addBuildinFunctions();
 
         Scope *funcscop = nullptr;
         while (!match(TokenType::T_EOF))
@@ -1360,7 +1369,7 @@ namespace Yan
     Type *parser::parseEnumSpecifier()
     {
         expect(TokenType::T_ENUM, "enum"); //期待关键字enum
-        Type *ty = enumType::create();
+        Type *ty = enum_type;;
         bool anmous = true;
         Token t;
         if (is(TokenType::T_IDENT))
