@@ -27,14 +27,14 @@ if(YAN_BUILD_TESTS)
     set(install_gmock OFF)
     set(build_gmock ON)
     # This project is tested using GoogleTest.
-    add_subdirectory("3pp/googletest")
+    add_subdirectory("third_party/googletest")
     set_property(TARGET gtest
                       APPEND PROPERTY COMPILE_OPTIONS -Wno-missing-field-initializers)
     set_property(TARGET gmock
                       APPEND PROPERTY COMPILE_OPTIONS -Wno-missing-field-initializers)
     add_executable(UT unittest/test_lexer.cpp
                         unittest/testAll.cpp)
-   
+
     target_link_libraries(UT gtest)
     target_link_libraries(UT compiler)
     add_test(NAME UT COMMAND UT)
