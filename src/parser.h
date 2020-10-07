@@ -61,7 +61,7 @@ namespace Yan
         Expr *primary();
 
         //declaration
-        Declaration *parseDeclaration(bool islocal);
+        void parseDeclaration(bool islocal, Node* node);
         Type *baseType(storageClass *sclass);
         Declarator declarator(Type *type);
         Type *declarator_array(Type *type);

@@ -719,15 +719,8 @@ namespace Yan
             }
             else if (isTypeName())
             {
-                auto declaration = parseDeclaration(true);
-                if (declaration)
-                {
-                    compoused->addStmt(declaration);
-                }
-                else
-                {
-                    continue;
-                }
+                parseDeclaration(true,compoused);
+               
             }
 
             else if (is(TokenType::T_LBRACE))
@@ -795,33 +788,49 @@ namespace Yan
 
     // declaration = basetype declarator type-suffix ("=" lvar-initializer)? ";"
     //             | basetype ";"
-    Declaration *parser::parseDeclaration(bool isloacl)
+    void parser::parseDeclaration(bool islocal, Node *node)
     {
-
-        DEBUG_LOG << " islocal = " << isloacl;
+        DEBUG_LOG << " islocal = " << islocal;
         storageClass sclass = storageClass::UNKNOW;
         auto type = baseType(&sclass);
         if (match(TokenType::T_SEMI))
         {
             //; struct u{int a;};
-            return nullptr;
+            return;
             //don't need create a ast node;
         }
 
-        auto pair = declarator(type);
-
-        auto identi = Identifier::create(pair.second, pair.first, isloacl);
-        currentScop_->addSymoble(pair.second, identi);
-        if (sclass == storageClass::TYPE_DEF)
+        while (!match(TokenType::T_SEMI) && !match(TokenType::T_EOF))
         {
-            identi->class_ = storageClass::TYPE_DEF;
-            expect(TokenType::T_SEMI, ";");
-            return nullptr;
+
+            auto pair = declarator(type);
+
+            auto identi = Identifier::create(pair.second, pair.first, islocal);
+            currentScop_->addSymoble(pair.second, identi);
+            if (sclass == storageClass::TYPE_DEF)
+            {
+                identi->class_ = storageClass::TYPE_DEF;
+                continue;
+            }
+            identi->setoffset(currentScop_->caculateOffset(pair.second));
+            auto *decl = Declaration::create(identi);
+            //TODO init
+             if (islocal)
+            {
+                static_cast<CompousedStmt *>(node)->addStmt(decl);
+            }
+            else
+            {
+                static_cast<Program *>(node)->add(decl);
+            }
+            if (match(TokenType::T_COMMA))
+            {
+                continue;
+            }
+
         }
-        identi->setoffset(currentScop_->caculateOffset(pair.second));
-        expect(TokenType::T_SEMI, ";");
-        return Declaration::create(identi);
     }
+  
     void parser::defineBuildinFunc(std::string name, Type *reType, std::vector<Type *> paramType)
     {
         auto functype = FuncType::create(reType);
@@ -834,18 +843,18 @@ namespace Yan
     }
     void parser::addBuildinFunctions()
     {
-        //user add buildin function 
+        //user add buildin function
         defineBuildinFunc("print", void_type, {int_type});
         defineBuildinFunc("printstr", void_type, {PtrType::create(char_type)});
         //system buildin function
         auto void_ptr = PtrType::create(void_type);
-        defineBuildinFunc("__builtin_va_arg",void_type,{void_ptr,void_ptr});
-        defineBuildinFunc("__builtin_va_start",void_type,{void_ptr});
+        defineBuildinFunc("__builtin_va_arg", void_type, {void_ptr, void_ptr});
+        defineBuildinFunc("__builtin_va_start", void_type, {void_ptr});
     }
     Program *parser::parseProgram()
     {
         auto program = Program::create();
-       addBuildinFunctions();
+        addBuildinFunctions();
 
         Scope *funcscop = nullptr;
         while (!match(TokenType::T_EOF))
@@ -856,11 +865,8 @@ namespace Yan
             }
             else
             {
-                auto decl = parseDeclaration(false);
-                if (decl)
-                {
-                    program->add(decl);
-                }
+                parseDeclaration(false,program);
+
             }
         }
 
@@ -1369,7 +1375,8 @@ namespace Yan
     Type *parser::parseEnumSpecifier()
     {
         expect(TokenType::T_ENUM, "enum"); //期待关键字enum
-        Type *ty = enum_type;;
+        Type *ty = enum_type;
+        ;
         bool anmous = true;
         Token t;
         if (is(TokenType::T_IDENT))
@@ -1455,7 +1462,7 @@ namespace Yan
                 struct_ty->setSize(mem.type_->getsize());
             }
         }
-        struct_ty->setSize(align_to(struct_ty->getsize(),struct_ty->getalign()));//对齐
+        struct_ty->setSize(align_to(struct_ty->getsize(), struct_ty->getalign())); //对齐
         struct_ty->setIncomplete(false);
         return struct_ty;
     }

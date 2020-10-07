@@ -342,7 +342,9 @@ namespace Yan
     };
     struct Initializer
     {
+        
         Type *type_;
+        int offset_;
         Expr *expr_;
     };
     //using InitList = std::list<Initializer>;
