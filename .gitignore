@@ -1,7 +1,6 @@
 build/*
 .vscode
-test/a·out
-test/a.s
+
 test/YAN
 test/*.symbol
 test/tmp
