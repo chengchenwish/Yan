@@ -342,20 +342,26 @@ namespace Yan
     };
     struct Initializer
     {
-        
+        Initializer(Type* ty, int offset, Expr* exp):
+        type_(ty),
+        offset_(offset),
+        expr_(exp)
+        {}
+
         Type *type_;
         int offset_;
         Expr *expr_;
     };
-    //using InitList = std::list<Initializer>;
+    //
     struct Declaration : public Stmt
     {
+        using InitList = std::list<Initializer>;
         Declaration(Identifier *identi) : obj_(identi) {}
         virtual void accept(Ivisitor *v) override { v->visit(this); }
         static Declaration *create(Identifier *identi) { return new Declaration(identi); }
         Identifier *obj_;
         //a {1,2,4}
-        // InitList inits_;
+         InitList inits_;
     };
 
     using ExtDeclList = std::vector<Node *>;

@@ -7,8 +7,11 @@ int main()
     c = 3;
     aa = 4;
     print(b+aa);
+    int w=22,q=66;
+    print(w+q);
     return 0;
 }
 /*Expected output:s
 6
+88
 */

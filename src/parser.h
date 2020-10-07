@@ -62,6 +62,7 @@ namespace Yan
 
         //declaration
         void parseDeclaration(bool islocal, Node* node);
+        Initializer parseDecInitializer(Type* ty);
         Type *baseType(storageClass *sclass);
         Declarator declarator(Type *type);
         Type *declarator_array(Type *type);
@@ -86,6 +87,7 @@ namespace Yan
 
     private:
         bool isInteger(Expr* node);
+        bool isString(Type*ty);
         bool isTypeName();
         bool findtypedef(const std::string &name);
         bool isFuncdef();

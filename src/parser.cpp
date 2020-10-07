@@ -565,6 +565,8 @@ namespace Yan
         expect(TokenType::T_LPAREN, "(");
         if (!is(TokenType::T_SEMI))
         {
+      //todo for(int i = 0;i<m;i++)
+
             init = ExprStmt::create(expr());
         }
 
@@ -785,7 +787,24 @@ namespace Yan
 
         return func;
     }
+//Initializer parser::parseInitializerList(Type*ty)
+////{
 
+//}
+Initializer parser:: parseDecInitializer(Type* ty)
+{
+    if(match(TokenType::T_LBRACE) || isString(ty))//{}
+    {
+        //return parseInitializerList(ty);
+    }
+    else
+    {
+        auto exp = assign();
+        return Initializer(ty,0,exp);
+
+    }
+
+}
     // declaration = basetype declarator type-suffix ("=" lvar-initializer)? ";"
     //             | basetype ";"
     void parser::parseDeclaration(bool islocal, Node *node)
@@ -815,6 +834,13 @@ namespace Yan
             identi->setoffset(currentScop_->caculateOffset(pair.second));
             auto *decl = Declaration::create(identi);
             //TODO init
+            if(match(TokenType::T_ASSIGN))
+            {            
+                auto init = parseDecInitializer(identi->type_);
+                decl->inits_.push_back(init);
+            }
+            //
+            //
              if (islocal)
             {
                 static_cast<CompousedStmt *>(node)->addStmt(decl);
@@ -830,6 +856,7 @@ namespace Yan
 
         }
     }
+
   
     void parser::defineBuildinFunc(std::string name, Type *reType, std::vector<Type *> paramType)
     {
@@ -1469,7 +1496,13 @@ namespace Yan
     bool parser::isInteger(Expr *node)
     {
 
-        node->type_->isOnekindOf(Type::T_INT, Type::T_CHAR, Type::T_LONG, Type::T_SHORT);
+       return  node->type_->isOnekindOf(Type::T_INT, Type::T_CHAR, Type::T_LONG, Type::T_SHORT);
+    }
+    bool parser::isString(Type*ty)
+    {
+ 
+        return  ty->isKindOf(Type::T_ARRAY) && ty->castToArray()->getBaseType()->isKindOf(Type::T_CHAR);
+
     }
 
 } // namespace Yan

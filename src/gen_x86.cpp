@@ -449,7 +449,36 @@ namespace Yan
     {
         if (node->obj_->isLocal_)
         {
-            return;
+            if(node->inits_.empty())
+            {
+                return;
+            }
+            node->inits_.front().expr_->accept(this);      
+        auto reg = regAllocator_.getStoredreg();
+
+          std::stringstream fm;
+        auto obj = node->obj_;
+        if (obj->type_->getsize() == 1)
+        {
+            fm << "movb "<<bregList[reg]<<", -" << obj->offset_ << "(%rbp)  ";
+
+        }
+        if (obj->type_->getsize() == 2)
+        {
+             fm << "movw "<<wregList[reg]<<", -" << obj->offset_ << "(%rbp)  ";
+        }
+        else if (obj->type_->getsize() == 4)
+        {
+           fm << "movl "<<dregList[reg]<<", -" << obj->offset_ << "(%rbp)  ";
+        }
+        else if (obj->type_->getsize() == 8)
+        {
+             fm << "movq "<<regList[reg]<<", -" << obj->offset_ << "(%rbp)  ";
+        }
+
+        emit(fm.str());
+        regAllocator_.freeReg(reg);
+        return;
         }
         Info("gen global variable:");
 
