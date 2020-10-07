@@ -658,9 +658,10 @@ namespace Yan
             regAllocator_.freeReg(reg);
         }
 
-        auto reg = regAllocator_.allocateReg();
+       /* auto reg = regAllocator_.allocateReg();
         Info("reg =%d", reg);
         emit("movq", "%rsp", regList[reg]);
+    
         emit("andq", "$15", regList[reg]);
         auto labe = genLabe();
         auto labe1 = genLabe();
@@ -675,6 +676,9 @@ namespace Yan
         emit("   call " + node->designator_->name_);
         emit(" addq $8,%rsp");
         emitLable(labe1);
+        */
+       emit("movq $0,%rax");
+        emit("   call " + node->designator_->name_);
 
         // if(!node->designator_->type_->castToFunc()->getBaseType()->isKindOf(Type::T_VOID))
         {
