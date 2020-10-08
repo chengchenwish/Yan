@@ -669,26 +669,52 @@ namespace Yan
         }
         expect(TokenType::T_RPAREN, ")");
         expect(TokenType::T_LBRACE, "{");
+        auto switchstmt = SwitchStmt::create();
         //TODO
         while (!match(TokenType::T_RBRACE) && !match(TokenType::T_EOF))
         {
             if (match(TokenType::T_CASE))
             {
-                
+                switchstmt->caseStmts_.push_back(parseCaseStmt(false, exp));
             }
             else if (match(TokenType::T_DEFALT))
             {
+                switchstmt->caseStmts_.push_back(parseCaseStmt(true, exp));
             }
             else
             {
                 ERROR_EXIT << "Expect 'case' or 'default' keyword";
             }
         }
-
+        return switchstmt;
     }
-    CaseDefaltStmt *parser::parseCaseStmt(bool isdefault)
+    CaseDefaltStmt *parser::parseCaseStmt(bool isdefault, Expr *exp)
     {
-        expect(TokenType::T_COMMA, ":");
+
+        int caseValue = isdefault ? 0 : constExpr<int>();
+        expect(TokenType::T_COLON, ":");
+        auto caseDefualt = CaseDefaltStmt::create(exp, isdefault, caseValue);
+        while(!isOneOf(TokenType::T_CASE,TokenType::T_DEFALT))
+        {
+            if(isdefault && is(TokenType::T_RBRACE))
+            {
+                break;
+            }
+        if(match(TokenType::T_LBRACE))//{}
+        {
+            selfScope self(*this,ScopeKind::BLOCK);
+            auto comstmt = parseCompoundStmt();
+            comstmt->scope_ = currentScop_;
+            caseDefualt->stmts_.push_back(comstmt);
+        }
+        else
+        {
+            caseDefualt->stmts_.push_back(parseSingleStmt());
+        }
+
+        }
+        return caseDefualt;
+
     }
 
     ReturnStmt *parser::parseReturnStmt()

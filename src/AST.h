@@ -55,11 +55,9 @@ namespace Yan
         virtual void visit(BreakContinueStmt *node) = 0;
         virtual void visit(LabelStmt *node) = 0;
         virtual void visit(ExprStmt *node) = 0;
-        virtual void visit(Enumerator * node) = 0;
+        virtual void visit(Enumerator *node) = 0;
         virtual void visit(SwitchStmt *node) = 0;
-        virtual void visit(CaseDefaultStmt *node) = 0;
-
-
+        virtual void visit(CaseDefaltStmt *node) = 0;
     };
 
     struct Node
@@ -121,8 +119,6 @@ namespace Yan
         bool postcheck_;
     };
 
-
-
     struct BreakContinueStmt : public Stmt
     {
         enum kind
@@ -158,25 +154,37 @@ namespace Yan
         virtual void accept(Ivisitor *v) override { v->visit(this); }
         std::string label_;
     };
-    struct SwitchStmt: public Stmt
+    struct SwitchStmt : public Stmt
     {
-        static SwitchStmt*create(){return new SwitchStmt;}
-        virtual void accept(Ivisitor* v)override {v->visit(this);}
-        std::vectot<CaseStmt*> caseStmts_;
+        static SwitchStmt *create() { return new SwitchStmt; }
+        virtual void accept(Ivisitor *v) override { v->visit(this); }
+        std::vector<CaseDefaltStmt *> caseStmts_;
     };
-    struct CaseDefaltStmt: public Stmt
+    struct CaseDefaltStmt : public Stmt
     {
-
-        static CaseDefaltStmt*create(){return new CaseDefaltStmt(Expr* exp, bool isdefault, int caseValue);}
-        CaseDefaltStmt(Expr* exp, bool isdefault, int caseValue): switchExpr_(exp),isdefaultLable_(isdefault),caseValue(caseValue)
-        {}
-      virtual void accept(Ivisitor* v)override {v->visit(this);}
-       Expr* switchExp_ = nullptr;
-       bool isdefaultLable_ = false;
-       int caseValue_ = 0;
-       std::vector<Stmt*> stmts_; 
-
-    }
+        static int seq = 0;
+        static std::string genCaseLabel()
+        {
+            return "case_lable_"+std::to_string(seq++);
+        }
+        static CaseDefaltStmt *create(Expr *exp, bool isdefault, int caseValue)
+        {
+            return new CaseDefaltStmt(exp, isdefault, caseValue);
+        }
+        CaseDefaltStmt(Expr *exp, bool isdefault, int caseValue) : switchExp_(exp), isdefaultLable_(isdefault), caseValue_(caseValue)
+        {
+            lable_ = CaseDefaltStm::genCaseLabel();
+        }
+        virtual void accept(Ivisitor *v) override
+        {
+            v->visit(this);
+        }
+        Expr *switchExp_ = nullptr;
+        bool isdefaultLable_ = false;
+        int caseValue_ = 0;
+        std::vector<Stmt *> stmts_;
+        std::string lable_;
+    };
     struct ExprStmt : public Stmt
     {
         ExprStmt(Expr *exp) : expr_(exp) {}
@@ -191,7 +199,7 @@ namespace Yan
         Expr() : type_(nullptr) {}
         virtual bool isLvalue() { return false; }
         virtual ~Expr(){};
-        Type *type_;//Todo ower the type
+        Type *type_; //Todo ower the type
     };
     enum class OpType
     {
@@ -231,7 +239,7 @@ namespace Yan
         OP_BITOR,
         OP_BITXOR,
         OP_BITAND,
-        OP_DOT,//.
+        OP_DOT, //.
 
         //UnaryOP
         OP_CAST,
@@ -242,7 +250,6 @@ namespace Yan
         OP_POSTDEC,
         OP_PREDEC,
         OP_NOT,
-        
 
         OP_UNKOWN
     };
@@ -326,9 +333,9 @@ namespace Yan
         virtual void accept(Ivisitor *v) override { v->visit(this); }
         void setoffset(int offset) { offset_ = offset; }
         Identifier(const std::string &name, Type *type, bool islocal) : Expr(type), name_(name), isLocal_(islocal) {}
-        static Identifier* clone(Identifier* old)
+        static Identifier *clone(Identifier *old)
         {
-            auto newnode = new Identifier(old->name_, old->type_,old->isLocal_);
+            auto newnode = new Identifier(old->name_, old->type_, old->isLocal_);
             newnode->offset_ = old->offset_;
             newnode->class_ = old->class_;
             return newnode;
@@ -338,18 +345,18 @@ namespace Yan
     };
     struct Enumerator : public Identifier
     {
-        static Enumerator* create(const std::string& name,int val)
+        static Enumerator *create(const std::string &name, int val)
         {
-            return new Enumerator(name,val);
+            return new Enumerator(name, val);
         }
-        virtual void accept(Ivisitor* v) override{ v->visit(this);}
-        Enumerator(const std::string&name, int val):Identifier(name,int_type,false)
+        virtual void accept(Ivisitor *v) override { v->visit(this); }
+        Enumerator(const std::string &name, int val) : Identifier(name, int_type, false)
         {
             value = val;
         }
         int value;
     };
-    
+
     //using ExtDecl = Node;
     struct FunctionDef : Node
     {
@@ -365,11 +372,11 @@ namespace Yan
     };
     struct Initializer
     {
-        Initializer(Type* ty, int offset, Expr* exp):
-        type_(ty),
-        offset_(offset),
-        expr_(exp)
-        {}
+        Initializer(Type *ty, int offset, Expr *exp) : type_(ty),
+                                                       offset_(offset),
+                                                       expr_(exp)
+        {
+        }
 
         Type *type_;
         int offset_;
@@ -384,7 +391,7 @@ namespace Yan
         static Declaration *create(Identifier *identi) { return new Declaration(identi); }
         Identifier *obj_;
         //a {1,2,4}
-         InitList inits_;
+        InitList inits_;
     };
 
     using ExtDeclList = std::vector<Node *>;

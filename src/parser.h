@@ -38,7 +38,7 @@ namespace Yan
         BreakContinueStmt *parseContinueBreakStmt(BreakContinueStmt::kind type);
         ReturnStmt* parseReturnStmt();
         SwitchStmt* parseSwitchStmt();
-        CaseDefaltStmt* parseCaseStmt();
+        CaseDefaltStmt* parseCaseStmt(bool isdefault,Expr* exp);
 
 
         //EXPR

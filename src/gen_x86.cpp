@@ -545,6 +545,36 @@ namespace Yan
             node->else_->accept(this);
         emitLable(elsEndLabel);
     }
+    void gen::visit(SwitchStmt *node)
+    {
+        auto endLabel = genLabe();
+        breakLabels_.push(endLabel);
+        for (int i = 0; i < node->caseStmts_.size(); i++)
+        {
+            auto caseStmt = node->caseStmts_[i];
+            if (i + 1 == node->caseStmts_.size())
+            {
+
+                checkswitchCondition(node->cond_, caseStmt->lable_, endLabel);
+            }
+            else
+            {
+                auto nextCase = node->caseStmts_[i + 1];
+                checkswitchCondition(node->cond_, caseStmt->lable_, nextCase->lable_);
+            }
+
+            emit(caseStmt->lable_);
+            caseStmt->accept(this);
+        }
+        emitLable(endLabel);
+        breakLabels_.pop();
+    }
+    void gen::visit(CaseDefaltStmt *node)
+    {
+
+assert(0);
+    }
+
     void gen::visit(LoopStmt *node)
     {
         DEBUG_LOG << " Gen LoopStmtmet";
@@ -703,11 +733,6 @@ namespace Yan
             regAllocator_.storeReg(r);
         }
     }
-
-     void gen:: visit(SwitchStmt *node)
-     {
-         //TODO
-     }
 
     void gen::visit(CompousedStmt *node)
     {
