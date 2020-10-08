@@ -48,6 +48,7 @@ namespace Yan
         void genLValueAddr(Expr *node);
         void loardArgs(Identifier *node, int index);
         void checkCondition(Expr *node, std::string trueLabel, std::string falsedLabel);
+        void checkswitchCondition(Expr* switch_val,int case_va, const std::string& caselb, const std::string&nextlb);
 
     private:
         void storeValue(Type *ty);

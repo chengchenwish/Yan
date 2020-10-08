@@ -162,7 +162,7 @@ namespace Yan
     };
     struct CaseDefaltStmt : public Stmt
     {
-        static int seq = 0;
+        static int seq;
         static std::string genCaseLabel()
         {
             return "case_lable_"+std::to_string(seq++);
@@ -173,7 +173,7 @@ namespace Yan
         }
         CaseDefaltStmt(Expr *exp, bool isdefault, int caseValue) : switchExp_(exp), isdefaultLable_(isdefault), caseValue_(caseValue)
         {
-            lable_ = CaseDefaltStm::genCaseLabel();
+            lable_ = CaseDefaltStmt::genCaseLabel();
         }
         virtual void accept(Ivisitor *v) override
         {
@@ -185,6 +185,7 @@ namespace Yan
         std::vector<Stmt *> stmts_;
         std::string lable_;
     };
+   
     struct ExprStmt : public Stmt
     {
         ExprStmt(Expr *exp) : expr_(exp) {}

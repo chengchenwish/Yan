@@ -7,6 +7,7 @@ namespace Yan
     // {
     //     v->visit(this);
     // }
+     int CaseDefaltStmt::seq = 0;
     CompousedStmt::CompousedStmt()
     {
     }

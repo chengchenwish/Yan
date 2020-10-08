@@ -555,15 +555,14 @@ namespace Yan
             if (i + 1 == node->caseStmts_.size())
             {
 
-                checkswitchCondition(node->cond_, caseStmt->lable_, endLabel);
+                checkswitchCondition(caseStmt->switchExp_, caseStmt->caseValue_, caseStmt->lable_, endLabel);
             }
             else
             {
                 auto nextCase = node->caseStmts_[i + 1];
-                checkswitchCondition(node->cond_, caseStmt->lable_, nextCase->lable_);
+                checkswitchCondition(caseStmt->switchExp_, caseStmt->caseValue_, caseStmt->lable_, nextCase->lable_);
             }
 
-            emit(caseStmt->lable_);
             caseStmt->accept(this);
         }
         emitLable(endLabel);
@@ -571,8 +570,13 @@ namespace Yan
     }
     void gen::visit(CaseDefaltStmt *node)
     {
+        emitLable(node->lable_);
+        for (auto& stmt: node-> stmts_)
+        {
+            stmt->accept(this);
+        }
 
-assert(0);
+//assert(0);
     }
 
     void gen::visit(LoopStmt *node)
@@ -636,6 +640,16 @@ assert(0);
         emit("jz " + falsedLabel);
         emit("jmp " + trueLabel);
         regAllocator_.freeReg(reg);
+    }
+    void gen:: checkswitchCondition(Expr* switch_val,int case_va, const std::string& caselb, const std::string&nextlb)
+    {
+        switch_val->accept(this);
+        auto reg = regAllocator_.getStoredreg();
+        emit("cmp", "$"+std::to_string(case_va), regList[reg]);
+        emit("jz " + caselb);
+        emit("jmp " + nextlb);
+        regAllocator_.freeReg(reg);
+
     }
 
     void gen::visit(GotoStmt *node)
