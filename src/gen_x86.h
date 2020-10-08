@@ -42,7 +42,7 @@ namespace Yan
         virtual void visit(Enumerator* node);
 
         void genAddr(Identifier *node);
-        void genLvalue(Expr *node);
+        void genLValueAddr(Expr *node);
         void loardArgs(Identifier *node, int index);
         void checkCondition(Expr *node, std::string trueLabel, std::string falsedLabel);
 

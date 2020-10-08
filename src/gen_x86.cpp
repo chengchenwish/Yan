@@ -185,7 +185,7 @@ namespace Yan
         }
         else if (node->op_ == OpType::OP_POSTINC)
         {
-            genLvalue(node->operand_);
+            genLValueAddr(node->operand_);
             node->operand_->accept(this);
             auto reg1 = regAllocator_.getStoredreg();
             emit("addq", "$1", regList[reg1]);
@@ -218,10 +218,11 @@ namespace Yan
         emit(fm);
         regAllocator_.storeReg(reg);
     }
-    void gen::genLvalue(Expr *node)
+    void gen::genLValueAddr(Expr *node)
     {
         NOTICE_LOG << "lvalue";
         assert(!node->type_->isKindOf(Type::T_ARRAY));
+        //addrGenerator will call genAddr according node type
         node->accept(addrGnerator_);
     }
     void gen::visit(BinaryOp *node)
@@ -229,7 +230,7 @@ namespace Yan
         DEBUG_LOG << "node op = " << static_cast<int>(node->op);
         if (node->op == OpType::OP_ASSIGN)
         {
-            genLvalue(node->left);
+            genLValueAddr(node->left);
             node->right->accept(this);
             storeValue(node->type_);
         }
@@ -447,6 +448,7 @@ namespace Yan
         }
     }
     //store function args from register to stack
+
     void gen::loardArgs(Identifier *node, int index)
     {
         auto offset = node->offset_;
@@ -465,28 +467,17 @@ namespace Yan
                 return;
             }
             node->inits_.front().expr_->accept(this);
+
             auto reg = regAllocator_.getStoredreg();
 
-            std::stringstream fm;
             auto obj = node->obj_;
-            if (obj->type_->getsize() == 1)
-            {
-                fm << "movb " << bregList[reg] << ", -" << obj->offset_ << "(%rbp)  ";
-            }
-            if (obj->type_->getsize() == 2)
-            {
-                fm << "movw " << wregList[reg] << ", -" << obj->offset_ << "(%rbp)  ";
-            }
-            else if (obj->type_->getsize() == 4)
-            {
-                fm << "movl " << dregList[reg] << ", -" << obj->offset_ << "(%rbp)  ";
-            }
-            else if (obj->type_->getsize() == 8)
-            {
-                fm << "movq " << regList[reg] << ", -" << obj->offset_ << "(%rbp)  ";
-            }
+            auto ty = obj->type_;
 
-            emit(fm.str());
+            auto inst = GetInst("mov", ty);
+            auto regstr = getReg(ty->getsize(), reg);
+            auto addr = "-" + std::to_string(obj->offset_) + "(%rbp)";
+            emit(inst, regstr, addr);
+
             regAllocator_.freeReg(reg);
             return;
         }
@@ -529,14 +520,13 @@ namespace Yan
 
             fm << "leaq  -" << node->offset_ << "(%rbp) , "
                << regList[reg];
-            emit(fm);
         }
         else
         {
 
             fm << "leaq " << node->name_ << "(%rip), " << regList[reg];
-            emit(fm.str());
         }
+        emit(fm);
         regAllocator_.storeReg(reg);
     }
     void gen::visit(IfStmt *node)
