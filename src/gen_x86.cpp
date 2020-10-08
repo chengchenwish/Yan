@@ -704,7 +704,7 @@ namespace Yan
         }
     }
 
-     void gen:: visit(SwitchCaseStmt *node)
+     void gen:: visit(SwitchStmt *node)
      {
          //TODO
      }

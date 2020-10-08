@@ -659,27 +659,36 @@ namespace Yan
         expect(TokenType::T_SEMI, ";");
         return BreakContinueStmt::create(type);
     }
-    SwitchCaseStmt *parser::parseSwitchCaseStmt()
+    SwitchStmt *parser::parseSwitchStmt()
     {
-        expect(TokenType::T_LPAREN,"(");
-        auto exp = expr();//
-        if(exp->type_->isKindOf(Type::T_INT) == false)
+        expect(TokenType::T_LPAREN, "(");
+        auto exp = expr(); //
+        if (exp->type_->isKindOf(Type::T_INT) == false)
         {
-            ERROR_EXIT<<"expect int type in switch statement";
+            ERROR_EXIT << "expect int type in switch statement";
         }
-         expect(TokenType::T_RPAREN,")");
-         expect(TokenType::T_LBRACE,"{");
-         //TODO
-         expect(TokenType::T_CASE,"case");
-         expect(TokenType::T_COMMA,":");
-         if(match(TokenType::T_LBRACE))//"{"
-         {
-             selfScope self(this,ScopeKind::BLOCK);
-             
-         }
+        expect(TokenType::T_RPAREN, ")");
+        expect(TokenType::T_LBRACE, "{");
+        //TODO
+        while (!match(TokenType::T_RBRACE) && !match(TokenType::T_EOF))
+        {
+            if (match(TokenType::T_CASE))
+            {
+                
+            }
+            else if (match(TokenType::T_DEFALT))
+            {
+            }
+            else
+            {
+                ERROR_EXIT << "Expect 'case' or 'default' keyword";
+            }
+        }
 
-         expect(TokenType::T_RBRACE,"}");
-
+    }
+    CaseDefaltStmt *parser::parseCaseStmt(bool isdefault)
+    {
+        expect(TokenType::T_COMMA, ":");
     }
 
     ReturnStmt *parser::parseReturnStmt()
@@ -706,9 +715,9 @@ namespace Yan
         {
             return parseDoWhileStmt();
         }
-        if(match(TokenType::T_SWITCH))
+        if (match(TokenType::T_SWITCH))
         {
-            return parseSwitchCaseStmt();
+            return parseSwitchStmt();
         }
         if (match(TokenType::T_BREAK))
         {

@@ -31,7 +31,8 @@ namespace Yan
     struct LabelStmt;
     struct ExprStmt;
     struct Enumerator;
-    struct SwitchCaseStmt;
+    struct SwitchStmt;
+    struct CaseDefaltStmt;
 
     class Ivisitor
     {
@@ -55,7 +56,9 @@ namespace Yan
         virtual void visit(LabelStmt *node) = 0;
         virtual void visit(ExprStmt *node) = 0;
         virtual void visit(Enumerator * node) = 0;
-        virtual void visit(SwitchCaseStmt *node) = 0;
+        virtual void visit(SwitchStmt *node) = 0;
+        virtual void visit(CaseDefaultStmt *node) = 0;
+
 
     };
 
@@ -117,10 +120,7 @@ namespace Yan
         // true for do-while
         bool postcheck_;
     };
-    struct SwitchCaseStmt:public Stmt
-    {
-        virtual void accept(Ivisitor *v) override { v->visit(this); }
-    };
+
 
 
     struct BreakContinueStmt : public Stmt
@@ -158,10 +158,25 @@ namespace Yan
         virtual void accept(Ivisitor *v) override { v->visit(this); }
         std::string label_;
     };
-    // struct SwitchCaseStmt: public Stmt
-    // {
-    //     virtual void accept(Ivisitor* v)override {v->visit(this);}
-    // };
+    struct SwitchStmt: public Stmt
+    {
+        static SwitchStmt*create(){return new SwitchStmt;}
+        virtual void accept(Ivisitor* v)override {v->visit(this);}
+        std::vectot<CaseStmt*> caseStmts_;
+    };
+    struct CaseDefaltStmt: public Stmt
+    {
+
+        static CaseDefaltStmt*create(){return new CaseDefaltStmt(Expr* exp, bool isdefault, int caseValue);}
+        CaseDefaltStmt(Expr* exp, bool isdefault, int caseValue): switchExpr_(exp),isdefaultLable_(isdefault),caseValue(caseValue)
+        {}
+      virtual void accept(Ivisitor* v)override {v->visit(this);}
+       Expr* switchExp_ = nullptr;
+       bool isdefaultLable_ = false;
+       int caseValue_ = 0;
+       std::vector<Stmt*> stmts_; 
+
+    }
     struct ExprStmt : public Stmt
     {
         ExprStmt(Expr *exp) : expr_(exp) {}

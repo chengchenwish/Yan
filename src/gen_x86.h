@@ -40,7 +40,8 @@ namespace Yan
         virtual void visit(LabelStmt *node) override;
         virtual void visit(ExprStmt *node);
         virtual void visit(Enumerator* node);
-        virtual void visit(SwitchCaseStmt *node);
+        virtual void visit(SwitchStmt *node);
+        virtual void visit(CaseDefaultStmt *node);
 
 
         void genAddr(Identifier *node);
@@ -171,7 +172,8 @@ namespace Yan
         virtual void visit(LabelStmt *node) override { assert(0); }
         virtual void visit(ExprStmt *node) override { assert(0); }
         virtual void visit(Enumerator* node)override{ assert(0);}
-        virtual void visit(SwitchCaseStmt *node)override{assert(0);}
+        virtual void visit(SwitchStmt *node)override{assert(0);}
+        virtual void visit(CaseDefaultStmt *node)override{assert(0);}
   
 
     private:
