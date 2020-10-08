@@ -659,6 +659,29 @@ namespace Yan
         expect(TokenType::T_SEMI, ";");
         return BreakContinueStmt::create(type);
     }
+    SwitchCaseStmt *parser::parseSwitchCaseStmt()
+    {
+        expect(TokenType::T_LPAREN,"(");
+        auto exp = expr();//
+        if(exp->type_->isKindOf(Type::T_INT) == false)
+        {
+            ERROR_EXIT<<"expect int type in switch statement";
+        }
+         expect(TokenType::T_RPAREN,")");
+         expect(TokenType::T_LBRACE,"{");
+         //TODO
+         expect(TokenType::T_CASE,"case");
+         expect(TokenType::T_COMMA,":");
+         if(match(TokenType::T_LBRACE))//"{"
+         {
+             selfScope self(this,ScopeKind::BLOCK);
+             
+         }
+
+         expect(TokenType::T_RBRACE,"}");
+
+    }
+
     ReturnStmt *parser::parseReturnStmt()
     {
         Expr *exp = nullptr;
@@ -682,6 +705,10 @@ namespace Yan
         if (match(TokenType::T_DO))
         {
             return parseDoWhileStmt();
+        }
+        if(match(TokenType::T_SWITCH))
+        {
+            return parseSwitchCaseStmt();
         }
         if (match(TokenType::T_BREAK))
         {

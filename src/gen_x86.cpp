@@ -703,6 +703,12 @@ namespace Yan
             regAllocator_.storeReg(r);
         }
     }
+
+     void gen:: visit(SwitchCaseStmt *node)
+     {
+         //TODO
+     }
+
     void gen::visit(CompousedStmt *node)
     {
         Info("gen Compoused statment");
