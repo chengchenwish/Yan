@@ -47,8 +47,8 @@ namespace Yan
         void checkCondition(Expr *node, std::string trueLabel, std::string falsedLabel);
 
     private:
-        void storeLValue(Type *ty);
-        void loadLValue(Identifier *node);
+        void storeValue(Type *ty);
+        void loadValue(Identifier *node);
         //operator
         void genAdd();
         void genSub();
@@ -65,6 +65,7 @@ namespace Yan
         {
             outfstream << "\t" << inst << " " << reg1 << ", " << reg2 << std::endl;
         }
+        std::string getReg(int width,int reg, bool argReg = false);
 
     public:
         class RegAllocator
