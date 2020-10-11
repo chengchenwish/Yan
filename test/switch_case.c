@@ -14,9 +14,9 @@ void main()
 
         
     }
-    print(2);
+    print(b);
 }
 /*
 Expected output:
-12
+2
 */
